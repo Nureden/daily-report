@@ -3,108 +3,390 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Трекер Отчетов по Датам</title>
+  <title>Трекер Отчетов по Процессам</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: var(--tg-theme-bg-color, #f4f1ea);
-      --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
-      --text: var(--tg-theme-text-color, #222222);
-      --hint: var(--tg-theme-hint-color, #707579);
-      --done-bg: #e6f4ea;
-      --done-border: #1e7e34;
-      --plan-bg: #fef7dc;
-      --plan-border: #d97706;
-      --border-color: rgba(0, 0, 0, 0.08);
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      
+      /* Мягкие, приятные для глаз оттенки */
+      --done-bg: #f0fdf4;
+      --done-border: #22c55e;
+      --done-text: #166534;
+      --done-badge: #dcfce7;
+
+      --plan-bg: #fffbeb;
+      --plan-border: #f59e0b;
+      --plan-text: #92400e;
+      --plan-badge: #fef3c7;
+
+      --accent-green: #16a34a;
+      --accent-blue: #0284c7;
+      --danger: #ef4444;
+      --radius: 12px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
       background-color: var(--bg);
-      color: var(--text);
-      padding: 12px;
-      padding-bottom: 80px;
+      color: var(--text-main);
+      padding: 14px;
+      padding-bottom: 90px;
+      font-size: 16px; /* Комфортный базовый размер */
+      line-height: 1.5;
     }
 
-    .app-container {
-      max-width: 900px;
+    .container {
+      max-width: 860px;
       margin: 0 auto;
     }
 
-    /* Шапка со статистикой */
-    .header-card {
+    /* Верхняя карточка */
+    .top-card {
       background: var(--card-bg);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
     }
 
-    .top-info {
+    .header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
 
     .app-title {
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      color: #0f172a;
     }
 
-    .badge-sync {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 10px;
+    .cloud-pill {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
       background: #e0f2fe;
       color: #0369a1;
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    .stats-grid {
+    /* Статистика */
+    .stats-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
-    .stat-pill {
-      padding: 8px 10px;
+    .stat-box {
+      padding: 12px 14px;
       border-radius: 10px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
-    .stat-pill.done { background: var(--done-bg); border-left: 3px solid var(--done-border); color: #14532d; }
-    .stat-pill.plan { background: var(--plan-bg); border-left: 3px solid var(--plan-border); color: #78350f; }
-    .stat-lbl { font-size: 11px; font-weight: 600; opacity: 0.8; }
-    .stat-num { font-size: 16px; font-weight: 800; }
+    .stat-box.done {
+      background: var(--done-bg);
+      border-left: 4px solid var(--done-border);
+      color: var(--done-text);
+    }
+    .stat-box.plan {
+      background: var(--plan-bg);
+      border-left: 4px solid var(--plan-border);
+      color: var(--plan-text);
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.85;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+    }
 
-    .header-buttons {
+    /* Кнопки отчета */
+    .report-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .report-actions { grid-template-columns: 1fr; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+    .btn-green {
+      background: var(--accent-green);
+      color: #ffffff;
+    }
+    .btn-blue {
+      background: var(--accent-blue);
+      color: #ffffff;
+    }
+    .btn-neutral {
+      background: #334155;
+      color: #ffffff;
+    }
+    .btn-subtle {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid var(--border);
+    }
+
+    /* Добавление процесса */
+    .add-proc-card {
+      background: var(--card-bg);
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 18px;
       display: flex;
       gap: 8px;
     }
-
-    .btn-main {
+    .add-proc-card input {
       flex: 1;
-      background: #15803d;
-      color: #ffffff;
-      border: none;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 10px;
+      font-size: 15px;
+      outline: none;
+      color: var(--text-main);
+    }
+    .add-proc-card input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    /* Карточки процессов */
+    .process-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .process-header {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: #ffffff;
+      user-select: none;
+    }
+    .process-header:hover {
+      background: #f8fafc;
+    }
+
+    .proc-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .proc-toggle-icon {
       font-size: 13px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .proc-toggle-icon.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .proc-menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .proc-menu-btn:hover {
+      background: #fef2f2;
+    }
+
+    .proc-content {
+      padding: 0 16px 16px 16px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .proc-content.hidden {
+      display: none;
+    }
+
+    /* Колонки со стикерами */
+    .lanes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 620px) {
+      .lanes-grid { grid-template-columns: 1fr; }
+    }
+
+    .lane {
+      background: #f8fafc;
+      border: 1px solid #eef2f6;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 90px;
+    }
+    .lane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .lane-header.done { color: var(--done-text); }
+    .lane-header.plan { color: var(--plan-text); }
+
+    /* Стикер */
+    .sticker {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+    .sticker.done {
+      background: var(--done-bg);
+      border-left: 5px solid var(--done-border);
+      color: var(--done-text);
+    }
+    .sticker.plan {
+      background: var(--plan-bg);
+      border-left: 5px solid var(--plan-border);
+      color: var(--plan-text);
+    }
+
+    .sticker-text {
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 600;
+      word-break: break-word;
+      cursor: pointer;
+    }
+
+    .sticker-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px dashed rgba(0,0,0,0.08);
+      padding-top: 6px;
+      font-size: 12px;
+    }
+
+    .date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .sticker-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .pill-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #334155;
+    }
+    .pill-btn:hover {
+      background: #ffffff;
+    }
+
+    /* Инлайн редактирование задачи */
+    .inline-edit-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    .inline-edit-box input {
+      padding: 8px 10px;
+      font-size: 15px;
+      border: 1px solid var(--accent-blue);
+      border-radius: 6px;
+      outline: none;
+    }
+    .inline-edit-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    /* Форма создания задачи */
+    .task-toggle-btn {
+      width: 100%;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px dashed #cbd5e1;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -112,296 +394,225 @@
       justify-content: center;
       gap: 6px;
     }
-
-    /* Создание процесса */
-    .add-proc-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+    .task-toggle-btn:hover {
+      background: #e2e8f0;
     }
 
-    .add-proc-row input {
-      flex: 1;
-      padding: 10px 12px;
+    .new-task-form {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 10px;
-      border: 1px solid var(--border-color);
-      background: var(--card-bg);
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-    }
-
-    .btn-add-proc {
-      background: #374151;
-      color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    /* Карточка процесса (Уровень 1) */
-    .process-card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .proc-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px dashed var(--border-color);
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-    }
-
-    .proc-name {
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .proc-del-btn {
-      background: transparent;
-      border: none;
-      color: #ef4444;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    /* Колонки со стикерами (Уровень 2) */
-    .lanes-box {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 550px) {
-      .lanes-box { grid-template-columns: 1fr; }
-    }
-
-    .lane {
-      background: rgba(0, 0, 0, 0.02);
-      border-radius: 10px;
-      padding: 8px;
-    }
-
-    .lane-title {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .lane-title.done { color: var(--done-border); }
-    .lane-title.plan { color: var(--plan-border); }
-
-    /* Стикер */
-    .sticky {
-      position: relative;
-      border-radius: 6px;
-      padding: 9px 10px;
-      margin-bottom: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      font-size: 13px;
+      padding: 12px;
+      margin-top: 10px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
     }
 
-    .sticky.done { background: var(--done-bg); border-left: 4px solid var(--done-border); color: #14532d; }
-    .sticky.plan { background: var(--plan-bg); border-left: 4px solid var(--plan-border); color: #78350f; }
+    .form-row-text input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+    }
 
-    .sticky-txt { line-height: 1.35; word-break: break-word; font-weight: 500; }
-    
-    .sticky-foot {
+    .form-row-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .form-row-dates input[type="date"] {
+      padding: 8px 10px;
+      font-size: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .date-quick-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+    }
+    .date-quick-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .form-row-bottom {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
-      border-top: 1px dashed rgba(0,0,0,0.1);
-      padding-top: 5px;
+      gap: 8px;
     }
-
-    .sticky-date {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-weight: 700;
-      background: rgba(255,255,255,0.7);
-      padding: 2px 6px;
-      border-radius: 4px;
+    .form-row-bottom select {
+      padding: 8px 10px;
+      font-size: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
     }
-
-    .btn-chip {
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* Форма добавления задачи */
-    .task-add-row {
-      display: grid;
-      grid-template-columns: 1fr 130px 100px auto;
+    .form-submit-btns {
+      display: flex;
       gap: 6px;
-      align-items: center;
     }
 
-    @media (max-width: 600px) {
-      .task-add-row {
-        grid-template-columns: 1fr 1fr;
-      }
-      .task-add-row input[type="text"] {
-        grid-column: span 2;
-      }
-      .task-add-row button {
-        grid-column: span 2;
-      }
+    /* Очистка / архив внизу процесса */
+    .proc-footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
     }
-
-    .task-add-row input, .task-add-row select {
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      font-size: 13px;
-      outline: none;
-      background: #fff;
-    }
-
-    .btn-add-task {
-      background: #4b5563;
-      color: white;
+    .btn-archive {
+      background: transparent;
       border: none;
-      padding: 7px 10px;
-      border-radius: 6px;
-      font-size: 13px;
+      color: #64748b;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .btn-archive:hover {
+      background: #f1f5f9;
+      color: var(--danger);
     }
 
-    /* Тост */
+    /* Тост оповещений */
     .toast {
       position: fixed;
-      bottom: 20px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
-      background: #1f2937;
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 25px;
-      font-size: 13px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 22px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
       display: none;
       z-index: 1000;
+      text-align: center;
+      max-width: 90%;
     }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <div class="header-card">
-      <div class="top-info">
-        <div class="app-title">📌 Древовидный трекер по датам</div>
-        <div class="badge-sync" id="syncStatus">● Хранилище активно</div>
+  <div class="container">
+    <!-- Шапка приложения -->
+    <div class="top-card">
+      <div class="header-row">
+        <div class="app-title">
+          <span>📋</span> Трекер процессов
+        </div>
+        <div class="cloud-pill" id="syncStatus">● Telegram Cloud</div>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-pill done">
-          <span class="stat-lbl">СДЕЛАНО (ЗАВЕРШЕНО)</span>
-          <span class="stat-num" id="countDone">0 задач</span>
+      <div class="stats-row">
+        <div class="stat-box done">
+          <span class="stat-label">Сделано</span>
+          <span class="stat-value" id="countDone">0 задач</span>
         </div>
-        <div class="stat-pill plan">
-          <span class="stat-lbl">В ПЛАНАХ (НАЗНАЧЕНО)</span>
-          <span class="stat-num" id="countPlan">0 задач</span>
+        <div class="stat-box plan">
+          <span class="stat-label">В планах</span>
+          <span class="stat-value" id="countPlan">0 задач</span>
         </div>
       </div>
 
-      <div class="header-buttons">
-        <button class="btn-main" onclick="shareReport()">📋 Скопировать древовидный отчет</button>
+      <div class="report-actions">
+        <button class="btn btn-green" onclick="copyReport()">
+          📋 Скопировать отчет
+        </button>
+        <button class="btn btn-blue" onclick="shareToTelegram()">
+          ✈️ Отправить в чат
+        </button>
       </div>
     </div>
 
-    <div class="add-proc-row">
-      <input type="text" id="newProcInput" placeholder="Новое направление / процесс (напр. Согласование сервитута)...">
-      <button class="btn-add-proc" onclick="addProcess()">+ Процесс</button>
+    <!-- Создание направления/процесса -->
+    <div class="add-proc-card">
+      <input type="text" id="newProcInput" placeholder="Новое направление (напр. Оформление сервитута)..." onkeydown="if(event.key==='Enter') addProcess()">
+      <button class="btn btn-neutral" onclick="addProcess()">+ Процесс</button>
     </div>
 
+    <!-- Дерево процессов -->
     <div id="processesList"></div>
   </div>
 
-  <div class="toast" id="toast">Древовидный отчет скопирован!</div>
+  <div class="toast" id="toastBox">Отчет скопирован!</div>
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'tma_tree_date_tracker_state';
+    const STORAGE_KEY = 'tma_tree_date_tracker_state_v2';
 
     if (tg) {
       tg.ready();
       tg.expand();
     }
 
-    // Текущая дата YYYY-MM-DD
     function getTodayISO() {
       const d = new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${y}-${m}-${day}`;
     }
 
-    // Форматирование ISO в ДД.ММ.ГГГГ
+    function getTomorrowISO() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
     function formatDateRU(isoStr) {
       if (!isoStr) return '';
-      const parts = isoStr.split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}.${parts[1]}.${parts[0]}`;
-      }
+      const p = isoStr.split('-');
+      if (p.length === 3) return `${p[2]}.${p[1]}.${p[0]}`;
       return isoStr;
     }
-
-    const todayISO = getTodayISO();
 
     let state = [
       {
         id: 1,
         title: "Согласование земельно-кадастровых материалов",
+        collapsed: false,
+        openForm: false,
         tasks: [
-          { id: 101, text: "Сверка контуров и координатная привязка участков", date: todayISO, status: "done" },
-          { id: 102, text: "Подготовка сопроводительных писем смежникам", date: todayISO, status: "done" },
-          { id: 103, text: "Выезд на контрольное полевое обследование", date: todayISO, status: "plan" }
+          { id: 101, text: "Сверка контуров и координатная привязка участков", date: getTodayISO(), status: "done" },
+          { id: 102, text: "Подготовка сопроводительных писем смежникам", date: getTodayISO(), status: "done" },
+          { id: 103, text: "Выезд на контрольное полевое обследование", date: getTomorrowISO(), status: "plan" }
         ]
       },
       {
         id: 2,
         title: "Экспертиза проектных коридоров коммуникаций",
+        collapsed: false,
+        openForm: false,
         tasks: [
-          { id: 201, text: "Анализ наложений с охранными зонами", date: todayISO, status: "done" },
-          { id: 202, text: "Составление сводной ведомости пересечений трассы", date: todayISO, status: "plan" }
+          { id: 201, text: "Анализ наложений с охранными зонами", date: getTodayISO(), status: "done" },
+          { id: 202, text: "Составление сводной ведомости пересечений трассы", date: getTomorrowISO(), status: "plan" }
         ]
       }
     ];
+
+    let editingTaskId = null;
 
     async function loadData() {
       if (tg?.CloudStorage) {
         tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
           if (!err && val) {
-            try {
-              state = JSON.parse(val);
-            } catch(e){}
+            try { state = JSON.parse(val); } catch(e){}
           } else {
             const local = localStorage.getItem(STORAGE_KEY);
             if (local) state = JSON.parse(local);
@@ -420,21 +631,19 @@
       localStorage.setItem(STORAGE_KEY, json);
 
       if (tg?.CloudStorage) {
-        tg.CloudStorage.setItem(STORAGE_KEY, json, (err, success) => {
-          const badge = document.getElementById('syncStatus');
-          if (success) {
-            badge.textContent = "● Синхронизировано в облако";
-            badge.style.color = "#15803d";
+        tg.CloudStorage.setItem(STORAGE_KEY, json, (err, ok) => {
+          const b = document.getElementById('syncStatus');
+          if (ok && b) {
+            b.textContent = "● Синхронизировано";
+            b.style.color = "#15803d";
           }
         });
       }
       render();
     }
 
-    function triggerHaptic() {
-      if (tg?.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('light');
-      }
+    function haptic() {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     }
 
     function addProcess() {
@@ -442,42 +651,78 @@
       const val = input.value.trim();
       if (!val) return;
 
-      state.push({ id: Date.now(), title: val, tasks: [] });
+      state.push({
+        id: Date.now(),
+        title: val,
+        collapsed: false,
+        openForm: false,
+        tasks: []
+      });
+
       input.value = '';
-      triggerHaptic();
+      haptic();
       saveData();
     }
 
-    function deleteProcess(id) {
-      if (confirm("Удалить этот процесс и все задачи в нем?")) {
-        state = state.filter(p => p.id !== id);
-        triggerHaptic();
+    function toggleCollapse(procId) {
+      const proc = state.find(p => p.id === procId);
+      if (proc) {
+        proc.collapsed = !proc.collapsed;
+        haptic();
         saveData();
       }
     }
 
+    function deleteProcess(procId) {
+      if (confirm("Удалить этот процесс и все задачи?")) {
+        state = state.filter(p => p.id !== procId);
+        haptic();
+        saveData();
+      }
+    }
+
+    function toggleTaskForm(procId) {
+      const proc = state.find(p => p.id === procId);
+      if (proc) {
+        proc.openForm = !proc.openForm;
+        render();
+      }
+    }
+
+    function setQuickDate(procId, when) {
+      const input = document.getElementById(`date-in-${procId}`);
+      if (!input) return;
+      input.value = (when === 'today') ? getTodayISO() : getTomorrowISO();
+    }
+
     function addTask(procId) {
-      const txt = document.getElementById(`txt-${procId}`).value.trim();
-      const dateVal = document.getElementById(`date-${procId}`).value || getTodayISO();
-      const status = document.getElementById(`status-${procId}`).value;
+      const txt = document.getElementById(`txt-in-${procId}`).value.trim();
+      const dt = document.getElementById(`date-in-${procId}`).value || getTodayISO();
+      const st = document.getElementById(`status-in-${procId}`).value;
 
       if (!txt) return;
 
       const proc = state.find(p => p.id === procId);
       if (proc) {
-        proc.tasks.push({ id: Date.now(), text: txt, date: dateVal, status: status });
-        triggerHaptic();
+        proc.tasks.push({
+          id: Date.now(),
+          text: txt,
+          date: dt,
+          status: st
+        });
+        proc.openForm = false; // закрываем форму после добавления
+        haptic();
         saveData();
       }
     }
 
-    function toggleTask(procId, taskId) {
+    function toggleTaskStatus(procId, taskId) {
       const proc = state.find(p => p.id === procId);
       if (!proc) return;
       const t = proc.tasks.find(x => x.id === taskId);
       if (t) {
-        t.status = t.status === 'done' ? 'plan' : 'done';
-        triggerHaptic();
+        t.status = (t.status === 'done') ? 'plan' : 'done';
+        haptic();
         saveData();
       }
     }
@@ -486,125 +731,238 @@
       const proc = state.find(p => p.id === procId);
       if (!proc) return;
       proc.tasks = proc.tasks.filter(x => x.id !== taskId);
-      triggerHaptic();
+      haptic();
       saveData();
+    }
+
+    function startEditTask(taskId) {
+      editingTaskId = taskId;
+      render();
+    }
+
+    function cancelEditTask() {
+      editingTaskId = null;
+      render();
+    }
+
+    function saveEditTask(procId, taskId) {
+      const txtInput = document.getElementById(`edit-txt-${taskId}`);
+      const dtInput = document.getElementById(`edit-dt-${taskId}`);
+      if (!txtInput) return;
+
+      const newTxt = txtInput.value.trim();
+      const newDt = dtInput.value;
+
+      if (!newTxt) return;
+
+      const proc = state.find(p => p.id === procId);
+      if (proc) {
+        const t = proc.tasks.find(x => x.id === taskId);
+        if (t) {
+          t.text = newTxt;
+          if (newDt) t.date = newDt;
+          editingTaskId = null;
+          haptic();
+          saveData();
+        }
+      }
+    }
+
+    function clearDoneTasks(procId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const count = proc.tasks.filter(t => t.status === 'done').length;
+      if (count === 0) {
+        showToast("В этом процессе нет выполненных задач");
+        return;
+      }
+      if (confirm(`Очистить выполненные задачи (${count} шт.)?`)) {
+        proc.tasks = proc.tasks.filter(t => t.status !== 'done');
+        haptic();
+        saveData();
+      }
     }
 
     function render() {
       const root = document.getElementById('processesList');
       root.innerHTML = '';
 
-      let countDone = 0;
-      let countPlan = 0;
+      let totalDone = 0;
+      let totalPlan = 0;
 
       state.forEach(proc => {
         const doneTasks = proc.tasks.filter(t => t.status === 'done');
         const planTasks = proc.tasks.filter(t => t.status === 'plan');
 
-        countDone += doneTasks.length;
-        countPlan += planTasks.length;
+        totalDone += doneTasks.length;
+        totalPlan += planTasks.length;
 
         const card = document.createElement('div');
         card.className = 'process-card';
 
-        const renderItem = (t) => `
-          <div class="sticky ${t.status}">
-            <div class="sticky-txt">${escapeHtml(t.text)}</div>
-            <div class="sticky-foot">
-              <span class="sticky-date">📅 ${formatDateRU(t.date)}</span>
-              <div style="display:flex; gap:4px;">
-                <button class="btn-chip" onclick="toggleTask(${proc.id}, ${t.id})">
-                  ${t.status === 'done' ? '➔ В план' : '✔ В сделано'}
-                </button>
-                <button class="btn-chip" style="color:#ef4444;" onclick="deleteTask(${proc.id}, ${t.id})">✕</button>
+        const renderSticker = (t) => {
+          if (editingTaskId === t.id) {
+            return `
+              <div class="sticker ${t.status}">
+                <div class="inline-edit-box">
+                  <input type="text" id="edit-txt-${t.id}" value="${escapeHtml(t.text)}">
+                  <input type="date" id="edit-dt-${t.id}" value="${t.date}">
+                  <div class="inline-edit-actions">
+                    <button class="pill-btn" onclick="cancelEditTask()">Отмена</button>
+                    <button class="pill-btn" style="background:#0284c7; color:#fff;" onclick="saveEditTask(${proc.id}, ${t.id})">Сохранить</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="sticker ${t.status}">
+              <div class="sticker-text" onclick="startEditTask(${t.id})" title="Нажмите, чтобы изменить">${escapeHtml(t.text)}</div>
+              <div class="sticker-foot">
+                <span class="date-badge">📅 ${formatDateRU(t.date)}</span>
+                <div class="sticker-btns">
+                  <button class="pill-btn" onclick="startEditTask(${t.id})" title="Редактировать">✏️</button>
+                  <button class="pill-btn" onclick="toggleTaskStatus(${proc.id}, ${t.id})">
+                    ${t.status === 'done' ? '➔ В план' : '✔ Сделано'}
+                  </button>
+                  <button class="pill-btn" style="color:var(--danger);" onclick="deleteTask(${proc.id}, ${t.id})">✕</button>
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        };
+
+        const isCollapsed = proc.collapsed;
 
         card.innerHTML = `
-          <div class="proc-header">
-            <div class="proc-name">📂 ${escapeHtml(proc.title)} <span style="font-size:12px; color:var(--hint); font-weight:normal;">(${proc.tasks.length} зад.)</span></div>
-            <button class="proc-del-btn" onclick="deleteProcess(${proc.id})">Удалить процесс</button>
+          <div class="process-header" onclick="toggleCollapse(${proc.id})">
+            <div class="proc-title-wrap">
+              <span class="proc-toggle-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
+              <span>📂 ${escapeHtml(proc.title)}</span>
+              <span style="font-size:13px; color:var(--text-muted); font-weight:normal;">(${proc.tasks.length})</span>
+            </div>
+            <button class="proc-menu-btn" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
-          <div class="lanes-box">
-            <div class="lane">
-              <div class="lane-title done"><span>🟢 Сделано</span><span>${doneTasks.length}</span></div>
-              ${doneTasks.map(renderItem).join('')}
-            </div>
-            <div class="lane">
-              <div class="lane-title plan"><span>🟡 В планах</span><span>${planTasks.length}</span></div>
-              ${planTasks.map(renderItem).join('')}
-            </div>
-          </div>
+          <div class="proc-content ${isCollapsed ? 'hidden' : ''}">
+            <div class="lanes-grid">
+              <div class="lane">
+                <div class="lane-header done">
+                  <span>🟢 Сделано</span>
+                  <span>${doneTasks.length}</span>
+                </div>
+                ${doneTasks.length > 0 ? doneTasks.map(renderSticker).join('') : '<div style="color:#94a3b8; font-size:13px; font-style:italic; padding:8px 4px;">Нет задач</div>'}
+              </div>
 
-          <div class="task-add-row">
-            <input type="text" id="txt-${proc.id}" placeholder="Текст задачи-стикера...">
-            <input type="date" id="date-${proc.id}" value="${getTodayISO()}">
-            <select id="status-${proc.id}">
-              <option value="done">Сделано</option>
-              <option value="plan">В планах</option>
-            </select>
-            <button class="btn-add-task" onclick="addTask(${proc.id})">+ Стикер</button>
+              <div class="lane">
+                <div class="lane-header plan">
+                  <span>🟡 В планах</span>
+                  <span>${planTasks.length}</span>
+                </div>
+                ${planTasks.length > 0 ? planTasks.map(renderSticker).join('') : '<div style="color:#94a3b8; font-size:13px; font-style:italic; padding:8px 4px;">Нет задач</div>'}
+              </div>
+            </div>
+
+            <!-- Компактная кнопка или форма -->
+            ${!proc.openForm ? `
+              <button class="task-toggle-btn" onclick="toggleTaskForm(${proc.id})">
+                + Добавить стикер в этот процесс
+              </button>
+            ` : `
+              <div class="new-task-form">
+                <div class="form-row-text">
+                  <input type="text" id="txt-in-${proc.id}" placeholder="Текст задачи..." onkeydown="if(event.key==='Enter') addTask(${proc.id})">
+                </div>
+                <div class="form-row-dates">
+                  <input type="date" id="date-in-${proc.id}" value="${getTodayISO()}">
+                  <button class="date-quick-btn" type="button" onclick="setQuickDate(${proc.id}, 'today')">Сегодня</button>
+                  <button class="date-quick-btn" type="button" onclick="setQuickDate(${proc.id}, 'tomorrow')">Завтра</button>
+                </div>
+                <div class="form-row-bottom">
+                  <select id="status-in-${proc.id}">
+                    <option value="done">🟢 Сделано</option>
+                    <option value="plan" selected>🟡 В планах</option>
+                  </select>
+                  <div class="form-submit-btns">
+                    <button class="btn btn-subtle" style="padding:8px 12px; font-size:13px;" onclick="toggleTaskForm(${proc.id})">Отмена</button>
+                    <button class="btn btn-neutral" style="padding:8px 14px; font-size:13px;" onclick="addTask(${proc.id})">Добавить</button>
+                  </div>
+                </div>
+              </div>
+            `}
+
+            <div class="proc-footer-actions">
+              <button class="btn-archive" onclick="clearDoneTasks(${proc.id})">
+                🧹 Очистить выполненное в этом процессе
+              </button>
+            </div>
           </div>
         `;
 
         root.appendChild(card);
       });
 
-      document.getElementById('countDone').textContent = `${countDone} задач`;
-      document.getElementById('countPlan').textContent = `${countPlan} задач`;
+      document.getElementById('countDone').textContent = `${totalDone} задач`;
+      document.getElementById('countPlan').textContent = `${totalPlan} задач`;
     }
 
-    function buildReportText() {
+    function buildTreeReport() {
       const todayRU = formatDateRU(getTodayISO());
-      let totalDone = 0;
-      let totalPlan = 0;
+      let grandDone = 0;
+      let grandPlan = 0;
 
       state.forEach(p => {
-        totalDone += p.tasks.filter(t => t.status === 'done').length;
-        totalPlan += p.tasks.filter(t => t.status === 'plan').length;
+        grandDone += p.tasks.filter(t => t.status === 'done').length;
+        grandPlan += p.tasks.filter(t => t.status === 'plan').length;
       });
 
-      let txt = `📅 Отчет по процессам на ${todayRU} | Выполнено: ${totalDone} | В планах: ${totalPlan}\n\n`;
+      let txt = `📅 Отчет по процессам на ${todayRU} | Выполнено: ${grandDone} | В планах: ${grandPlan}
+
+`;
 
       state.forEach(p => {
         const doneList = p.tasks.filter(t => t.status === 'done');
         const planList = p.tasks.filter(t => t.status === 'plan');
 
-        txt += `📂 Процесс: ${p.title}\n`;
+        txt += `📂 Процесс: ${p.title}
+`;
 
         if (doneList.length > 0) {
           const hasPlan = planList.length > 0;
-          txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО (${doneList.length})\n`;
+          txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО (${doneList.length})
+`;
           doneList.forEach((t, idx) => {
             const isLast = idx === doneList.length - 1;
             const prefix = hasPlan ? '│   ' : '    ';
-            txt += `${prefix}${isLast ? '└──' : '├──'} ${t.text} [Дата: ${formatDateRU(t.date)}]\n`;
+            txt += `${prefix}${isLast ? '└──' : '├──'} ${t.text} [Дата: ${formatDateRU(t.date)}]
+`;
           });
         }
 
         if (planList.length > 0) {
-          txt += `└── 🟡 В ПЛАНАХ (${planList.length})\n`;
+          txt += `└── 🟡 В ПЛАНАХ (${planList.length})
+`;
           planList.forEach((t, idx) => {
             const isLast = idx === planList.length - 1;
-            txt += `    ${isLast ? '└──' : '├──'} ${t.text} [Срок: ${formatDateRU(t.date)}]\n`;
+            txt += `    ${isLast ? '└──' : '├──'} ${t.text} [Срок: ${formatDateRU(t.date)}]
+`;
           });
         }
 
-        txt += `\n`;
+        txt += `
+`;
       });
 
       return txt.trim();
     }
 
-    function shareReport() {
-      const report = buildReportText();
-      triggerHaptic();
+    function copyReport() {
+      const report = buildTreeReport();
+      haptic();
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(report).then(() => showToast());
+        navigator.clipboard.writeText(report).then(() => showToast("Древовидный отчет скопирован в буфер!"));
       } else {
         const t = document.createElement("textarea");
         t.value = report;
@@ -612,14 +970,28 @@
         t.select();
         document.execCommand("copy");
         document.body.removeChild(t);
-        showToast();
+        showToast("Древовидный отчет скопирован в буфер!");
       }
     }
 
-    function showToast() {
-      const toast = document.getElementById('toast');
+    function shareToTelegram() {
+      const report = buildTreeReport();
+      haptic();
+
+      // Telegram Share Link
+      const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(report)}`;
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(shareUrl);
+      } else {
+        window.open(shareUrl, '_blank');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      toast.textContent = msg;
       toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 2500);
+      setTimeout(() => { toast.style.display = 'none'; }, 2600);
     }
 
     function escapeHtml(str) {
