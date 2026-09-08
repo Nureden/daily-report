@@ -281,7 +281,7 @@
       display: none !important;
     }
 
-    /* 4. ОБЪЕКТЫ */
+    /* 4. ОБЪЕКТЫ (ПОДЗАДАЧИ ТЕПЕРЬ СВОРАЧИВАЮТСЯ ПО КЛИКУ НА ОБЪЕКТ) */
     .object-card {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -302,13 +302,27 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .obj-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .obj-collapse-arrow {
+      font-size: 10px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    .obj-collapse-arrow.collapsed {
+      transform: rotate(-90deg);
     }
     .obj-name {
       font-size: 15px;
       font-weight: 800;
       color: #0f172a;
-      flex: 1;
-      cursor: pointer;
       word-break: normal;
       overflow-wrap: break-word;
     }
@@ -351,7 +365,7 @@
       border-color: var(--danger-border);
     }
 
-    /* Прогресс-бар */
+    /* Тонкий прогресс-бар объекта */
     .progress-bar-bg {
       width: 100%;
       height: 4px;
@@ -369,7 +383,18 @@
       background: var(--done);
     }
 
-    /* 5. ШАГИ / ЭТАПЫ */
+    /* ТЕЛО ОБЪЕКТА (СПИСОК ПОДЗАДАЧ) */
+    .obj-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .obj-body.hidden {
+      display: none !important;
+    }
+
+    /* 5. ШАГИ / ПОДЗАДАЧИ */
     .steps-list {
       display: flex;
       flex-direction: column;
@@ -439,7 +464,6 @@
       flex-wrap: wrap;
     }
 
-    /* Кнопка вызова календаря */
     .step-date-btn {
       display: inline-flex;
       align-items: center;
@@ -481,7 +505,6 @@
       background: var(--brand-subtle);
     }
 
-    /* Кнопка вызова меню рисков */
     .btn-blocker-trigger {
       background: #ffffff;
       border: 1px solid #cbd5e1;
@@ -519,7 +542,6 @@
       background: rgba(0,0,0,0.04);
     }
 
-    /* Плашка блокера */
     .blocker-banner {
       display: flex;
       align-items: center;
@@ -548,7 +570,6 @@
       padding: 2px 4px;
     }
 
-    /* 100% готовность */
     .all-done-banner {
       background: var(--done-bg);
       border: 1px dashed var(--done-border);
@@ -1054,7 +1075,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v15_collapsed_default';
+    const STORAGE_KEY = 'manager_daily_tracker_v16_subtask_collapse';
 
     if (tg) {
       tg.ready();
@@ -1133,7 +1154,7 @@
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
-    // По умолчанию collapsed: true (свернуто)
+    // По умолчанию collapsed: true и для процессов, и для объектов (подзадачи свернуты)
     let state = [
       {
         id: 1,
@@ -1145,10 +1166,11 @@
             id: 101,
             title: "Жылыой - ЛЭС",
             archived: false,
+            collapsed: true,
             showAddForm: false,
             steps: [
               { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
+              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: true, blocker: null },
               { id: 1003, text: "Утверждение ЗУП МИО", date: "до 20.09.2026", done: false, blocker: null },
               { id: 1004, text: "Постановление акима", date: "до 30.09.2026", done: false, blocker: null },
               { id: 1005, text: "Акт на землю, регистрация", date: "до 11.10.2026", done: false, blocker: null }
@@ -1158,10 +1180,12 @@
             id: 102,
             title: "Жылыой - ВП",
             archived: false,
+            collapsed: true,
             showAddForm: false,
             steps: [
               { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: false, blocker: null }
+              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: true, blocker: null },
+              { id: 2003, text: "Утверждение ЗУП МИО", date: "до 23.09.2026", done: false, blocker: null }
             ]
           }
         ]
@@ -1175,10 +1199,11 @@
           if (Array.isArray(p)) {
             state = p.map(pr => ({
               ...pr,
-              collapsed: true, // ВСЕГДА СВЕРНУТ ПРИ ЗАГРУЗКЕ И ОБНОВЛЕНИИ
+              collapsed: true, // Процессы свернуты по умолчанию при обновлении
               showArchive: pr.showArchive || false,
               objects: (pr.objects || []).map(o => ({
                 ...o,
+                collapsed: o.collapsed !== undefined ? o.collapsed : true, // Подзадачи объектов тоже свернуты по умолчанию
                 archived: !!o.archived,
                 showAddForm: false,
                 steps: (o.steps || []).map(s => ({
@@ -1196,13 +1221,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v14_always_open') || localStorage.getItem('manager_daily_tracker_v13_modal_calendar');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v15_collapsed_default');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v14_always_open') || localStorage.getItem('manager_daily_tracker_v13_modal_calendar');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v15_collapsed_default');
         if (local) parseVal(local);
         render();
       }
@@ -1243,7 +1268,7 @@
       state.push({
         id: Date.now(),
         title: val,
-        collapsed: false, // только что созданный процесс открыт для заполнения
+        collapsed: false,
         showArchive: false,
         objects: []
       });
@@ -1260,6 +1285,18 @@
         haptic();
         render();
       }
+    }
+
+    /* СВОРАЧИВАНИЕ / РАЗВОРАЧИВАНИЕ ПОДЗАДАЧ ОБЪЕКТА */
+    function toggleObjectCollapse(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      obj.collapsed = !obj.collapsed;
+      haptic();
+      render();
     }
 
     function deleteProcess(procId) {
@@ -1437,6 +1474,7 @@
           id: Date.now(),
           title: name.trim(),
           archived: false,
+          collapsed: false, // новый созданный объект сразу открыт
           showAddForm: false,
           steps: []
         });
@@ -1455,6 +1493,7 @@
           id: Date.now(),
           title: name.trim(),
           archived: false,
+          collapsed: false,
           showAddForm: false,
           steps: STANDARD_WORKFLOW.map((text, idx) => ({
             id: Date.now() + idx,
@@ -1483,6 +1522,7 @@
         id: Date.now(),
         title: newTitle.trim(),
         archived: false,
+        collapsed: false,
         showAddForm: false,
         steps: src.steps.map((s, i) => ({
           id: Date.now() + i + 1,
@@ -1662,7 +1702,7 @@
         });
 
         card.innerHTML = `
-          <!-- КОМПАКТНЫЙ СТИКЕР: НАЖАТИЕ РАСКРЫВАЕТ / СВОРАЧИВАЕТ -->
+          <!-- КОМПАКТНЫЙ СТИКЕР-ЗАГОЛОВОК ПРОЦЕССА -->
           <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
@@ -1678,105 +1718,109 @@
               const tCount = obj.steps.length;
               const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
               const isAllDone = tCount > 0 && dCount === tCount;
+              const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
 
               return `
                 <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
-                  <div class="obj-header">
-                    <div class="obj-name" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Нажмите для переименования">
-                      📌 ${escapeHtml(obj.title)}
+                  <!-- КЛИК ПО ШАПКЕ ОБЪЕКТА СВОРАЧИВАЕТ/РАЗВОРАЧИВАЕТ ЕГО ПОДЗАДАЧИ -->
+                  <div class="obj-header" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})">
+                    <div class="obj-title-wrap">
+                      <span class="obj-collapse-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
+                      <span class="obj-name">📌 ${escapeHtml(obj.title)}</span>
                     </div>
                     <div class="obj-tools">
                       ${tCount > 0 ? `
                         <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
                       ` : ''}
-                      <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать объект">📋</button>
-                      <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕</button>
+                      <button class="btn-icon-tool" onclick="event.stopPropagation(); editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
+                      <button class="btn-icon-tool" onclick="event.stopPropagation(); cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
+                      <button class="btn-icon-tool del" onclick="event.stopPropagation(); deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
                     </div>
                   </div>
 
                   ${tCount > 0 ? `
-                    <div class="progress-bar-bg">
+                    <div class="progress-bar-bg" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})" style="cursor:pointer;">
                       <div class="progress-bar-fill ${isAllDone ? 'done' : ''}" style="width: ${percent}%;"></div>
                     </div>
                   ` : ''}
 
-                  ${isAllDone ? `
-                    <div class="all-done-banner">
-                      <span>🎉 Все этапы успешно закрыты!</span>
-                      <button class="btn-finish-work" onclick="archiveObject(${proc.id}, ${obj.id})">
-                        🏁 В архив
+                  <!-- ТЕЛО ОБЪЕКТА (СВОРАЧИВАЕМЫЕ ПОДЗАДАЧИ) -->
+                  <div class="obj-body ${isObjCollapsed ? 'hidden' : ''}">
+                    ${isAllDone ? `
+                      <div class="all-done-banner">
+                        <span>🎉 Все этапы успешно закрыты!</span>
+                        <button class="btn-finish-work" onclick="archiveObject(${proc.id}, ${obj.id})">
+                          🏁 В архив
+                        </button>
+                      </div>
+                    ` : ''}
+
+                    <!-- СПИСОК ШАГОВ / ПОДЗАДАЧ -->
+                    <div class="steps-list">
+                      ${obj.steps.map(s => {
+                        const hasBlock = !s.done && !!s.blocker;
+                        const dateMeta = analyzeDeadline(s.date, s.done);
+
+                        return `
+                          <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
+                            <div class="step-header-line">
+                              <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                              <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
+                            </div>
+
+                            <div class="step-footer-line">
+                              <div class="step-actions-left">
+                                <button type="button" class="step-date-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                  ${dateMeta.text}
+                                </button>
+                                <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                  ${hasBlock ? '🚨 Задержка' : '+ риск'}
+                                </button>
+                              </div>
+                              <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
+                            </div>
+
+                            ${hasBlock ? `
+                              <div class="blocker-banner">
+                                <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                  🚨 ${escapeHtml(s.blocker)}
+                                </span>
+                                <button class="blocker-clear-btn" onclick="clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
+                              </div>
+                            ` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+
+                    <!-- РАСКРЫВАЮЩАЯСЯ ФОРМА ДОБАВЛЕНИЯ -->
+                    ${!obj.showAddForm ? `
+                      <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
+                        + Добавить этап / шаблоны
                       </button>
-                    </div>
-                  ` : ''}
-
-                  <!-- СПИСОК ШАГОВ -->
-                  <div class="steps-list">
-                    ${obj.steps.map(s => {
-                      const hasBlock = !s.done && !!s.blocker;
-                      const dateMeta = analyzeDeadline(s.date, s.done);
-
-                      return `
-                        <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
-                          <div class="step-header-line">
-                            <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
-                            <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
-                          </div>
-
-                          <div class="step-footer-line">
-                            <div class="step-actions-left">
-                              <!-- КАЛЕНДАРЬ ПО КЛИКУ -->
-                              <button type="button" class="step-date-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
-                                ${dateMeta.text}
-                              </button>
-
-                              <!-- РИСКИ ПО КЛИКУ -->
-                              <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                ${hasBlock ? '🚨 Задержка' : '+ риск'}
-                              </button>
-                            </div>
-                            <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
-                          </div>
-
-                          ${hasBlock ? `
-                            <div class="blocker-banner">
-                              <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                🚨 ${escapeHtml(s.blocker)}
-                              </span>
-                              <button class="blocker-clear-btn" onclick="clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
-                            </div>
-                          ` : ''}
+                    ` : `
+                      <div class="step-fast-add">
+                        <div class="template-chips-bar">
+                          <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов</button>
+                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
+                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
+                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
+                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
+                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
                         </div>
-                      `;
-                    }).join('')}
+
+                        <div class="sfa-row-1">
+                          <input type="text" id="txt-${obj.id}" placeholder="Свое название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
+                          <input type="date" id="date-cal-${obj.id}" value="${getTodayISO()}">
+                        </div>
+
+                        <div class="sfa-row-2">
+                          <button type="button" class="tpl-chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
+                          <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
+                        </div>
+                      </div>
+                    `}
                   </div>
-
-                  <!-- РАСКРЫВАЮЩАЯСЯ ФОРМА -->
-                  ${!obj.showAddForm ? `
-                    <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
-                      + Добавить этап / шаблоны
-                    </button>
-                  ` : `
-                    <div class="step-fast-add">
-                      <div class="template-chips-bar">
-                        <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
-                      </div>
-
-                      <div class="sfa-row-1">
-                        <input type="text" id="txt-${obj.id}" placeholder="Свое название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
-                        <input type="date" id="date-cal-${obj.id}" value="${getTodayISO()}">
-                      </div>
-
-                      <div class="sfa-row-2">
-                        <button type="button" class="tpl-chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
-                        <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
-                      </div>
-                    </div>
-                  `}
                 </div>
               `;
             }).join('')}
@@ -1859,100 +1903,132 @@
       });
 
       if (reportMode === 'executive') {
-        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}\n\n`;
+        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}
+
+`;
 
         if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:\n`;
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:
+`;
           blockers.forEach(b => {
-            txt += `• ${b.obj} (${b.proc}):\n`;
-            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
-            txt += `     └ Причина: ${b.reason}\n`;
+            txt += `• ${b.obj} (${b.proc}):
+`;
+            txt += `  ⚠️ ${b.step} [${b.date}]
+`;
+            txt += `     └ Причина: ${b.reason}
+`;
           });
-          txt += `\n`;
+          txt += `
+`;
         }
 
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:\n`;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
+`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = o.steps.filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
-              doneTxt += `• ${o.title} (${p.title}):\n`;
+              doneTxt += `• ${o.title} (${p.title}):
+`;
               todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]\n`;
+                doneTxt += `  - ${s.text} [закрыто]
+`;
               });
             }
           });
         });
-        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
-        txt += doneTxt + `\n`;
+        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов
+`;
+        txt += doneTxt + `
+`;
 
         if (archivedList.length > 0) {
-          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):\n`;
+          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):
+`;
           archivedList.forEach(a => {
-            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто\n`;
+            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто
+`;
           });
-          txt += `\n`;
+          txt += `
+`;
         }
 
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:\n`;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:
+`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const regularSteps = o.steps.filter(s => !s.done && !s.blocker);
             if (regularSteps.length > 0) {
               hasPlan = true;
-              planTxt += `• ${o.title} (${p.title}):\n`;
+              planTxt += `• ${o.title} (${p.title}):
+`;
               regularSteps.forEach(s => {
                 const dateStr = s.date ? ` [${s.date}]` : '';
-                planTxt += `  - ${s.text}${dateStr}\n`;
+                planTxt += `  - ${s.text}${dateStr}
+`;
               });
             }
           });
         });
-        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
+        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!
+`;
         txt += planTxt;
 
         return txt.trim();
 
       } else {
-        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}\n\n`;
+        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}
+
+`;
 
         if (blockers.length > 0) {
-          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):\n`;
+          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):
+`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date || 'без даты'}]\n`;
+            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date || 'без даты'}]
+`;
           });
-          txt += `\n`;
+          txt += `
+`;
         }
 
         state.forEach(p => {
           const active = p.objects.filter(o => !o.archived);
-          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
+`;
           if (active.length === 0) {
-            txt += `  (все объекты завершены и в архиве)\n\n`;
+            txt += `  (все объекты завершены и в архиве)
+
+`;
             return;
           }
 
           active.forEach(o => {
             const d = o.steps.filter(s => s.done).length;
             const t = o.steps.length;
-            txt += `📌 ${o.title} [готовность: ${d}/${t}]\n`;
+            txt += `📌 ${o.title} [готовность: ${d}/${t}]
+`;
             o.steps.forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
+              txt += `  ${icon} ${s.text} ${status}${blockStr}
+`;
             });
           });
-          txt += `\n`;
+          txt += `
+`;
         });
 
         if (archivedList.length > 0) {
-          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):\n`;
+          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):
+`;
           archivedList.forEach(a => {
-            txt += `• ${a.obj} (${a.proc})\n`;
+            txt += `• ${a.obj} (${a.proc})
+`;
           });
         }
 
