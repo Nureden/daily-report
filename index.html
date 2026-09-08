@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Трекер Отчетов по Датам</title>
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: var(--tg-theme-bg-color, #f4f1ea);
+      --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+      --text: var(--tg-theme-text-color, #222222);
+      --hint: var(--tg-theme-hint-color, #707579);
+      --done-bg: #e6f4ea;
+      --done-border: #1e7e34;
+      --plan-bg: #fef7dc;
+      --plan-border: #d97706;
+      --border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 12px;
+      padding-bottom: 80px;
+    }
+
+    .app-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Шапка со статистикой */
+    .header-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-color);
+    }
+
+    .top-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .app-title {
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-sync {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 600;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-pill {
+      padding: 8px 10px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-pill.done { background: var(--done-bg); border-left: 3px solid var(--done-border); color: #14532d; }
+    .stat-pill.plan { background: var(--plan-bg); border-left: 3px solid var(--plan-border); color: #78350f; }
+    .stat-lbl { font-size: 11px; font-weight: 600; opacity: 0.8; }
+    .stat-num { font-size: 16px; font-weight: 800; }
+
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-main {
+      flex: 1;
+      background: #15803d;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* Создание процесса */
+    .add-proc-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .add-proc-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .btn-add-proc {
+      background: #374151;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Карточка процесса (Уровень 1) */
+    .process-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .proc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .proc-name {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .proc-del-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Колонки со стикерами (Уровень 2) */
+    .lanes-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 550px) {
+      .lanes-box { grid-template-columns: 1fr; }
+    }
+
+    .lane {
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    .lane-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .lane-title.done { color: var(--done-border); }
+    .lane-title.plan { color: var(--plan-border); }
+
+    /* Стикер */
+    .sticky {
+      position: relative;
+      border-radius: 6px;
+      padding: 9px 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sticky.done { background: var(--done-bg); border-left: 4px solid var(--done-border); color: #14532d; }
+    .sticky.plan { background: var(--plan-bg); border-left: 4px solid var(--plan-border); color: #78350f; }
+
+    .sticky-txt { line-height: 1.35; word-break: break-word; font-weight: 500; }
+    
+    .sticky-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      padding-top: 5px;
+    }
+
+    .sticky-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.7);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .btn-chip {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Форма добавления задачи */
+    .task-add-row {
+      display: grid;
+      grid-template-columns: 1fr 130px 100px auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      .task-add-row {
+        grid-template-columns: 1fr 1fr;
+      }
+      .task-add-row input[type="text"] {
+        grid-column: span 2;
+      }
+      .task-add-row button {
+        grid-column: span 2;
+      }
+    }
+
+    .task-add-row input, .task-add-row select {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+      outline: none;
+      background: #fff;
+    }
+
+    .btn-add-task {
+      background: #4b5563;
+      color: white;
+      border: none;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Тост */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 25px;
+      font-size: 13px;
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="header-card">
+      <div class="top-info">
+        <div class="app-title">📌 Древовидный трекер по датам</div>
+        <div class="badge-sync" id="syncStatus">● Хранилище активно</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-pill done">
+          <span class="stat-lbl">СДЕЛАНО (ЗАВЕРШЕНО)</span>
+          <span class="stat-num" id="countDone">0 задач</span>
+        </div>
+        <div class="stat-pill plan">
+          <span class="stat-lbl">В ПЛАНАХ (НАЗНАЧЕНО)</span>
+          <span class="stat-num" id="countPlan">0 задач</span>
+        </div>
+      </div>
+
+      <div class="header-buttons">
+        <button class="btn-main" onclick="shareReport()">📋 Скопировать древовидный отчет</button>
+      </div>
+    </div>
+
+    <div class="add-proc-row">
+      <input type="text" id="newProcInput" placeholder="Новое направление / процесс (напр. Согласование сервитута)...">
+      <button class="btn-add-proc" onclick="addProcess()">+ Процесс</button>
+    </div>
+
+    <div id="processesList"></div>
+  </div>
+
+  <div class="toast" id="toast">Древовидный отчет скопирован!</div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    const STORAGE_KEY = 'tma_tree_date_tracker_state';
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    // Текущая дата YYYY-MM-DD
+    function getTodayISO() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Форматирование ISO в ДД.ММ.ГГГГ
+    function formatDateRU(isoStr) {
+      if (!isoStr) return '';
+      const parts = isoStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      }
+      return isoStr;
+    }
+
+    const todayISO = getTodayISO();
+
+    let state = [
+      {
+        id: 1,
+        title: "Согласование земельно-кадастровых материалов",
+        tasks: [
+          { id: 101, text: "Сверка контуров и координатная привязка участков", date: todayISO, status: "done" },
+          { id: 102, text: "Подготовка сопроводительных писем смежникам", date: todayISO, status: "done" },
+          { id: 103, text: "Выезд на контрольное полевое обследование", date: todayISO, status: "plan" }
+        ]
+      },
+      {
+        id: 2,
+        title: "Экспертиза проектных коридоров коммуникаций",
+        tasks: [
+          { id: 201, text: "Анализ наложений с охранными зонами", date: todayISO, status: "done" },
+          { id: 202, text: "Составление сводной ведомости пересечений трассы", date: todayISO, status: "plan" }
+        ]
+      }
+    ];
+
+    async function loadData() {
+      if (tg?.CloudStorage) {
+        tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
+          if (!err && val) {
+            try {
+              state = JSON.parse(val);
+            } catch(e){}
+          } else {
+            const local = localStorage.getItem(STORAGE_KEY);
+            if (local) state = JSON.parse(local);
+          }
+          render();
+        });
+      } else {
+        const local = localStorage.getItem(STORAGE_KEY);
+        if (local) state = JSON.parse(local);
+        render();
+      }
+    }
+
+    function saveData() {
+      const json = JSON.stringify(state);
+      localStorage.setItem(STORAGE_KEY, json);
+
+      if (tg?.CloudStorage) {
+        tg.CloudStorage.setItem(STORAGE_KEY, json, (err, success) => {
+          const badge = document.getElementById('syncStatus');
+          if (success) {
+            badge.textContent = "● Синхронизировано в облако";
+            badge.style.color = "#15803d";
+          }
+        });
+      }
+      render();
+    }
+
+    function triggerHaptic() {
+      if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+      }
+    }
+
+    function addProcess() {
+      const input = document.getElementById('newProcInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      state.push({ id: Date.now(), title: val, tasks: [] });
+      input.value = '';
+      triggerHaptic();
+      saveData();
+    }
+
+    function deleteProcess(id) {
+      if (confirm("Удалить этот процесс и все задачи в нем?")) {
+        state = state.filter(p => p.id !== id);
+        triggerHaptic();
+        saveData();
+      }
+    }
+
+    function addTask(procId) {
+      const txt = document.getElementById(`txt-${procId}`).value.trim();
+      const dateVal = document.getElementById(`date-${procId}`).value || getTodayISO();
+      const status = document.getElementById(`status-${procId}`).value;
+
+      if (!txt) return;
+
+      const proc = state.find(p => p.id === procId);
+      if (proc) {
+        proc.tasks.push({ id: Date.now(), text: txt, date: dateVal, status: status });
+        triggerHaptic();
+        saveData();
+      }
+    }
+
+    function toggleTask(procId, taskId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const t = proc.tasks.find(x => x.id === taskId);
+      if (t) {
+        t.status = t.status === 'done' ? 'plan' : 'done';
+        triggerHaptic();
+        saveData();
+      }
+    }
+
+    function deleteTask(procId, taskId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      proc.tasks = proc.tasks.filter(x => x.id !== taskId);
+      triggerHaptic();
+      saveData();
+    }
+
+    function render() {
+      const root = document.getElementById('processesList');
+      root.innerHTML = '';
+
+      let countDone = 0;
+      let countPlan = 0;
+
+      state.forEach(proc => {
+        const doneTasks = proc.tasks.filter(t => t.status === 'done');
+        const planTasks = proc.tasks.filter(t => t.status === 'plan');
+
+        countDone += doneTasks.length;
+        countPlan += planTasks.length;
+
+        const card = document.createElement('div');
+        card.className = 'process-card';
+
+        const renderItem = (t) => `
+          <div class="sticky ${t.status}">
+            <div class="sticky-txt">${escapeHtml(t.text)}</div>
+            <div class="sticky-foot">
+              <span class="sticky-date">📅 ${formatDateRU(t.date)}</span>
+              <div style="display:flex; gap:4px;">
+                <button class="btn-chip" onclick="toggleTask(${proc.id}, ${t.id})">
+                  ${t.status === 'done' ? '➔ В план' : '✔ В сделано'}
+                </button>
+                <button class="btn-chip" style="color:#ef4444;" onclick="deleteTask(${proc.id}, ${t.id})">✕</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        card.innerHTML = `
+          <div class="proc-header">
+            <div class="proc-name">📂 ${escapeHtml(proc.title)} <span style="font-size:12px; color:var(--hint); font-weight:normal;">(${proc.tasks.length} зад.)</span></div>
+            <button class="proc-del-btn" onclick="deleteProcess(${proc.id})">Удалить процесс</button>
+          </div>
+
+          <div class="lanes-box">
+            <div class="lane">
+              <div class="lane-title done"><span>🟢 Сделано</span><span>${doneTasks.length}</span></div>
+              ${doneTasks.map(renderItem).join('')}
+            </div>
+            <div class="lane">
+              <div class="lane-title plan"><span>🟡 В планах</span><span>${planTasks.length}</span></div>
+              ${planTasks.map(renderItem).join('')}
+            </div>
+          </div>
+
+          <div class="task-add-row">
+            <input type="text" id="txt-${proc.id}" placeholder="Текст задачи-стикера...">
+            <input type="date" id="date-${proc.id}" value="${getTodayISO()}">
+            <select id="status-${proc.id}">
+              <option value="done">Сделано</option>
+              <option value="plan">В планах</option>
+            </select>
+            <button class="btn-add-task" onclick="addTask(${proc.id})">+ Стикер</button>
+          </div>
+        `;
+
+        root.appendChild(card);
+      });
+
+      document.getElementById('countDone').textContent = `${countDone} задач`;
+      document.getElementById('countPlan').textContent = `${countPlan} задач`;
+    }
+
+    function buildReportText() {
+      const todayRU = formatDateRU(getTodayISO());
+      let totalDone = 0;
+      let totalPlan = 0;
+
+      state.forEach(p => {
+        totalDone += p.tasks.filter(t => t.status === 'done').length;
+        totalPlan += p.tasks.filter(t => t.status === 'plan').length;
+      });
+
+      let txt = `📅 Отчет по процессам на ${todayRU} | Выполнено: ${totalDone} | В планах: ${totalPlan}\n\n`;
+
+      state.forEach(p => {
+        const doneList = p.tasks.filter(t => t.status === 'done');
+        const planList = p.tasks.filter(t => t.status === 'plan');
+
+        txt += `📂 Процесс: ${p.title}\n`;
+
+        if (doneList.length > 0) {
+          const hasPlan = planList.length > 0;
+          txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО (${doneList.length})\n`;
+          doneList.forEach((t, idx) => {
+            const isLast = idx === doneList.length - 1;
+            const prefix = hasPlan ? '│   ' : '    ';
+            txt += `${prefix}${isLast ? '└──' : '├──'} ${t.text} [Дата: ${formatDateRU(t.date)}]\n`;
+          });
+        }
+
+        if (planList.length > 0) {
+          txt += `└── 🟡 В ПЛАНАХ (${planList.length})\n`;
+          planList.forEach((t, idx) => {
+            const isLast = idx === planList.length - 1;
+            txt += `    ${isLast ? '└──' : '├──'} ${t.text} [Срок: ${formatDateRU(t.date)}]\n`;
+          });
+        }
+
+        txt += `\n`;
+      });
+
+      return txt.trim();
+    }
+
+    function shareReport() {
+      const report = buildReportText();
+      triggerHaptic();
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(report).then(() => showToast());
+      } else {
+        const t = document.createElement("textarea");
+        t.value = report;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand("copy");
+        document.body.removeChild(t);
+        showToast();
+      }
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 2500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, '&quot;');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
