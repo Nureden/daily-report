@@ -3,208 +3,193 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Трекер Процессов и Объектов</title>
+  <title>Управленческий трекер проектов</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #f4f6f9;
+      --bg: #f1f5f9;
       --card-bg: #ffffff;
-      --text-main: #1e293b;
+      --text-main: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
       
-      --accent-green: #16a34a;
-      --accent-green-bg: #f0fdf4;
-      --accent-green-border: #86efac;
-      
-      --accent-amber: #d97706;
-      --accent-amber-bg: #fffbeb;
-      --accent-amber-border: #fde68a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: #eff6ff;
 
-      --accent-blue: #0284c7;
+      --done: #16a34a;
+      --done-bg: #f0fdf4;
+      --done-border: #bbf7d0;
+
+      --work: #d97706;
+      --work-bg: #fffbeb;
+      --work-border: #fde68a;
+
       --danger: #ef4444;
       --radius: 12px;
+      --shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 14px;
-      padding-bottom: 90px;
+      padding: 12px;
+      padding-bottom: 100px; /* запас под плавающую панель отчетов */
       font-size: 16px;
       line-height: 1.5;
     }
 
-    .container {
+    .app-container {
       max-width: 860px;
       margin: 0 auto;
     }
 
-    /* Верхняя карточка */
-    .top-card {
+    /* 1. ПАНЕЛЬ РУКОВОДИТЕЛЯ (Executive Dashboard) */
+    .dashboard-card {
       background: var(--card-bg);
       border-radius: var(--radius);
       padding: 16px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       border: 1px solid var(--border);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+      box-shadow: var(--shadow);
     }
 
-    .header-row {
+    .dash-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
-    .app-title {
-      font-size: 20px;
+    .dash-title {
+      font-size: 19px;
       font-weight: 800;
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #0f172a;
     }
 
-    .cloud-pill {
+    .sync-badge {
       font-size: 12px;
-      padding: 4px 10px;
+      font-weight: 700;
+      padding: 3px 9px;
       border-radius: 20px;
       background: #e0f2fe;
       color: #0369a1;
-      font-weight: 700;
     }
 
-    /* Статистика */
-    .stats-row {
+    .metrics-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       margin-bottom: 14px;
     }
-    @media (max-width: 500px) {
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .stat-box.all { display: none; }
-    }
 
-    .stat-box {
+    .metric-card {
       padding: 10px 12px;
-      border-radius: 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
       display: flex;
       flex-direction: column;
-      gap: 3px;
     }
-    .stat-box.done {
-      background: var(--accent-green-bg);
-      border-left: 4px solid var(--accent-green);
+    .metric-card.green {
+      background: var(--done-bg);
+      border-color: var(--done-border);
       color: #166534;
     }
-    .stat-box.plan {
-      background: var(--accent-amber-bg);
-      border-left: 4px solid var(--accent-amber);
+    .metric-card.amber {
+      background: var(--work-bg);
+      border-color: var(--work-border);
       color: #92400e;
     }
-    .stat-box.all {
-      background: #f1f5f9;
-      border-left: 4px solid #64748b;
-      color: #334155;
+    .metric-card.blue {
+      background: var(--accent-light);
+      border-color: #bfdbfe;
+      color: #1e40af;
     }
-    .stat-label {
-      font-size: 12px;
+    .metric-lbl {
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       opacity: 0.85;
     }
-    .stat-value {
-      font-size: 19px;
+    .metric-num {
+      font-size: 20px;
       font-weight: 800;
+      margin-top: 2px;
     }
 
-    /* Кнопки отчета */
-    .report-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    @media (max-width: 480px) {
-      .report-actions { grid-template-columns: 1fr; }
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 12px 16px;
-      font-size: 15px;
-      font-weight: 700;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .btn:active {
-      transform: scale(0.98);
-      opacity: 0.9;
-    }
-    .btn-green {
-      background: var(--accent-green);
-      color: #ffffff;
-    }
-    .btn-blue {
-      background: var(--accent-blue);
-      color: #ffffff;
-    }
-    .btn-neutral {
-      background: #334155;
-      color: #ffffff;
-    }
-    .btn-subtle {
-      background: #f1f5f9;
-      color: #334155;
-      border: 1px solid var(--border);
-    }
-
-    /* Добавление процесса */
-    .add-proc-card {
-      background: var(--card-bg);
-      border: 1px dashed #cbd5e1;
-      border-radius: var(--radius);
-      padding: 12px;
-      margin-bottom: 18px;
+    /* Выбор формата отчета */
+    .report-modes {
       display: flex;
       gap: 8px;
+      margin-bottom: 10px;
     }
-    .add-proc-card input {
+    .report-mode-btn {
       flex: 1;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 700;
       border-radius: 8px;
-      font-size: 16px;
-      outline: none;
-      color: var(--text-main);
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
     }
-    .add-proc-card input:focus {
-      border-color: var(--accent-blue);
+    .report-mode-btn.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
     }
 
-    /* Карточки процессов */
-    .process-card {
+    /* 2. БЫСТРОЕ ДОБАВЛЕНИЕ НАПРАВЛЕНИЯ */
+    .quick-add-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .quick-add-bar input {
+      flex: 1;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #ffffff;
+      outline: none;
+    }
+    .quick-add-bar input:focus {
+      border-color: var(--accent);
+    }
+    .btn-dark {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* 3. КАРТОЧКА ПРОЦЕССА */
+    .process-section {
       background: var(--card-bg);
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
       overflow: hidden;
     }
 
@@ -213,216 +198,210 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
       background: #ffffff;
+      cursor: pointer;
       user-select: none;
+      border-bottom: 1px solid #f1f5f9;
     }
     .process-header:hover {
       background: #f8fafc;
     }
 
-    .proc-title-wrap {
+    .proc-title-group {
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 17px;
       font-weight: 700;
-      color: #0f172a;
     }
-    .proc-toggle-icon {
-      font-size: 13px;
+    .proc-arrow {
+      font-size: 12px;
       color: var(--text-muted);
       transition: transform 0.2s;
     }
-    .proc-toggle-icon.collapsed {
+    .proc-arrow.collapsed {
       transform: rotate(-90deg);
     }
 
-    .proc-del-btn {
-      background: transparent;
-      border: none;
-      color: var(--danger);
+    .proc-meta-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .proc-del-link {
+      color: #94a3b8;
       font-size: 13px;
-      font-weight: 600;
-      padding: 6px 10px;
-      border-radius: 6px;
+      background: none;
+      border: none;
       cursor: pointer;
     }
-    .proc-del-btn:hover {
-      background: #fef2f2;
+    .proc-del-link:hover {
+      color: var(--danger);
     }
 
-    .proc-content {
-      padding: 0 16px 16px 16px;
-      border-top: 1px solid #f1f5f9;
-    }
-    .proc-content.hidden {
-      display: none;
-    }
-
-    /* Список карточек объектов во всю ширину */
-    .objects-list {
+    .process-body {
+      padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-top: 14px;
-      margin-bottom: 14px;
+    }
+    .process-body.hidden {
+      display: none;
     }
 
-    /* Карточка объекта */
-    .obj-card {
+    /* 4. ОБЪЕКТЫ / ПРОЕКТЫ (ПОЛНАЯ ШИРИНА) */
+    .object-card {
       background: #ffffff;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
       display: flex;
       flex-direction: column;
       gap: 10px;
-      transition: border-color 0.2s;
     }
-    .obj-card.fully-done {
-      background: #f9fdfa;
-      border-color: var(--accent-green-border);
+    .object-card.completed-obj {
+      background: #fcfdfc;
+      border-color: #bbf7d0;
     }
 
     .obj-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
-    .obj-title {
-      font-size: 17px;
+    .obj-name {
+      font-size: 16px;
       font-weight: 700;
       color: #0f172a;
-      cursor: pointer;
       flex: 1;
+      cursor: pointer;
     }
-    .obj-right-meta {
+    .obj-tools {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
-    .progress-pill {
-      font-size: 12px;
+    .badge-percent {
+      font-size: 11px;
       font-weight: 800;
-      padding: 3px 9px;
-      border-radius: 20px;
+      padding: 3px 8px;
+      border-radius: 12px;
       background: #f1f5f9;
       color: #475569;
       white-space: nowrap;
     }
-    .progress-pill.done {
-      background: var(--accent-green-bg);
+    .badge-percent.green {
+      background: var(--done-bg);
       color: #15803d;
     }
-    .obj-del-btn {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 4px;
+
+    /* Прогресс-бар */
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      overflow: hidden;
     }
-    .obj-del-btn:hover {
-      color: var(--danger);
-      background: #fef2f2;
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .progress-bar-fill.done {
+      background: var(--done);
     }
 
-    /* Список шагов / этапов внутри объекта */
-    .steps-container {
+    /* 5. ШАГИ / ЭТАПЫ */
+    .steps-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
 
-    .step-row {
+    .step-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       padding: 8px 10px;
-      background: #f8fafc;
       border-radius: 8px;
+      background: #f8fafc;
       border: 1px solid #f1f5f9;
     }
-    .step-row.completed {
-      background: var(--accent-green-bg);
-      border-color: var(--accent-green-border);
+    .step-item.is-done {
+      background: var(--done-bg);
+      border-color: var(--done-border);
     }
 
-    .step-left {
+    .step-main {
       display: flex;
       align-items: center;
       gap: 10px;
       flex: 1;
     }
-    .step-checkbox {
-      width: 19px;
-      height: 19px;
+    .step-chk {
+      width: 20px;
+      height: 20px;
       cursor: pointer;
-      accent-color: var(--accent-green);
+      accent-color: var(--done);
       flex-shrink: 0;
     }
-    .step-text {
+    .step-title {
       font-size: 15px;
-      line-height: 1.35;
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer;
+      line-height: 1.35;
       word-break: break-word;
     }
-    .step-row.completed .step-text {
+    .step-item.is-done .step-title {
       text-decoration: line-through;
       color: #166534;
-      opacity: 0.75;
+      opacity: 0.7;
     }
 
-    .step-right {
+    .step-aside {
       display: flex;
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
     }
 
-    /* Бейдж даты шага (нажмите, чтобы изменить дату) */
-    .step-date-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    .step-date-tag {
       font-size: 12px;
       font-weight: 700;
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 6px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #334155;
       cursor: pointer;
       user-select: none;
+      white-space: nowrap;
     }
-    .step-row.completed .step-date-pill {
-      background: #ffffff;
-      border-color: var(--accent-green-border);
+    .step-item.is-done .step-date-tag {
+      border-color: #86efac;
       color: #166534;
     }
 
-    .step-del-btn {
+    .mini-del {
       background: none;
       border: none;
       color: #94a3b8;
       font-size: 14px;
       cursor: pointer;
-      padding: 3px 5px;
-      border-radius: 4px;
+      padding: 2px 4px;
     }
-    .step-del-btn:hover {
+    .mini-del:hover {
       color: var(--danger);
     }
 
-    /* Добавление шага к объекту */
-    .add-step-box {
+    /* 6. ФОРМА БЫСТРОГО ДОБАВЛЕНИЯ ШАГА */
+    .step-fast-add {
       background: #f8fafc;
       border: 1px dashed #cbd5e1;
       border-radius: 8px;
@@ -432,11 +411,11 @@
       gap: 8px;
       margin-top: 4px;
     }
-    .add-step-inputs {
+    .sfa-row-1 {
       display: flex;
       gap: 6px;
     }
-    .add-step-inputs input.step-title-input {
+    .sfa-row-1 input[type="text"] {
       flex: 1;
       padding: 9px 12px;
       font-size: 15px;
@@ -444,30 +423,31 @@
       border-radius: 6px;
       outline: none;
     }
-    .add-step-inputs input.step-date-input {
+    .sfa-row-1 input.date-input {
       width: 140px;
       padding: 9px 10px;
       font-size: 14px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
+      background: #fff;
     }
     @media (max-width: 480px) {
-      .add-step-inputs { flex-direction: column; }
-      .add-step-inputs input.step-date-input { width: 100%; }
+      .sfa-row-1 { flex-direction: column; }
+      .sfa-row-1 input.date-input { width: 100%; }
     }
 
-    .add-step-bottom {
+    .sfa-row-2 {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 6px;
     }
-    .quick-date-buttons {
+    .quick-chips {
       display: flex;
       gap: 4px;
     }
-    .mini-date-btn {
+    .chip {
       background: #ffffff;
       border: 1px solid #cbd5e1;
       padding: 4px 8px;
@@ -477,10 +457,11 @@
       color: #334155;
       cursor: pointer;
     }
-    .mini-date-btn:hover {
+    .chip:hover {
       background: #f1f5f9;
     }
-    .add-step-btn {
+
+    .btn-add-step {
       background: #334155;
       color: #ffffff;
       border: none;
@@ -491,146 +472,154 @@
       cursor: pointer;
     }
 
-    /* Добавление объекта в процесс */
-    .add-obj-toggle-btn {
+    /* Кнопка добавления объекта */
+    .btn-new-obj {
       width: 100%;
-      background: #f1f5f9;
+      background: #f8fafc;
       color: #475569;
       border: 1px dashed #cbd5e1;
       padding: 10px;
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
+      text-align: center;
+    }
+    .btn-new-obj:hover {
+      background: #f1f5f9;
+    }
+
+    /* 7. ПЛАВАЮЩАЯ НИЖНЯЯ ПАНЕЛЬ ДЛЯ ТЕЛЕФОНА (Action Bar) */
+    .floating-action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .fab-btn {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-    }
-    .add-obj-toggle-btn:hover {
-      background: #e2e8f0;
-    }
-
-    .new-obj-form {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
       gap: 8px;
-    }
-    .new-obj-form input {
-      padding: 10px 12px;
+      padding: 13px;
       font-size: 15px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      outline: none;
-    }
-    .new-obj-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 6px;
-    }
-
-    /* Очистка */
-    .proc-footer-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 10px;
-    }
-    .btn-archive {
-      background: transparent;
+      font-weight: 700;
+      border-radius: 10px;
       border: none;
-      color: #64748b;
-      font-size: 13px;
-      font-weight: 600;
       cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
+      color: #ffffff;
+      transition: transform 0.1s;
     }
-    .btn-archive:hover {
-      background: #f1f5f9;
-      color: var(--danger);
+    .fab-btn:active {
+      transform: scale(0.98);
+    }
+    .fab-btn.copy {
+      background: #16a34a;
+    }
+    .fab-btn.send {
+      background: #0284c7;
     }
 
-    /* Тост */
+    /* Тост уведомлений */
     .toast {
       position: fixed;
-      bottom: 24px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: #0f172a;
       color: #ffffff;
-      padding: 12px 22px;
-      border-radius: 30px;
+      padding: 10px 20px;
+      border-radius: 20px;
       font-size: 14px;
       font-weight: 600;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
       display: none;
-      z-index: 1000;
-      text-align: center;
-      max-width: 90%;
+      z-index: 200;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- Верхний блок -->
-    <div class="top-card">
-      <div class="header-row">
-        <div class="app-title">
-          <span>📋</span> Трекер процессов и объектов
+  <div class="app-container">
+    <!-- ПАНЕЛЬ РУКОВОДИТЕЛЯ -->
+    <div class="dashboard-card">
+      <div class="dash-top">
+        <div class="dash-title">
+          <span>📊</span> Мониторинг проектов
         </div>
-        <div class="cloud-pill" id="syncStatus">● Telegram Cloud</div>
+        <div class="sync-badge" id="syncTag">● Синхронизировано</div>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-box done">
-          <span class="stat-label">Сделано</span>
-          <span class="stat-value" id="countDone">0 шагов</span>
+      <div class="metrics-grid">
+        <div class="metric-card green">
+          <span class="metric-lbl">Сделано</span>
+          <span class="metric-num" id="mDone">0</span>
         </div>
-        <div class="stat-box plan">
-          <span class="stat-label">В работе / План</span>
-          <span class="stat-value" id="countPlan">0 шагов</span>
+        <div class="metric-card amber">
+          <span class="metric-lbl">В работе</span>
+          <span class="metric-num" id="mPlan">0</span>
         </div>
-        <div class="stat-box all">
-          <span class="stat-label">Объектов</span>
-          <span class="stat-value" id="countObjects">0</span>
+        <div class="metric-card blue">
+          <span class="metric-lbl">Объектов</span>
+          <span class="metric-num" id="mTotal">0</span>
         </div>
       </div>
 
-      <div class="report-actions">
-        <button class="btn btn-green" onclick="copyReport()">
-          📋 Скопировать отчет
+      <!-- Выбор формата отчета для руководителя -->
+      <div class="report-modes">
+        <button class="report-mode-btn active" id="modeExecutive" onclick="setReportMode('executive')">
+          ⚡ Отчет за сегодня (Сводка)
         </button>
-        <button class="btn btn-blue" onclick="shareToTelegram()">
-          ✈️ Отправить в чат
+        <button class="report-mode-btn" id="modeFull" onclick="setReportMode('full')">
+          📋 Полный статус-отчет
         </button>
       </div>
     </div>
 
-    <!-- Новое направление / процесс -->
-    <div class="add-proc-card">
+    <!-- ДОБАВЛЕНИЕ НОВОГО НАПРАВЛЕНИЯ -->
+    <div class="quick-add-bar">
       <input type="text" id="newProcInput" placeholder="Новое направление (напр. Оформление сервитута)..." onkeydown="if(event.key==='Enter') addProcess()">
-      <button class="btn btn-neutral" onclick="addProcess()">+ Процесс</button>
+      <button class="btn-dark" onclick="addProcess()">+ Процесс</button>
     </div>
 
-    <!-- Список процессов -->
-    <div id="processesList"></div>
+    <!-- СПИСОК ПРОЦЕССОВ И ОБЪЕКТОВ -->
+    <div id="processesRoot"></div>
   </div>
 
-  <div class="toast" id="toastBox">Отчет скопирован!</div>
+  <!-- ПЛАВАЮЩАЯ ПАНЕЛЬ С КНОПКАМИ КОПИРОВАНИЯ (ВСЕГДА ПОД РУКОЙ) -->
+  <div class="floating-action-bar">
+    <button class="fab-btn copy" onclick="copyReport()">
+      📋 Скопировать отчет
+    </button>
+    <button class="fab-btn send" onclick="shareToTelegram()">
+      ✈️ Отправить в Telegram
+    </button>
+  </div>
+
+  <div class="toast" id="toastMsg">Отчет скопирован!</div>
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'tma_unified_object_tree_v4';
+    const STORAGE_KEY = 'manager_daily_tracker_v5';
 
     if (tg) {
       tg.ready();
       tg.expand();
     }
+
+    let reportMode = 'executive'; // 'executive' или 'full'
 
     function getTodayStr() {
       const d = new Date();
@@ -649,21 +638,19 @@
       return `${day}.${m}.${y}`;
     }
 
-    // Структура данных: Процесс -> Объекты (на всю ширину) -> Шаги со сроками
     let state = [
       {
         id: 1,
         title: "по изменению границ СЭЗ",
         collapsed: false,
-        openObjForm: false,
         objects: [
           {
             id: 101,
             title: "Дорожная карта",
             steps: [
-              { id: 1001, text: "Акт сверки НАО", date: "08.09.2026", done: true },
-              { id: 1002, text: "Экспликация Гипрозем", date: "08.09 – 12.09", done: false },
-              { id: 1003, text: "Постановление акимата", date: "до 18.09", done: false }
+              { id: 1001, text: "Акт сверки НАО", date: "08.09.2026", done: true, doneDate: "08.09.2026" },
+              { id: 1002, text: "Экспликация Гипрозем", date: "08.09 – 12.09", done: false, doneDate: null },
+              { id: 1003, text: "Постановление акимата", date: "до 18.09", done: false, doneDate: null }
             ]
           }
         ]
@@ -672,22 +659,21 @@
         id: 2,
         title: "Дополнительные зем участки",
         collapsed: false,
-        openObjForm: false,
         objects: [
           {
             id: 201,
             title: "Жылыой - ЛЭС",
             steps: [
-              { id: 2001, text: "Акт сверки НАО", date: "08.09.2026", done: true },
-              { id: 2002, text: "Экспликация Гипрозем", date: "до 12.09", done: false }
+              { id: 2001, text: "Акт сверки НАО", date: "08.09.2026", done: true, doneDate: "08.09.2026" },
+              { id: 2002, text: "Экспликация Гипрозем", date: "до 12.09", done: false, doneDate: null }
             ]
           },
           {
             id: 202,
             title: "Жылыой - ВП",
             steps: [
-              { id: 3001, text: "Акт сверки НАО", date: "08.09.2026", done: false },
-              { id: 3002, text: "Экспликация Гипрозем", date: "до 15.09", done: false }
+              { id: 3001, text: "Акт сверки НАО", date: "08.09.2026", done: false, doneDate: null },
+              { id: 3002, text: "Экспликация Гипрозем", date: "до 15.09", done: false, doneDate: null }
             ]
           }
         ]
@@ -695,16 +681,18 @@
     ];
 
     async function loadData() {
-      const tryParse = (val) => {
+      const parseVal = (val) => {
         try {
-          const parsed = JSON.parse(val);
-          if (Array.isArray(parsed)) {
-            state = parsed.map(p => ({
-              ...p,
-              openObjForm: false,
-              objects: (p.objects || []).map(o => ({
+          const p = JSON.parse(val);
+          if (Array.isArray(p)) {
+            state = p.map(pr => ({
+              ...pr,
+              objects: (pr.objects || []).map(o => ({
                 ...o,
-                steps: o.steps || []
+                steps: (o.steps || []).map(s => ({
+                  ...s,
+                  doneDate: s.doneDate || (s.done ? getTodayStr() : null)
+                }))
               }))
             }));
           }
@@ -714,16 +702,16 @@
       if (tg?.CloudStorage) {
         tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
           if (!err && val) {
-            tryParse(val);
+            parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY);
-            if (local) tryParse(local);
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('tma_unified_object_tree_v4');
+            if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY);
-        if (local) tryParse(local);
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('tma_unified_object_tree_v4');
+        if (local) parseVal(local);
         render();
       }
     }
@@ -734,10 +722,10 @@
 
       if (tg?.CloudStorage) {
         tg.CloudStorage.setItem(STORAGE_KEY, json, (err, ok) => {
-          const b = document.getElementById('syncStatus');
-          if (ok && b) {
-            b.textContent = "● Синхронизировано";
-            b.style.color = "#15803d";
+          const tag = document.getElementById('syncTag');
+          if (ok && tag) {
+            tag.textContent = "● Синхронизировано";
+            tag.style.color = "#15803d";
           }
         });
       }
@@ -746,6 +734,13 @@
 
     function haptic() {
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function setReportMode(m) {
+      reportMode = m;
+      document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
+      document.getElementById('modeFull').classList.toggle('active', m === 'full');
+      showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный статус-отчет");
     }
 
     function addProcess() {
@@ -757,7 +752,6 @@
         id: Date.now(),
         title: val,
         collapsed: false,
-        openObjForm: false,
         objects: []
       });
 
@@ -766,55 +760,44 @@
       saveData();
     }
 
-    function toggleCollapse(procId) {
-      const proc = state.find(p => p.id === procId);
-      if (proc) {
-        proc.collapsed = !proc.collapsed;
+    function toggleProcessCollapse(procId) {
+      const p = state.find(x => x.id === procId);
+      if (p) {
+        p.collapsed = !p.collapsed;
         haptic();
         saveData();
       }
     }
 
     function deleteProcess(procId) {
-      if (confirm("Удалить этот процесс и все его объекты?")) {
-        state = state.filter(p => p.id !== procId);
+      if (confirm("Удалить это направление со всеми объектами?")) {
+        state = state.filter(x => x.id !== procId);
         haptic();
         saveData();
       }
     }
 
-    function toggleObjForm(procId) {
-      const proc = state.find(p => p.id === procId);
-      if (proc) {
-        proc.openObjForm = !proc.openObjForm;
-        render();
-      }
-    }
+    function promptAddObject(procId) {
+      const name = prompt("Название объекта / участка (напр. Жылыой - ЛЭС):");
+      if (!name || !name.trim()) return;
 
-    function addObject(procId) {
-      const input = document.getElementById(`new-obj-in-${procId}`);
-      if (!input) return;
-      const title = input.value.trim();
-      if (!title) return;
-
-      const proc = state.find(p => p.id === procId);
-      if (proc) {
-        proc.objects.push({
+      const p = state.find(x => x.id === procId);
+      if (p) {
+        p.objects.push({
           id: Date.now(),
-          title: title,
+          title: name.trim(),
           steps: []
         });
-        proc.openObjForm = false;
         haptic();
         saveData();
       }
     }
 
     function deleteObject(procId, objId) {
-      if (confirm("Удалить этот объект?")) {
-        const proc = state.find(p => p.id === procId);
-        if (proc) {
-          proc.objects = proc.objects.filter(o => o.id !== objId);
+      if (confirm("Удалить данный объект?")) {
+        const p = state.find(x => x.id === procId);
+        if (p) {
+          p.objects = p.objects.filter(o => o.id !== objId);
           haptic();
           saveData();
         }
@@ -822,43 +805,39 @@
     }
 
     function editObjectTitle(procId, objId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const obj = proc.objects.find(o => o.id === objId);
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      const newTitle = prompt("Название объекта / проекта:", obj.title);
-      if (newTitle !== null && newTitle.trim() !== '') {
+      const newTitle = prompt("Название объекта:", obj.title);
+      if (newTitle && newTitle.trim()) {
         obj.title = newTitle.trim();
         haptic();
         saveData();
       }
     }
 
-    function setQuickDateInput(objId, val) {
-      const dInput = document.getElementById(`step-date-${objId}`);
-      if (dInput) dInput.value = val;
-    }
-
-    function addStep(procId, objId) {
-      const tInput = document.getElementById(`step-txt-${objId}`);
-      const dInput = document.getElementById(`step-date-${objId}`);
+    function addStepToObject(procId, objId) {
+      const tInput = document.getElementById(`txt-${objId}`);
+      const dInput = document.getElementById(`date-${objId}`);
       if (!tInput) return;
 
       const txt = tInput.value.trim();
       const dt = (dInput ? dInput.value.trim() : '') || getTodayStr();
       if (!txt) return;
 
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const obj = proc.objects.find(o => o.id === objId);
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
       obj.steps.push({
         id: Date.now(),
         text: txt,
         date: dt,
-        done: false
+        done: false,
+        doneDate: null
       });
 
       tInput.value = '';
@@ -869,55 +848,55 @@
     }
 
     function toggleStep(procId, objId, stepId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const obj = proc.objects.find(o => o.id === objId);
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
       const step = obj.steps.find(s => s.id === stepId);
       if (step) {
         step.done = !step.done;
-        // Если отметили сделанным сегодня, можно обновить дату или оставить прежнюю
-        haptic();
-        saveData();
-      }
-    }
-
-    function editStepText(procId, objId, stepId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const obj = proc.objects.find(o => o.id === objId);
-      if (!obj) return;
-      const step = obj.steps.find(s => s.id === stepId);
-      if (!step) return;
-
-      const newTxt = prompt("Описание шага / этапа:", step.text);
-      if (newTxt !== null && newTxt.trim() !== '') {
-        step.text = newTxt.trim();
+        step.doneDate = step.done ? getTodayStr() : null;
         haptic();
         saveData();
       }
     }
 
     function editStepDate(procId, objId, stepId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const obj = proc.objects.find(o => o.id === objId);
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
       const step = obj.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      const newDate = prompt("Укажите дату или промежуток (напр. 08.09.2026, до 15.09, 08.09-12.09):", step.date);
-      if (newDate !== null && newDate.trim() !== '') {
+      const newDate = prompt("Срок или интервал (напр. 08.09.2026, до 15.09, 08.09-12.09):", step.date);
+      if (newDate && newDate.trim()) {
         step.date = newDate.trim();
         haptic();
         saveData();
       }
     }
 
+    function editStepText(procId, objId, stepId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
+      if (!obj) return;
+      const step = obj.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const newTxt = prompt("Описание этапа / задачи:", step.text);
+      if (newTxt && newTxt.trim()) {
+        step.text = newTxt.trim();
+        haptic();
+        saveData();
+      }
+    }
+
     function deleteStep(procId, objId, stepId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const obj = proc.objects.find(o => o.id === objId);
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
       obj.steps = obj.steps.filter(s => s.id !== stepId);
@@ -925,274 +904,257 @@
       saveData();
     }
 
-    function clearDoneSteps(procId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-
-      let count = 0;
-      proc.objects.forEach(o => {
-        count += o.steps.filter(s => s.done).length;
-      });
-
-      if (count === 0) {
-        showToast("Нет выполненных шагов для очистки");
-        return;
-      }
-
-      if (confirm(`Удалить все выполненные шаги (${count} шт.) в этом процессе?`)) {
-        proc.objects.forEach(o => {
-          o.steps = o.steps.filter(s => !s.done);
-        });
-        haptic();
-        saveData();
-      }
+    function setChipDate(objId, val) {
+      const input = document.getElementById(`date-${objId}`);
+      if (input) input.value = val;
     }
 
     function render() {
-      const root = document.getElementById('processesList');
+      const root = document.getElementById('processesRoot');
       root.innerHTML = '';
 
-      let totalDoneSteps = 0;
-      let totalPlanSteps = 0;
-      let totalObjects = 0;
+      let totalDone = 0;
+      let totalPlan = 0;
+      let totalObjs = 0;
 
       state.forEach(proc => {
         const card = document.createElement('div');
-        card.className = 'process-card';
+        card.className = 'process-section';
 
-        let procStepsCount = 0;
         proc.objects.forEach(o => {
-          totalObjects++;
+          totalObjs++;
           o.steps.forEach(s => {
-            procStepsCount++;
-            if (s.done) totalDoneSteps++;
-            else totalPlanSteps++;
+            if (s.done) totalDone++;
+            else totalPlan++;
           });
         });
 
         const isCollapsed = proc.collapsed;
 
         card.innerHTML = `
-          <div class="process-header" onclick="toggleCollapse(${proc.id})">
-            <div class="proc-title-wrap">
-              <span class="proc-toggle-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
+          <div class="process-header" onclick="toggleProcessCollapse(${proc.id})">
+            <div class="proc-title-group">
+              <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
               <span>📂 ${escapeHtml(proc.title)}</span>
-              <span style="font-size:13px; color:var(--text-muted); font-weight:normal;">(${proc.objects.length} объектов)</span>
+              <span style="font-size:13px; color:var(--text-muted); font-weight:normal;">(${proc.objects.length})</span>
             </div>
-            <button class="proc-del-btn" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
+            <div class="proc-meta-actions">
+              <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
+            </div>
           </div>
 
-          <div class="proc-content ${isCollapsed ? 'hidden' : ''}">
-            <div class="objects-list">
-              ${proc.objects.map(obj => {
-                const doneCount = obj.steps.filter(s => s.done).length;
-                const totalCount = obj.steps.length;
-                const isFullyDone = totalCount > 0 && doneCount === totalCount;
+          <div class="process-body ${isCollapsed ? 'hidden' : ''}">
+            ${proc.objects.map(obj => {
+              const dCount = obj.steps.filter(s => s.done).length;
+              const tCount = obj.steps.length;
+              const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
+              const isAllDone = tCount > 0 && dCount === tCount;
 
-                return `
-                  <div class="obj-card ${isFullyDone ? 'fully-done' : ''}">
-                    <div class="obj-header">
-                      <div class="obj-title" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Нажмите, чтобы изменить название">
-                        📌 ${escapeHtml(obj.title)}
-                      </div>
-                      <div class="obj-right-meta">
-                        ${totalCount > 0 ? `
-                          <div class="progress-pill ${isFullyDone ? 'done' : ''}">
-                            ${doneCount}/${totalCount} ${isFullyDone ? 'завершено' : 'закрыто'}
-                          </div>
-                        ` : ''}
-                        <button class="obj-del-btn" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕</button>
-                      </div>
+              return `
+                <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
+                  <div class="obj-header">
+                    <div class="obj-name" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Нажмите для переименования">
+                      📌 ${escapeHtml(obj.title)}
                     </div>
-
-                    <!-- Шаги объекта -->
-                    <div class="steps-container">
-                      ${obj.steps.map(step => `
-                        <div class="step-row ${step.done ? 'completed' : ''}">
-                          <div class="step-left">
-                            <input type="checkbox" class="step-checkbox" ${step.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${step.id})">
-                            <span class="step-text" onclick="editStepText(${proc.id}, ${obj.id}, ${step.id})" title="Нажмите, чтобы изменить текст">${escapeHtml(step.text)}</span>
-                          </div>
-                          <div class="step-right">
-                            <span class="step-date-pill" onclick="editStepDate(${proc.id}, ${obj.id}, ${step.id})" title="Нажмите, чтобы изменить дату или срок">
-                              📅 ${escapeHtml(step.date || 'Без даты')}
-                            </span>
-                            <button class="step-del-btn" onclick="deleteStep(${proc.id}, ${obj.id}, ${step.id})" title="Удалить шаг">✕</button>
-                          </div>
-                        </div>
-                      `).join('')}
-                    </div>
-
-                    <!-- Форма добавления нового шага -->
-                    <div class="add-step-box">
-                      <div class="add-step-inputs">
-                        <input type="text" class="step-title-input" id="step-txt-${obj.id}" placeholder="+ шаг / этап..." onkeydown="if(event.key==='Enter') addStep(${proc.id}, ${obj.id})">
-                        <input type="text" class="step-date-input" id="step-date-${obj.id}" value="${getTodayStr()}" placeholder="Срок / диапазон">
-                      </div>
-                      <div class="add-step-bottom">
-                        <div class="quick-date-buttons">
-                          <button type="button" class="mini-date-btn" onclick="setQuickDateInput(${obj.id}, '${getTodayStr()}')">Сегодня</button>
-                          <button type="button" class="mini-date-btn" onclick="setQuickDateInput(${obj.id}, '${getTomorrowStr()}')">Завтра</button>
-                          <button type="button" class="mini-date-btn" onclick="setQuickDateInput(${obj.id}, 'до ${getTomorrowStr()}')">Диапазон</button>
-                        </div>
-                        <button type="button" class="add-step-btn" onclick="addStep(${proc.id}, ${obj.id})">Добавить шаг</button>
-                      </div>
+                    <div class="obj-tools">
+                      ${tCount > 0 ? `
+                        <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
+                      ` : ''}
+                      <button class="mini-del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕</button>
                     </div>
                   </div>
-                `;
-              }).join('')}
-            </div>
 
-            <!-- Добавление нового объекта -->
-            ${!proc.openObjForm ? `
-              <button class="add-obj-toggle-btn" onclick="toggleObjForm(${proc.id})">
-                + Добавить объект / проект в этот процесс
-              </button>
-            ` : `
-              <div class="new-obj-form">
-                <input type="text" id="new-obj-in-${proc.id}" placeholder="Название объекта (напр. Жылыой - ЛЭС)..." onkeydown="if(event.key==='Enter') addObject(${proc.id})">
-                <div class="new-obj-actions">
-                  <button class="btn btn-subtle" style="padding:7px 12px; font-size:13px;" onclick="toggleObjForm(${proc.id})">Отмена</button>
-                  <button class="btn btn-neutral" style="padding:7px 14px; font-size:13px;" onclick="addObject(${proc.id})">Создать объект</button>
+                  ${tCount > 0 ? `
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill ${isAllDone ? 'done' : ''}" style="width: ${percent}%;"></div>
+                    </div>
+                  ` : ''}
+
+                  <!-- Список шагов -->
+                  <div class="steps-list">
+                    ${obj.steps.map(s => `
+                      <div class="step-item ${s.done ? 'is-done' : ''}">
+                        <div class="step-main">
+                          <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                          <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
+                        </div>
+                        <div class="step-aside">
+                          <span class="step-date-tag" onclick="editStepDate(${proc.id}, ${obj.id}, ${s.id})" title="Изменить срок">
+                            ${s.done ? '✔ ' : '📅 '}${escapeHtml(s.date)}
+                          </span>
+                          <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕</button>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+
+                  <!-- Быстрое добавление шага в 1 клик -->
+                  <div class="step-fast-add">
+                    <div class="sfa-row-1">
+                      <input type="text" id="txt-${obj.id}" placeholder="+ этап / задача..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
+                      <input type="text" class="date-input" id="date-${obj.id}" value="${getTodayStr()}" placeholder="Срок">
+                    </div>
+                    <div class="sfa-row-2">
+                      <div class="quick-chips">
+                        <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getTodayStr()}')">Сегодня</button>
+                        <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getTomorrowStr()}')">Завтра</button>
+                        <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до ${getTomorrowStr()}')">Диапазон</button>
+                      </div>
+                      <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            `}
+              `;
+            }).join('')}
 
-            <div class="proc-footer-actions">
-              <button class="btn-archive" onclick="clearDoneSteps(${proc.id})">
-                🧹 Очистить закрытые шаги в этом процессе
-              </button>
-            </div>
+            <button class="btn-new-obj" onclick="promptAddObject(${proc.id})">
+              + Добавить объект в «${escapeHtml(proc.title)}»
+            </button>
           </div>
         `;
 
         root.appendChild(card);
       });
 
-      document.getElementById('countDone').textContent = `${totalDoneSteps} шагов`;
-      document.getElementById('countPlan').textContent = `${totalPlanSteps} шагов`;
-      document.getElementById('countObjects').textContent = totalObjects;
+      document.getElementById('mDone').textContent = totalDone;
+      document.getElementById('mPlan').textContent = totalPlan;
+      document.getElementById('mTotal').textContent = totalObjs;
     }
 
-    /* Формирование древовидного отчета: автоматическое разделение на СДЕЛАНО и В РАБОТЕ */
-    function buildTreeReport() {
-      const todayStr = getTodayStr();
-      let totalDone = 0;
-      let totalPlan = 0;
+    /* ФОРМИРОВАНИЕ УПРАВЛЕНЧЕСКОГО ОТЧЕТА (TELEGRAM-FRIENDLY) */
+    function generateTelegramReport() {
+      const today = getTodayStr();
 
-      state.forEach(p => {
-        p.objects.forEach(o => {
-          o.steps.forEach(s => {
-            if (s.done) totalDone++;
-            else totalPlan++;
+      if (reportMode === 'executive') {
+        // Формат «Сводка за сегодня» — то, что нужно руководителю в 18:00
+        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}
+
+`;
+
+        let hasDone = false;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
+`;
+
+        state.forEach(p => {
+          p.objects.forEach(o => {
+            const todayDoneSteps = o.steps.filter(s => s.done);
+            if (todayDoneSteps.length > 0) {
+              hasDone = true;
+              doneTxt += `• ${o.title} (${p.title}):
+`;
+              todayDoneSteps.forEach(s => {
+                doneTxt += `  - ${s.text} [закрыто]
+`;
+              });
+            }
           });
         });
-      });
 
-      let txt = `📅 Отчет по процессам на ${todayStr} | Выполнено: ${totalDone} | В работе: ${totalPlan}
+        if (!hasDone) {
+          doneTxt += `• Текущие работы без закрытых этапов
+`;
+        }
 
+        txt += doneTxt + `
 `;
 
-      state.forEach(p => {
-        // Проверяем, есть ли шаги в процессе
-        const doneObjects = [];
-        const planObjects = [];
+        let hasPlan = false;
+        let planTxt = `⏳ В РАБОТЕ И ПЛАНЫ:
+`;
 
-        p.objects.forEach(obj => {
-          const doneSteps = obj.steps.filter(s => s.done);
-          const planSteps = obj.steps.filter(s => !s.done);
-
-          if (doneSteps.length > 0) {
-            doneObjects.push({ title: obj.title, steps: doneSteps });
-          }
-          if (planSteps.length > 0) {
-            planObjects.push({ title: obj.title, steps: planSteps });
-          }
+        state.forEach(p => {
+          p.objects.forEach(o => {
+            const pendingSteps = o.steps.filter(s => !s.done);
+            if (pendingSteps.length > 0) {
+              hasPlan = true;
+              planTxt += `• ${o.title} (${p.title}):
+`;
+              pendingSteps.forEach(s => {
+                planTxt += `  - ${s.text} [срок: ${s.date}]
+`;
+              });
+            }
+          });
         });
 
-        if (doneObjects.length === 0 && planObjects.length === 0) return;
+        if (!hasPlan) {
+          planTxt += `• Все текущие этапы завершены!
+`;
+        }
 
-        txt += `📂 Процесс: ${p.title}
+        txt += planTxt;
+        return txt.trim();
+
+      } else {
+        // Полный статус-отчет по всей картине объектов
+        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}
+
 `;
 
-        const hasPlan = planObjects.length > 0;
+        state.forEach(p => {
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
+`;
+          if (p.objects.length === 0) {
+            txt += `  (нет объектов)
 
-        if (doneObjects.length > 0) {
-          txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО:
 `;
-          doneObjects.forEach((obj, oIdx) => {
-            const isLastObj = oIdx === doneObjects.length - 1;
-            const p1 = hasPlan ? '│   ' : '    ';
-            txt += `${p1}${isLastObj ? '└──' : '├──'} 📌 ${obj.title}
+            return;
+          }
+
+          p.objects.forEach(o => {
+            const d = o.steps.filter(s => s.done).length;
+            const t = o.steps.length;
+            txt += `📌 ${o.title} [готовность: ${d}/${t}]
 `;
-            
-            obj.steps.forEach((s, sIdx) => {
-              const isLastStep = sIdx === obj.steps.length - 1;
-              const p2 = p1 + (isLastObj ? '    ' : '│   ');
-              txt += `${p2}${isLastStep ? '└──' : '├──'} ✔ ${s.text} [${s.date}]
+            o.steps.forEach(s => {
+              const icon = s.done ? '✔' : '⏳';
+              const status = s.done ? '[выполнено]' : `[срок: ${s.date}]`;
+              txt += `  ${icon} ${s.text} ${status}
 `;
             });
           });
-        }
+          txt += `
+`;
+        });
 
-        if (planObjects.length > 0) {
-          txt += `└── 🟡 В РАБОТЕ / ПЛАНЫ:
-`;
-          planObjects.forEach((obj, oIdx) => {
-            const isLastObj = oIdx === planObjects.length - 1;
-            txt += `    ${isLastObj ? '└──' : '├──'} 📌 ${obj.title}
-`;
-            
-            obj.steps.forEach((s, sIdx) => {
-              const isLastStep = sIdx === obj.steps.length - 1;
-              const p2 = '    ' + (isLastObj ? '    ' : '│   ');
-              txt += `${p2}${isLastStep ? '└──' : '├──'} ⏳ ${s.text} [Срок: ${s.date}]
-`;
-            });
-          });
-        }
-
-        txt += `
-`;
-      });
-
-      return txt.trim();
+        return txt.trim();
+      }
     }
 
     function copyReport() {
-      const report = buildTreeReport();
+      const text = generateTelegramReport();
       haptic();
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(report).then(() => showToast("Древовидный отчет скопирован в буфер!"));
+        navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован в буфер!"));
       } else {
-        const t = document.createElement("textarea");
-        t.value = report;
-        document.body.appendChild(t);
-        t.select();
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
         document.execCommand("copy");
-        document.body.removeChild(t);
-        showToast("Древовидный отчет скопирован в буфер!");
+        document.body.removeChild(ta);
+        showToast("Отчет скопирован в буфер!");
       }
     }
 
     function shareToTelegram() {
-      const report = buildTreeReport();
+      const text = generateTelegramReport();
       haptic();
 
-      const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(report)}`;
+      const url = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
       if (tg?.openTelegramLink) {
-        tg.openTelegramLink(shareUrl);
+        tg.openTelegramLink(url);
       } else {
-        window.open(shareUrl, '_blank');
+        window.open(url, '_blank');
       }
     }
 
     function showToast(msg) {
-      const toast = document.getElementById('toastBox');
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2600);
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2400);
     }
 
     function escapeHtml(str) {
