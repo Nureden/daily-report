@@ -338,7 +338,7 @@
     .obj-tools {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       flex-shrink: 0;
     }
     .badge-percent {
@@ -360,13 +360,15 @@
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 4px 7px;
-      font-size: 12px;
+      padding: 3px 5px;
+      font-size: 11px;
       cursor: pointer;
       color: #475569;
+      line-height: 1;
     }
     .btn-icon-tool:hover {
-      background: #f1f5f9;
+      background: #e2e8f0;
+      color: #0f172a;
     }
     .btn-icon-tool.del:hover {
       color: var(--danger);
@@ -1182,7 +1184,7 @@
       {
         id: 1,
         title: "Дополнительные зем участки",
-        collapsed: true, // ВСЕГДА СВЕРНУТО ПО УМОЛЧАНИЮ
+        collapsed: true,
         showArchive: false,
         objects: [
           {
@@ -1229,7 +1231,7 @@
             merged[pKey] = {
               id: p.id || Date.now() + Math.random(),
               title: pTitle,
-              collapsed: true, // Всегда свернуты по умолчанию
+              collapsed: true,
               showArchive: false,
               objectsMap: {}
             };
@@ -1373,7 +1375,7 @@
       state.push({
         id: Date.now(),
         title: val,
-        collapsed: false, // Новое направление открыто
+        collapsed: false,
         showArchive: false,
         objects: []
       });
@@ -1402,6 +1404,21 @@
       obj.collapsed = !obj.collapsed;
       haptic();
       render();
+    }
+
+    /* ФУНКЦИЯ ПЕРЕМЕЩЕНИЯ ОБЪЕКТА ВВЕРХ ИЛИ ВНИЗ */
+    function moveObject(procId, objId, direction) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const idx = p.objects.findIndex(o => o.id === objId);
+      if (idx < 0) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= p.objects.length) return;
+
+      const item = p.objects.splice(idx, 1)[0];
+      p.objects.splice(newIdx, 0, item);
+      haptic();
+      saveData();
     }
 
     function deleteProcess(procId) {
@@ -1799,7 +1816,7 @@
 
       state.forEach(proc => {
         const card = document.createElement('div');
-        const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true; // ВСЕГДА СВЕРНУТО ПО УМОЛЧАНИЮ
+        const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true;
         card.className = `process-section ${!isCollapsed ? 'is-open' : ''}`;
 
         const activeObjects = (proc.objects || []).filter(o => !o.archived);
@@ -1827,7 +1844,7 @@
           </div>
 
           <div class="process-body ${isCollapsed ? 'hidden' : ''}">
-            ${activeObjects.map(obj => {
+            ${activeObjects.map((obj, objIdx) => {
               const dCount = (obj.steps || []).filter(s => s.done).length;
               const tCount = (obj.steps || []).length;
               const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
@@ -1841,13 +1858,17 @@
                       <span class="obj-collapse-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
                       <span class="obj-name">📌 ${escapeHtml(obj.title)}</span>
                     </div>
-                    <div class="obj-tools">
+                    <div class="obj-tools" onclick="event.stopPropagation()">
                       ${tCount > 0 ? `
                         <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
                       ` : ''}
-                      <button class="btn-icon-tool" onclick="event.stopPropagation(); editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
-                      <button class="btn-icon-tool" onclick="event.stopPropagation(); cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
-                      <button class="btn-icon-tool del" onclick="event.stopPropagation(); deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
+                      <!-- КНОПКИ ПЕРЕМЕЩЕНИЯ ОБЪЕКТА ВВЕРХ/ВНИЗ -->
+                      ${objIdx > 0 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, -1)" title="Выше">⬆️</button>` : ''}
+                      ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
+                      
+                      <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
+                      <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
+                      <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
                     </div>
                   </div>
 
