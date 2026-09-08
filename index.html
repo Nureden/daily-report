@@ -374,7 +374,7 @@
       border-color: var(--danger-border);
     }
 
-    /* Верхняя строка: чекбокс + текст */
+    /* Строка 1: Чекбокс + Название */
     .step-header-line {
       display: flex;
       align-items: flex-start;
@@ -406,7 +406,7 @@
       opacity: 0.7;
     }
 
-    /* Нижняя строка: дата, риск, удаление */
+    /* Строка 2: Календарь, Риск, Удаление */
     .step-footer-line {
       display: flex;
       justify-content: space-between;
@@ -421,6 +421,24 @@
       flex-wrap: wrap;
     }
 
+    /* Контейнер нативного календаря */
+    .step-date-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .hidden-date-picker {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
     .step-date-tag {
       font-size: 11px;
       font-weight: 700;
@@ -429,9 +447,9 @@
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #334155;
-      cursor: pointer;
       user-select: none;
       white-space: nowrap;
+      pointer-events: none;
     }
     .step-date-tag.overdue {
       background: #fee2e2;
@@ -447,6 +465,11 @@
       background: #ffffff;
       border-color: var(--done-border);
       color: var(--done);
+    }
+    .step-date-tag.empty {
+      color: var(--text-muted);
+      border-style: dashed;
+      background: #f8fafc;
     }
 
     .btn-blocker-trigger {
@@ -611,9 +634,9 @@
       border-radius: 6px;
       outline: none;
     }
-    .sfa-row-1 input.date-input {
-      width: 120px;
-      padding: 7px 6px;
+    .sfa-row-1 input[type="date"] {
+      width: 130px;
+      padding: 6px 8px;
       font-size: 12px;
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -623,30 +646,16 @@
 
     .sfa-row-2 {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       gap: 6px;
-    }
-    .quick-chips {
-      display: flex;
-      gap: 3px;
-    }
-    .chip {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      padding: 3px 6px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
     }
 
     .btn-add-step {
       background: var(--neutral-dark);
       color: #ffffff;
       border: none;
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 700;
@@ -717,7 +726,7 @@
       cursor: pointer;
     }
 
-    /* Плавающая нижняя панель */
+    /* 6. ПЛАВАЮЩАЯ ПАНЕЛЬ */
     .floating-action-bar {
       position: fixed;
       bottom: 0;
@@ -834,7 +843,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v11_reglament';
+    const STORAGE_KEY = 'manager_daily_tracker_v12_calendar';
 
     if (tg) {
       tg.ready();
@@ -843,14 +852,21 @@
 
     let reportMode = 'executive';
 
-    // Регламент этапов с нормативными смещениями дней от текущей даты
     const STANDARD_WORKFLOW = [
-      { text: "Акт сверки НАО", days: 3 },
-      { text: "Экспликация Гипрозем", days: 7 },
-      { text: "Утверждение ЗУП МИО", days: 15 },
-      { text: "Постановление акима", days: 25 },
-      { text: "Акт на землю, регистрация", days: 35 }
+      "Акт сверки НАО",
+      "Экспликация Гипрозем",
+      "Утверждение ЗУП МИО",
+      "Постановление акима",
+      "Акт на землю, регистрация"
     ];
+
+    function getTodayISO() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
 
     function getTodayStr() {
       const d = new Date();
@@ -860,28 +876,26 @@
       return `${day}.${m}.${y}`;
     }
 
-    function getTomorrowStr() {
-      const d = new Date();
-      d.setDate(d.getDate() + 1);
-      const day = String(d.getDate()).padStart(2, '0');
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const y = d.getFullYear();
-      return `${day}.${m}.${y}`;
+    function isoToDisplay(isoStr) {
+      if (!isoStr) return '';
+      const p = isoStr.split('-');
+      if (p.length === 3) return `до ${p[2]}.${p[1]}.${p[0]}`;
+      return isoStr;
     }
 
-    // Расчет даты со смещением по регламенту: 'до ДД.ММ.ГГГГ'
-    function getOffsetDateStr(offsetDays) {
-      const d = new Date();
-      d.setDate(d.getDate() + offsetDays);
-      const day = String(d.getDate()).padStart(2, '0');
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const y = d.getFullYear();
-      return `до ${day}.${m}.${y}`;
+    function displayToISO(dispStr) {
+      if (!dispStr) return '';
+      const match = dispStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!match) return '';
+      const day = match[1].padStart(2, '0');
+      const month = match[2].padStart(2, '0');
+      const year = match[3] || new Date().getFullYear();
+      return `${year}-${month}-${day}`;
     }
 
     function analyzeDeadline(dateStr, isDone) {
-      if (isDone) return { cls: 'done', text: dateStr };
-      if (!dateStr) return { cls: '', text: 'Без даты' };
+      if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
+      if (!dateStr) return { cls: 'empty', text: '📅 Выбрать дату' };
 
       const match = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
       if (!match) return { cls: '', text: dateStr };
@@ -920,11 +934,11 @@
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 1001, text: "Акт сверки НАО", date: getOffsetDateStr(3), done: true, blocker: null },
-              { id: 1002, text: "Экспликация Гипрозем", date: getOffsetDateStr(7), done: false, blocker: "Оплата не идет у подрядчика" },
-              { id: 1003, text: "Утверждение ЗУП МИО", date: getOffsetDateStr(15), done: false, blocker: null },
-              { id: 1004, text: "Постановление акима", date: getOffsetDateStr(25), done: false, blocker: null },
-              { id: 1005, text: "Акт на землю, регистрация", date: getOffsetDateStr(35), done: false, blocker: null }
+              { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
+              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
+              { id: 1003, text: "Утверждение ЗУП МИО", date: "", done: false, blocker: null },
+              { id: 1004, text: "Постановление акима", date: "", done: false, blocker: null },
+              { id: 1005, text: "Акт на землю, регистрация", date: "", done: false, blocker: null }
             ]
           },
           {
@@ -933,8 +947,8 @@
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 2001, text: "Акт сверки НАО", date: getOffsetDateStr(3), done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: getOffsetDateStr(7), done: false, blocker: null }
+              { id: 2001, text: "Акт сверки НАО", date: "", done: false, blocker: null },
+              { id: 2002, text: "Экспликация Гипрозем", date: "", done: false, blocker: null }
             ]
           }
         ]
@@ -968,13 +982,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v10_refined') || localStorage.getItem('manager_daily_tracker_v9_mobile');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v11_reglament') || localStorage.getItem('manager_daily_tracker_v10_refined');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v10_refined') || localStorage.getItem('manager_daily_tracker_v9_mobile');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v11_reglament') || localStorage.getItem('manager_daily_tracker_v10_refined');
         if (local) parseVal(local);
         render();
       }
@@ -1135,9 +1149,9 @@
       }
     }
 
-    /* АВТОМАТИЧЕСКИЙ РАСЧЕТ СРОКОВ ПО РЕГЛАМЕНТУ (+3, +7, +15, +25, +35 дней) */
+    /* Создание объекта сразу с 5 этапами (без навязанных дат — дата выбирается по календарю) */
     function createObjectWithStandardWorkflow(procId) {
-      const name = prompt("Название объекта (сроки рассчитаются по регламенту):");
+      const name = prompt("Название объекта:");
       if (!name || !name.trim()) return;
 
       const p = state.find(x => x.id === procId);
@@ -1147,15 +1161,15 @@
           title: name.trim(),
           archived: false,
           showAddForm: false,
-          steps: STANDARD_WORKFLOW.map((item, idx) => ({
+          steps: STANDARD_WORKFLOW.map((text, idx) => ({
             id: Date.now() + idx,
-            text: item.text,
-            date: getOffsetDateStr(item.days),
+            text: text,
+            date: "", // оставляем чистым под календарь
             done: false,
             blocker: null
           }))
         });
-        showToast("Создан объект со сроками по регламенту!");
+        showToast("Создан объект с 5 этапами! Выберите даты по календарю.");
         haptic();
         saveData();
       }
@@ -1196,33 +1210,31 @@
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      STANDARD_WORKFLOW.forEach((item, idx) => {
+      STANDARD_WORKFLOW.forEach((stepText, idx) => {
         obj.steps.push({
           id: Date.now() + idx,
-          text: item.text,
-          date: getOffsetDateStr(item.days),
+          text: stepText,
+          date: "",
           done: false,
           blocker: null
         });
       });
 
-      showToast("5 этапов со сроками добавлены!");
+      showToast("5 этапов добавлены!");
       haptic();
       saveData();
     }
 
-    function quickAddStepChip(procId, objId, stepText, offsetDays) {
+    function quickAddStepChip(procId, objId, stepText) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      const autoDate = offsetDays ? getOffsetDateStr(offsetDays) : getTodayStr();
-
       obj.steps.push({
         id: Date.now(),
         text: stepText,
-        date: autoDate,
+        date: "",
         done: false,
         blocker: null
       });
@@ -1258,11 +1270,13 @@
 
     function addStepToObject(procId, objId) {
       const tInput = document.getElementById(`txt-${objId}`);
-      const dInput = document.getElementById(`date-${objId}`);
+      const dInput = document.getElementById(`date-cal-${objId}`);
       if (!tInput) return;
 
       const txt = tInput.value.trim();
-      const dt = (dInput ? dInput.value.trim() : '') || getTodayStr();
+      const isoDate = dInput ? dInput.value : '';
+      const dispDate = isoToDisplay(isoDate);
+
       if (!txt) return;
 
       const p = state.find(x => x.id === procId);
@@ -1273,14 +1287,12 @@
       obj.steps.push({
         id: Date.now(),
         text: txt,
-        date: dt,
+        date: dispDate,
         done: false,
         blocker: null
       });
 
       tInput.value = '';
-      if (dInput) dInput.value = getTodayStr();
-
       haptic();
       saveData();
     }
@@ -1299,7 +1311,8 @@
       }
     }
 
-    function editStepDate(procId, objId, stepId) {
+    /* ВЫБОР ДАТЫ ИЗ КАЛЕНДАРЯ НАПРЯМУЮ */
+    function onCalendarSelect(procId, objId, stepId, isoVal) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
       const obj = p.objects.find(o => o.id === objId);
@@ -1307,12 +1320,9 @@
       const step = obj.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      const newDate = prompt("Срок или интервал (напр. до 10.09.2026, 08.09-12.09):", step.date);
-      if (newDate && newDate.trim()) {
-        step.date = newDate.trim();
-        haptic();
-        saveData();
-      }
+      step.date = isoToDisplay(isoVal);
+      haptic();
+      saveData();
     }
 
     function editStepText(procId, objId, stepId) {
@@ -1340,11 +1350,6 @@
       obj.steps = obj.steps.filter(s => s.id !== stepId);
       haptic();
       saveData();
-    }
-
-    function setChipDate(objId, val) {
-      const input = document.getElementById(`date-${objId}`);
-      if (input) input.value = val;
     }
 
     function render() {
@@ -1387,7 +1392,6 @@
           </div>
 
           <div class="process-body ${isCollapsed ? 'hidden' : ''}">
-            <!-- АКТИВНЫЕ ОБЪЕКТЫ -->
             ${activeObjects.map(obj => {
               const dCount = obj.steps.filter(s => s.done).length;
               const tCount = obj.steps.length;
@@ -1415,7 +1419,6 @@
                     </div>
                   ` : ''}
 
-                  <!-- БАННЕР 100% -->
                   ${isAllDone ? `
                     <div class="all-done-banner">
                       <span>🎉 Все этапы успешно закрыты!</span>
@@ -1430,6 +1433,7 @@
                     ${obj.steps.map(s => {
                       const hasBlock = !s.done && !!s.blocker;
                       const dateMeta = analyzeDeadline(s.date, s.done);
+                      const currentISO = displayToISO(s.date) || getTodayISO();
 
                       return `
                         <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
@@ -1440,9 +1444,14 @@
 
                           <div class="step-footer-line">
                             <div class="step-actions-left">
-                              <span class="step-date-tag ${dateMeta.cls}" onclick="editStepDate(${proc.id}, ${obj.id}, ${s.id})" title="Изменить срок">
-                                ${dateMeta.text}
-                              </span>
+                              <!-- НАСТОЯЩИЙ КАЛЕНДАРЬ -->
+                              <div class="step-date-wrap" title="Нажмите, чтобы выбрать дату в календаре">
+                                <span class="step-date-tag ${dateMeta.cls}">
+                                  ${dateMeta.text}
+                                </span>
+                                <input type="date" class="hidden-date-picker" value="${currentISO}" onchange="onCalendarSelect(${proc.id}, ${obj.id}, ${s.id}, this.value)">
+                              </div>
+
                               <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
                                 ${hasBlock ? '🚨 Задержка' : '+ риск'}
                               </button>
@@ -1463,7 +1472,7 @@
                     }).join('')}
                   </div>
 
-                  <!-- СКЛАДЫВАЮЩАЯСЯ ФОРМА С АВТОРАСЧЕТОМ СРОКОВ -->
+                  <!-- РАСКРЫВАЮЩАЯСЯ ФОРМА С КАЛЕНДАРЕМ -->
                   ${!obj.showAddForm ? `
                     <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
                       + Добавить этап / шаблоны
@@ -1471,29 +1480,22 @@
                   ` : `
                     <div class="step-fast-add">
                       <div class="template-chips-bar">
-                        <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов регламента</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО', 3)">+ Акт НАО (+3д)</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем', 7)">+ Экспликация (+7д)</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО', 15)">+ ЗУП МИО (+15д)</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима', 25)">+ Постановление (+25д)</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация', 35)">+ Акт на землю (+35д)</button>
+                        <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
                       </div>
 
                       <div class="sfa-row-1">
                         <input type="text" id="txt-${obj.id}" placeholder="Свое название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
-                        <input type="text" class="date-input" id="date-${obj.id}" value="${getTodayStr()}" placeholder="Срок">
+                        <input type="date" id="date-cal-${obj.id}" value="${getTodayISO()}">
                       </div>
 
                       <div class="sfa-row-2">
-                        <div class="quick-chips">
-                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getTodayStr()}')">Сегодня</button>
-                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getOffsetDateStr(3)}')">+3 дн.</button>
-                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getOffsetDateStr(7)}')">+7 дн.</button>
-                        </div>
-                        <div style="display:flex; gap:4px;">
-                          <button type="button" class="chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
-                          <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
-                        </div>
+                        <button type="button" class="tpl-chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
+                        <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
                       </div>
                     </div>
                   `}
@@ -1501,10 +1503,9 @@
               `;
             }).join('')}
 
-            <!-- КНОПКИ СОЗДАНИЯ ОБЪЕКТА -->
             <div class="proc-add-actions">
               <button class="btn-new-obj template" onclick="createObjectWithStandardWorkflow(${proc.id})">
-                ⚡ Создать объект со сроками регламента
+                ⚡ Создать объект с 5 этапами
               </button>
               <button class="btn-new-obj" onclick="promptAddObject(${proc.id})">
                 + Пустой объект
@@ -1564,7 +1565,7 @@
                 proc: p.title,
                 obj: o.title,
                 step: s.text,
-                date: s.date,
+                date: s.date || 'срок не указан',
                 reason: s.blocker
               });
             }
@@ -1580,131 +1581,100 @@
       });
 
       if (reportMode === 'executive') {
-        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}
-
-`;
+        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:
-`;
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj} (${b.proc}):
-`;
-            txt += `  ⚠️ ${b.step} [${b.date}]
-`;
-            txt += `     └ Причина: ${b.reason}
-`;
+            txt += `• ${b.obj} (${b.proc}):\n`;
+            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
+            txt += `     └ Причина: ${b.reason}\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
-`;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:\n`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = o.steps.filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
-              doneTxt += `• ${o.title} (${p.title}):
-`;
+              doneTxt += `• ${o.title} (${p.title}):\n`;
               todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]
-`;
+                doneTxt += `  - ${s.text} [закрыто]\n`;
               });
             }
           });
         });
-        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов
-`;
-        txt += doneTxt + `
-`;
+        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
+        txt += doneTxt + `\n`;
 
         if (archivedList.length > 0) {
-          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):
-`;
+          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):\n`;
           archivedList.forEach(a => {
-            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто
-`;
+            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:
-`;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:\n`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const regularSteps = o.steps.filter(s => !s.done && !s.blocker);
             if (regularSteps.length > 0) {
               hasPlan = true;
-              planTxt += `• ${o.title} (${p.title}):
-`;
+              planTxt += `• ${o.title} (${p.title}):\n`;
               regularSteps.forEach(s => {
-                planTxt += `  - ${s.text} [${s.date}]
-`;
+                const dateStr = s.date ? ` [${s.date}]` : '';
+                planTxt += `  - ${s.text}${dateStr}\n`;
               });
             }
           });
         });
-        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!
-`;
+        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
         txt += planTxt;
 
         return txt.trim();
 
       } else {
-        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}
-
-`;
+        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):
-`;
+          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]
-`;
+            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date || 'без даты'}]\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         state.forEach(p => {
           const active = p.objects.filter(o => !o.archived);
-          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
-`;
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
           if (active.length === 0) {
-            txt += `  (все объекты завершены и в архиве)
-
-`;
+            txt += `  (все объекты завершены и в архиве)\n\n`;
             return;
           }
 
           active.forEach(o => {
             const d = o.steps.filter(s => s.done).length;
             const t = o.steps.length;
-            txt += `📌 ${o.title} [готовность: ${d}/${t}]
-`;
+            txt += `📌 ${o.title} [готовность: ${d}/${t}]\n`;
             o.steps.forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
-              const status = s.done ? '[выполнено]' : `[${s.date}]`;
+              const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}
-`;
+              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
           });
-          txt += `
-`;
+          txt += `\n`;
         });
 
         if (archivedList.length > 0) {
-          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):
-`;
+          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):\n`;
           archivedList.forEach(a => {
-            txt += `• ${a.obj} (${a.proc})
-`;
+            txt += `• ${a.obj} (${a.proc})\n`;
           });
         }
 
