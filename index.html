@@ -35,7 +35,7 @@
 
       --neutral-dark: #334155;
       --radius: 12px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05);
     }
 
     * {
@@ -49,7 +49,7 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 8px 10px 100px 10px;
+      padding: 8px 10px 105px 10px;
       font-size: 15px;
       line-height: 1.45;
     }
@@ -64,7 +64,7 @@
       background: var(--card-bg);
       border-radius: var(--radius);
       padding: 12px 14px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
     }
@@ -178,7 +178,7 @@
     .quick-add-bar {
       display: flex;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .quick-add-bar input {
       flex: 1;
@@ -204,33 +204,43 @@
       white-space: nowrap;
     }
 
-    /* 3. КАРТОЧКА ПРОЦЕССА */
+    /* 3. ПРОЦЕСС КАК ЗАМЕТНЫЙ СТИКЕР */
     .process-section {
       background: var(--card-bg);
       border-radius: var(--radius);
-      border: 1px solid var(--border);
+      border: 1px solid #cbd5e1;
       box-shadow: var(--shadow-sm);
-      margin-bottom: 10px;
+      margin-bottom: 14px;
       overflow: hidden;
     }
 
-    .process-header {
+    .process-sticker-header {
       padding: 12px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #ffffff;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
       cursor: pointer;
       user-select: none;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 2px solid #e2e8f0;
+      border-left: 5px solid var(--brand);
     }
 
     .proc-title-group {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 15px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .proc-tag-count {
+      font-size: 11px;
       font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 7px;
+      border-radius: 10px;
     }
     .proc-arrow {
       font-size: 11px;
@@ -247,16 +257,20 @@
       background: none;
       border: none;
       cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
     }
     .proc-del-link:hover {
       color: var(--danger);
+      background: var(--danger-bg);
     }
 
     .process-body {
-      padding: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      background: #fafbfc;
     }
     .process-body.hidden {
       display: none;
@@ -271,6 +285,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     .object-card.completed-obj {
       background: #fcfdfc;
@@ -353,13 +368,13 @@
     .steps-list {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
     }
 
     .step-item {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       padding: 8px 10px;
       border-radius: 8px;
       background: #f8fafc;
@@ -374,7 +389,6 @@
       border-color: var(--danger-border);
     }
 
-    /* Строка 1: Чекбокс + Название */
     .step-header-line {
       display: flex;
       align-items: flex-start;
@@ -406,7 +420,6 @@
       opacity: 0.7;
     }
 
-    /* Строка 2: Календарь, Риск, Удаление */
     .step-footer-line {
       display: flex;
       justify-content: space-between;
@@ -417,71 +430,64 @@
     .step-actions-left {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
-    /* Контейнер нативного календаря */
-    .step-date-wrap {
-      position: relative;
+    /* Кнопка вызова календаря */
+    .step-date-btn {
       display: inline-flex;
       align-items: center;
-      cursor: pointer;
-    }
-    .hidden-date-picker {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 2;
-    }
-
-    .step-date-tag {
+      gap: 4px;
       font-size: 11px;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 3px 8px;
       border-radius: 5px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #334155;
+      cursor: pointer;
       user-select: none;
       white-space: nowrap;
-      pointer-events: none;
+      transition: all 0.15s;
     }
-    .step-date-tag.overdue {
+    .step-date-btn:active {
+      transform: scale(0.96);
+    }
+    .step-date-btn.overdue {
       background: #fee2e2;
       border-color: #fca5a5;
       color: #991b1b;
     }
-    .step-date-tag.urgent {
+    .step-date-btn.urgent {
       background: #fef3c7;
       border-color: #fde68a;
       color: #92400e;
     }
-    .step-date-tag.done {
+    .step-date-btn.done {
       background: #ffffff;
       border-color: var(--done-border);
       color: var(--done);
     }
-    .step-date-tag.empty {
-      color: var(--text-muted);
+    .step-date-btn.empty {
+      color: var(--brand);
       border-style: dashed;
-      background: #f8fafc;
+      border-color: var(--brand-border);
+      background: var(--brand-subtle);
     }
 
+    /* Кнопка вызова меню рисков */
     .btn-blocker-trigger {
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 5px;
-      padding: 2px 6px;
+      padding: 3px 7px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       color: #64748b;
       white-space: nowrap;
+      transition: all 0.15s;
     }
     .btn-blocker-trigger:hover {
       background: #f1f5f9;
@@ -508,7 +514,7 @@
       background: rgba(0,0,0,0.04);
     }
 
-    /* Блокер плашка */
+    /* Плашка блокера */
     .blocker-banner {
       display: flex;
       align-items: center;
@@ -517,7 +523,7 @@
       background: #ffffff;
       border: 1px solid #fca5a5;
       border-radius: 6px;
-      padding: 4px 8px;
+      padding: 5px 8px;
       font-size: 12px;
       color: #991b1b;
       font-weight: 600;
@@ -567,7 +573,7 @@
 
     /* Форма добавления шага */
     .step-add-toggle-btn {
-      background: none;
+      background: #ffffff;
       border: 1px dashed var(--border);
       color: var(--text-muted);
       border-radius: 6px;
@@ -669,9 +675,9 @@
     }
     .btn-new-obj {
       flex: 1;
-      background: #f8fafc;
+      background: #ffffff;
       color: var(--neutral-dark);
-      border: 1px dashed var(--border);
+      border: 1px dashed #94a3b8;
       padding: 8px 6px;
       border-radius: 8px;
       font-size: 13px;
@@ -687,7 +693,7 @@
 
     /* Архив */
     .archive-section {
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px 10px;
@@ -712,13 +718,13 @@
       justify-content: space-between;
       align-items: center;
       padding: 6px 8px;
-      background: #ffffff;
+      background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 13px;
     }
     .btn-restore {
-      background: none;
+      background: #ffffff;
       border: 1px solid var(--border);
       padding: 2px 6px;
       border-radius: 4px;
@@ -760,6 +766,137 @@
     .fab-btn.copy { background: #16a34a; }
     .fab-btn.send { background: #0284c7; }
 
+    /* 7. УНИВЕРСАЛЬНОЕ МОДАЛЬНОЕ ОКНО */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: flex-end; /* Mobile bottom sheet style */
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+    @media (min-width: 600px) {
+      .modal-overlay { align-items: center; }
+    }
+
+    .modal-sheet {
+      background: #ffffff;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    @media (min-width: 600px) {
+      .modal-sheet { border-radius: 16px; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+
+    .modal-step-name {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: -6px;
+    }
+
+    .modal-preset-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .preset-btn {
+      text-align: left;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.1s;
+    }
+    .preset-btn:hover {
+      background: #eff6ff;
+      border-color: var(--brand-border);
+      color: var(--brand);
+    }
+    .preset-btn.active {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    .modal-input:focus {
+      border-color: var(--brand);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .modal-btn-primary {
+      flex: 1;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .modal-btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     /* Тост */
     .toast {
       position: fixed;
@@ -773,7 +910,7 @@
       font-size: 13px;
       font-weight: 600;
       display: none;
-      z-index: 200;
+      z-index: 2000;
       white-space: nowrap;
     }
   </style>
@@ -839,11 +976,86 @@
     </button>
   </div>
 
+  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР ДАТЫ ИЗ КАЛЕНДАРЯ -->
+  <div class="modal-overlay" id="dateModalOverlay" onclick="closeDateModal(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">📅 Выбрать срок этапа</div>
+        <button class="modal-close" onclick="closeDateModal()">✕</button>
+      </div>
+      <div class="modal-step-name" id="dateModalStepTitle">Этап...</div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Точная дата по календарю:</label>
+        <input type="date" id="modalDatePickerInput" class="modal-input" style="font-size:16px;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Быстрый выбор:</label>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(0)">Сегодня</button>
+          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(1)">Завтра</button>
+          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(3)">+3 дня</button>
+          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(7)">+7 дней</button>
+          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(15)">+15 дней</button>
+          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(30)">+1 месяц</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn-primary" onclick="saveDateFromModal()">Сохранить срок</button>
+        <button class="modal-btn-danger" onclick="clearDateFromModal()">Без даты</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР РИСКА / ЗАДЕРЖКИ С ВАРИАНТАМИ -->
+  <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">🚨 Укажите причину задержки</div>
+        <button class="modal-close" onclick="closeRiskModal()">✕</button>
+      </div>
+      <div class="modal-step-name" id="riskModalStepTitle">Этап...</div>
+
+      <div class="modal-preset-grid">
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Оплата не идет у подрядчика')">
+          💳 Оплата не идет у подрядчика
+        </button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('На согласовании в акимате / МИО')">
+          🏛 На согласовании в акимате / МИО
+        </button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Замечания НАО / Гипрозем')">
+          📐 Замечания НАО / Гипрозем
+        </button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Спор / согласование со смежниками')">
+          🤝 Спор / согласование со смежниками
+        </button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание земельной комиссии')">
+          ⚖️ Ожидание земельной комиссии
+        </button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание подписания постановления')">
+          📜 Ожидание подписания постановления
+        </button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Или введите свою причину:</label>
+        <input type="text" id="customRiskInput" class="modal-input" placeholder="Например: Задержка полевого выезда...">
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn-primary" onclick="saveRiskFromModal()">Зафиксировать</button>
+        <button class="modal-btn-danger" id="riskClearBtn" onclick="clearRiskFromModal()">Снять</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toastMsg">Отчет скопирован!</div>
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v12_calendar';
+    const STORAGE_KEY = 'manager_daily_tracker_v13_modal_calendar';
 
     if (tg) {
       tg.ready();
@@ -851,6 +1063,9 @@
     }
 
     let reportMode = 'executive';
+
+    // Активные ссылки для модалок
+    let activeModalTarget = { procId: null, objId: null, stepId: null };
 
     const STANDARD_WORKFLOW = [
       "Акт сверки НАО",
@@ -930,25 +1145,22 @@
         objects: [
           {
             id: 101,
-            title: "Жылыой - ЛЭС",
+            title: "Жылыой - Дорога Сарыкамыс",
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
-              { id: 1003, text: "Утверждение ЗУП МИО", date: "", done: false, blocker: null },
-              { id: 1004, text: "Постановление акима", date: "", done: false, blocker: null },
-              { id: 1005, text: "Акт на землю, регистрация", date: "", done: false, blocker: null }
+              { id: 1001, text: "Постановление акима", date: `до ${getTodayStr()}`, done: false, blocker: null },
+              { id: 1002, text: "Акт на землю, регистрация", date: "до 13.10.2026", done: false, blocker: null },
+              { id: 1003, text: "Акт сверки НАО", date: "", done: false, blocker: null }
             ]
           },
           {
             id: 102,
-            title: "Жылыой - ВП",
+            title: "Жылыой - ВЛ",
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 2001, text: "Акт сверки НАО", date: "", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "", done: false, blocker: null }
+              { id: 2001, text: "Постановление акима", date: "до 03.10.2026", done: false, blocker: null }
             ]
           }
         ]
@@ -962,6 +1174,7 @@
           if (Array.isArray(p)) {
             state = p.map(pr => ({
               ...pr,
+              collapsed: false, // Всегда открыт как стикер по умолчанию
               showArchive: pr.showArchive || false,
               objects: (pr.objects || []).map(o => ({
                 ...o,
@@ -982,13 +1195,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v11_reglament') || localStorage.getItem('manager_daily_tracker_v10_refined');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v11_reglament') || localStorage.getItem('manager_daily_tracker_v10_refined');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
         if (local) parseVal(local);
         render();
       }
@@ -1098,37 +1311,119 @@
       }
     }
 
-    function promptToggleBlocker(procId, objId, stepId) {
+    /* 8. ЛОГИКА МОДАЛЬНОГО ОКНА ДАТЫ */
+    function openDateModal(procId, objId, stepId) {
+      activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-      const step = obj.steps.find(s => s.id === stepId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      const current = step.blocker || "Оплата не идет у подрядчика";
-      const reason = prompt("Укажите причину задержки / блокер:", current);
+      document.getElementById('dateModalStepTitle').textContent = `${obj.title} → ${step.text}`;
+      const iso = displayToISO(step.date) || getTodayISO();
+      document.getElementById('modalDatePickerInput').value = iso;
 
-      if (reason !== null) {
-        step.blocker = reason.trim() === "" ? null : reason.trim();
-        showToast(step.blocker ? "Зафиксирована задержка!" : "Задержка снята");
-        haptic();
-        saveData();
-      }
+      document.getElementById('dateModalOverlay').style.display = 'flex';
+      haptic();
     }
 
-    function clearBlocker(procId, objId, stepId) {
+    function closeDateModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('dateModalOverlay').style.display = 'none';
+    }
+
+    function setModalDateOffset(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      document.getElementById('modalDatePickerInput').value = `${y}-${m}-${day}`;
+      haptic();
+    }
+
+    function saveDateFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-      const step = obj.steps.find(s => s.id === stepId);
-      if (step) {
-        step.blocker = null;
-        showToast("Задержка снята");
-        haptic();
-        saveData();
-      }
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const iso = document.getElementById('modalDatePickerInput').value;
+      step.date = iso ? isoToDisplay(iso) : '';
+      closeDateModal();
+      showToast("Срок сохранен!");
+      haptic();
+      saveData();
+    }
+
+    function clearDateFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      step.date = '';
+      closeDateModal();
+      showToast("Срок очищен");
+      haptic();
+      saveData();
+    }
+
+    /* 9. ЛОГИКА МОДАЛЬНОГО ОКНА РИСКОВ / БЛОКЕРОВ */
+    function openRiskModal(procId, objId, stepId) {
+      activeModalTarget = { procId, objId, stepId };
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
+      document.getElementById('customRiskInput').value = step.blocker || '';
+      document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
+
+      document.getElementById('riskModalOverlay').style.display = 'flex';
+      haptic();
+    }
+
+    function closeRiskModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('riskModalOverlay').style.display = 'none';
+    }
+
+    function selectRiskPreset(text) {
+      document.getElementById('customRiskInput').value = text;
+      saveRiskFromModal();
+    }
+
+    function saveRiskFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const val = document.getElementById('customRiskInput').value.trim();
+      step.blocker = val !== '' ? val : null;
+      closeRiskModal();
+      showToast(step.blocker ? "Задержка зафиксирована!" : "Задержка снята");
+      haptic();
+      saveData();
+    }
+
+    function clearRiskFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      step.blocker = null;
+      closeRiskModal();
+      showToast("Задержка снята");
+      haptic();
+      saveData();
     }
 
     function promptAddObject(procId) {
@@ -1149,7 +1444,6 @@
       }
     }
 
-    /* Создание объекта сразу с 5 этапами (без навязанных дат — дата выбирается по календарю) */
     function createObjectWithStandardWorkflow(procId) {
       const name = prompt("Название объекта:");
       if (!name || !name.trim()) return;
@@ -1164,12 +1458,12 @@
           steps: STANDARD_WORKFLOW.map((text, idx) => ({
             id: Date.now() + idx,
             text: text,
-            date: "", // оставляем чистым под календарь
+            date: "",
             done: false,
             blocker: null
           }))
         });
-        showToast("Создан объект с 5 этапами! Выберите даты по календарю.");
+        showToast("Создан объект с 5 этапами!");
         haptic();
         saveData();
       }
@@ -1311,20 +1605,6 @@
       }
     }
 
-    /* ВЫБОР ДАТЫ ИЗ КАЛЕНДАРЯ НАПРЯМУЮ */
-    function onCalendarSelect(procId, objId, stepId, isoVal) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-      const step = obj.steps.find(s => s.id === stepId);
-      if (!step) return;
-
-      step.date = isoToDisplay(isoVal);
-      haptic();
-      saveData();
-    }
-
     function editStepText(procId, objId, stepId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
@@ -1382,11 +1662,12 @@
         const isCollapsed = proc.collapsed;
 
         card.innerHTML = `
-          <div class="process-header" onclick="toggleProcessCollapse(${proc.id})">
+          <!-- ЗАМЕТНЫЙ СТИКЕР-ЗАГОЛОВОК ПРОЦЕССА -->
+          <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
-              <span>📂 ${escapeHtml(proc.title)}</span>
-              <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(${activeObjects.length} в работе)</span>
+              <span>📁 ${escapeHtml(proc.title)}</span>
+              <span class="proc-tag-count">${activeObjects.length} в работе</span>
             </div>
             <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
@@ -1433,7 +1714,6 @@
                     ${obj.steps.map(s => {
                       const hasBlock = !s.done && !!s.blocker;
                       const dateMeta = analyzeDeadline(s.date, s.done);
-                      const currentISO = displayToISO(s.date) || getTodayISO();
 
                       return `
                         <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
@@ -1444,15 +1724,13 @@
 
                           <div class="step-footer-line">
                             <div class="step-actions-left">
-                              <!-- НАСТОЯЩИЙ КАЛЕНДАРЬ -->
-                              <div class="step-date-wrap" title="Нажмите, чтобы выбрать дату в календаре">
-                                <span class="step-date-tag ${dateMeta.cls}">
-                                  ${dateMeta.text}
-                                </span>
-                                <input type="date" class="hidden-date-picker" value="${currentISO}" onchange="onCalendarSelect(${proc.id}, ${obj.id}, ${s.id}, this.value)">
-                              </div>
+                              <!-- КНОПКА КАЛЕНДАРЯ: НАЖИМАЕТСЯ НАПРЯМУЮ -->
+                              <button type="button" class="step-date-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                ${dateMeta.text}
+                              </button>
 
-                              <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
+                              <!-- КНОПКА РИСКА: ОТКРЫВАЕТ ВАРИАНТЫ -->
+                              <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                 ${hasBlock ? '🚨 Задержка' : '+ риск'}
                               </button>
                             </div>
@@ -1461,7 +1739,7 @@
 
                           ${hasBlock ? `
                             <div class="blocker-banner">
-                              <span class="reason-text" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
+                              <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                 🚨 ${escapeHtml(s.blocker)}
                               </span>
                               <button class="blocker-clear-btn" onclick="clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
@@ -1552,7 +1830,7 @@
       document.getElementById('mTotal').textContent = totalActiveObjs;
     }
 
-    /* ОТЧЕТ ДЛЯ TELEGRAM */
+    /* 10. ФОРМИРОВАНИЕ ОТЧЕТА ДЛЯ TELEGRAM */
     function generateTelegramReport() {
       const today = getTodayStr();
 
