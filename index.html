@@ -8,7 +8,6 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      /* Мягкая управленческая палитра (Slate & Steel) */
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --text-main: #0f172a;
@@ -375,7 +374,7 @@
       border-color: var(--danger-border);
     }
 
-    /* Верхняя строка шага: Чекбокс + Текст */
+    /* Верхняя строка: чекбокс + текст */
     .step-header-line {
       display: flex;
       align-items: flex-start;
@@ -407,7 +406,7 @@
       opacity: 0.7;
     }
 
-    /* Нижняя строка шага: Дата, Блокер, Удаление */
+    /* Нижняя строка: дата, риск, удаление */
     .step-footer-line {
       display: flex;
       justify-content: space-between;
@@ -422,7 +421,6 @@
       flex-wrap: wrap;
     }
 
-    /* Умные индикаторы даты */
     .step-date-tag {
       font-size: 11px;
       font-weight: 700;
@@ -451,7 +449,6 @@
       color: var(--done);
     }
 
-    /* Спокойная кнопка риска/блокера */
     .btn-blocker-trigger {
       background: #ffffff;
       border: 1px solid #cbd5e1;
@@ -488,7 +485,7 @@
       background: rgba(0,0,0,0.04);
     }
 
-    /* Плашка блокера */
+    /* Блокер плашка */
     .blocker-banner {
       display: flex;
       align-items: center;
@@ -517,7 +514,7 @@
       padding: 2px 4px;
     }
 
-    /* Баннер 100% готовности */
+    /* 100% готовность */
     .all-done-banner {
       background: var(--done-bg);
       border: 1px dashed var(--done-border);
@@ -545,7 +542,7 @@
       white-space: nowrap;
     }
 
-    /* Компактная раскрывающаяся форма добавления шага */
+    /* Форма добавления шага */
     .step-add-toggle-btn {
       background: none;
       border: 1px dashed var(--border);
@@ -656,7 +653,7 @@
       cursor: pointer;
     }
 
-    /* Кнопки внизу процесса */
+    /* Кнопки процессов */
     .proc-add-actions {
       display: flex;
       gap: 6px;
@@ -720,7 +717,7 @@
       cursor: pointer;
     }
 
-    /* 6. ПЛАВАЮЩАЯ ПАНЕЛЬ */
+    /* Плавающая нижняя панель */
     .floating-action-bar {
       position: fixed;
       bottom: 0;
@@ -837,7 +834,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v10_refined';
+    const STORAGE_KEY = 'manager_daily_tracker_v11_reglament';
 
     if (tg) {
       tg.ready();
@@ -846,12 +843,13 @@
 
     let reportMode = 'executive';
 
+    // Регламент этапов с нормативными смещениями дней от текущей даты
     const STANDARD_WORKFLOW = [
-      "Акт сверки НАО",
-      "Экспликация Гипрозем",
-      "Утверждение ЗУП МИО",
-      "Постановление акима",
-      "Акт на землю, регистрация"
+      { text: "Акт сверки НАО", days: 3 },
+      { text: "Экспликация Гипрозем", days: 7 },
+      { text: "Утверждение ЗУП МИО", days: 15 },
+      { text: "Постановление акима", days: 25 },
+      { text: "Акт на землю, регистрация", days: 35 }
     ];
 
     function getTodayStr() {
@@ -871,12 +869,20 @@
       return `${day}.${m}.${y}`;
     }
 
-    /* Умный парсинг дат и расчет срочности */
+    // Расчет даты со смещением по регламенту: 'до ДД.ММ.ГГГГ'
+    function getOffsetDateStr(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const day = String(d.getDate()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const y = d.getFullYear();
+      return `до ${day}.${m}.${y}`;
+    }
+
     function analyzeDeadline(dateStr, isDone) {
       if (isDone) return { cls: 'done', text: dateStr };
       if (!dateStr) return { cls: '', text: 'Без даты' };
 
-      // Извлекаем день, месяц, год (напр. 10.09.2026 или до 10.09.2026)
       const match = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
       if (!match) return { cls: '', text: dateStr };
 
@@ -914,11 +920,11 @@
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
-              { id: 1003, text: "Утверждение ЗУП МИО", date: "до 20.09.2026", done: false, blocker: null },
-              { id: 1004, text: "Постановление акима", date: "до 30.09.2026", done: false, blocker: null },
-              { id: 1005, text: "Акт на землю, регистрация", date: "до 11.10.2026", done: false, blocker: null }
+              { id: 1001, text: "Акт сверки НАО", date: getOffsetDateStr(3), done: true, blocker: null },
+              { id: 1002, text: "Экспликация Гипрозем", date: getOffsetDateStr(7), done: false, blocker: "Оплата не идет у подрядчика" },
+              { id: 1003, text: "Утверждение ЗУП МИО", date: getOffsetDateStr(15), done: false, blocker: null },
+              { id: 1004, text: "Постановление акима", date: getOffsetDateStr(25), done: false, blocker: null },
+              { id: 1005, text: "Акт на землю, регистрация", date: getOffsetDateStr(35), done: false, blocker: null }
             ]
           },
           {
@@ -927,8 +933,8 @@
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: false, blocker: null }
+              { id: 2001, text: "Акт сверки НАО", date: getOffsetDateStr(3), done: false, blocker: null },
+              { id: 2002, text: "Экспликация Гипрозем", date: getOffsetDateStr(7), done: false, blocker: null }
             ]
           }
         ]
@@ -962,13 +968,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v9_mobile') || localStorage.getItem('manager_daily_tracker_v8_archive');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v10_refined') || localStorage.getItem('manager_daily_tracker_v9_mobile');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v9_mobile') || localStorage.getItem('manager_daily_tracker_v8_archive');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v10_refined') || localStorage.getItem('manager_daily_tracker_v9_mobile');
         if (local) parseVal(local);
         render();
       }
@@ -1129,8 +1135,9 @@
       }
     }
 
+    /* АВТОМАТИЧЕСКИЙ РАСЧЕТ СРОКОВ ПО РЕГЛАМЕНТУ (+3, +7, +15, +25, +35 дней) */
     function createObjectWithStandardWorkflow(procId) {
-      const name = prompt("Название объекта (заполнится полным регламентом):");
+      const name = prompt("Название объекта (сроки рассчитаются по регламенту):");
       if (!name || !name.trim()) return;
 
       const p = state.find(x => x.id === procId);
@@ -1140,15 +1147,15 @@
           title: name.trim(),
           archived: false,
           showAddForm: false,
-          steps: STANDARD_WORKFLOW.map((txt, idx) => ({
+          steps: STANDARD_WORKFLOW.map((item, idx) => ({
             id: Date.now() + idx,
-            text: txt,
-            date: getTodayStr(),
+            text: item.text,
+            date: getOffsetDateStr(item.days),
             done: false,
             blocker: null
           }))
         });
-        showToast("Создан объект с 5 этапами!");
+        showToast("Создан объект со сроками по регламенту!");
         haptic();
         saveData();
       }
@@ -1189,34 +1196,33 @@
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      STANDARD_WORKFLOW.forEach((stepText, idx) => {
+      STANDARD_WORKFLOW.forEach((item, idx) => {
         obj.steps.push({
           id: Date.now() + idx,
-          text: stepText,
-          date: getTodayStr(),
+          text: item.text,
+          date: getOffsetDateStr(item.days),
           done: false,
           blocker: null
         });
       });
 
-      showToast("5 этапов добавлены!");
+      showToast("5 этапов со сроками добавлены!");
       haptic();
       saveData();
     }
 
-    function quickAddStepChip(procId, objId, stepText) {
+    function quickAddStepChip(procId, objId, stepText, offsetDays) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      const dInput = document.getElementById(`date-${objId}`);
-      const dt = (dInput ? dInput.value.trim() : '') || getTodayStr();
+      const autoDate = offsetDays ? getOffsetDateStr(offsetDays) : getTodayStr();
 
       obj.steps.push({
         id: Date.now(),
         text: stepText,
-        date: dt,
+        date: autoDate,
         done: false,
         blocker: null
       });
@@ -1419,7 +1425,7 @@
                     </div>
                   ` : ''}
 
-                  <!-- СПИСОК ШАГОВ (ДВУХУРОВНЕВАЯ МОБИЛЬНАЯ КОМПОНОВКА) -->
+                  <!-- СПИСОК ШАГОВ -->
                   <div class="steps-list">
                     ${obj.steps.map(s => {
                       const hasBlock = !s.done && !!s.blocker;
@@ -1427,13 +1433,11 @@
 
                       return `
                         <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
-                          <!-- Строка 1: Чекбокс и полное название без переноса -->
                           <div class="step-header-line">
                             <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
                             <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
                           </div>
 
-                          <!-- Строка 2: Дата, Риск и Удаление -->
                           <div class="step-footer-line">
                             <div class="step-actions-left">
                               <span class="step-date-tag ${dateMeta.cls}" onclick="editStepDate(${proc.id}, ${obj.id}, ${s.id})" title="Изменить срок">
@@ -1446,7 +1450,6 @@
                             <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
                           </div>
 
-                          <!-- Плашка блокера -->
                           ${hasBlock ? `
                             <div class="blocker-banner">
                               <span class="reason-text" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
@@ -1460,33 +1463,32 @@
                     }).join('')}
                   </div>
 
-                  <!-- АККУРАТНО СКЛАДЫВАЮЩАЯСЯ ФОРМА ДОБАВЛЕНИЯ -->
+                  <!-- СКЛАДЫВАЮЩАЯСЯ ФОРМА С АВТОРАСЧЕТОМ СРОКОВ -->
                   ${!obj.showAddForm ? `
                     <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
                       + Добавить этап / шаблоны
                     </button>
                   ` : `
                     <div class="step-fast-add">
-                      <!-- Шаблоны этапов -->
                       <div class="template-chips-bar">
-                        <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
-                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
+                        <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов регламента</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО', 3)">+ Акт НАО (+3д)</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем', 7)">+ Экспликация (+7д)</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО', 15)">+ ЗУП МИО (+15д)</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима', 25)">+ Постановление (+25д)</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация', 35)">+ Акт на землю (+35д)</button>
                       </div>
 
                       <div class="sfa-row-1">
-                        <input type="text" id="txt-${obj.id}" placeholder="Название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
+                        <input type="text" id="txt-${obj.id}" placeholder="Свое название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
                         <input type="text" class="date-input" id="date-${obj.id}" value="${getTodayStr()}" placeholder="Срок">
                       </div>
 
                       <div class="sfa-row-2">
                         <div class="quick-chips">
                           <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getTodayStr()}')">Сегодня</button>
-                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до ${getTomorrowStr()}')">Завтра</button>
-                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до 30.09.2026')">Конец мес.</button>
+                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getOffsetDateStr(3)}')">+3 дн.</button>
+                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getOffsetDateStr(7)}')">+7 дн.</button>
                         </div>
                         <div style="display:flex; gap:4px;">
                           <button type="button" class="chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
@@ -1502,7 +1504,7 @@
             <!-- КНОПКИ СОЗДАНИЯ ОБЪЕКТА -->
             <div class="proc-add-actions">
               <button class="btn-new-obj template" onclick="createObjectWithStandardWorkflow(${proc.id})">
-                ⚡ Создать объект сразу с 5 этапами
+                ⚡ Создать объект со сроками регламента
               </button>
               <button class="btn-new-obj" onclick="promptAddObject(${proc.id})">
                 + Пустой объект
@@ -1534,7 +1536,6 @@
         root.appendChild(card);
       });
 
-      // Динамический цвет плашки задержек
       const bCard = document.getElementById('mBlockersCard');
       if (bCard) {
         if (totalBlockers > 0) {
