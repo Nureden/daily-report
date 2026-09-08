@@ -35,7 +35,7 @@
 
       --neutral-dark: #334155;
       --radius: 12px;
-      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05);
+      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
 
     * {
@@ -204,14 +204,15 @@
       white-space: nowrap;
     }
 
-    /* 3. ПРОЦЕСС КАК ПОЛНОЦЕННЫЙ СТИКЕР (ВСЕГДА РАЗВЕРНУТ) */
+    /* 3. ПРОЦЕСС КАК КОМПАКТНЫЙ СТИКЕР (СВОРАЧИВАЕМЫЙ) */
     .process-section {
       background: var(--card-bg);
       border-radius: var(--radius);
       border: 1px solid #cbd5e1;
       box-shadow: var(--shadow-sm);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       overflow: hidden;
+      transition: box-shadow 0.2s ease;
     }
 
     .process-sticker-header {
@@ -222,18 +223,30 @@
       background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
       cursor: pointer;
       user-select: none;
-      border-bottom: 2px solid #e2e8f0;
       border-left: 5px solid var(--brand);
+    }
+    .process-section.is-open .process-sticker-header {
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .proc-title-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       font-size: 16px;
       font-weight: 800;
       color: #0f172a;
     }
+    .proc-arrow {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    .proc-arrow.collapsed {
+      transform: rotate(-90deg);
+    }
+
     .proc-tag-count {
       font-size: 11px;
       font-weight: 700;
@@ -241,14 +254,6 @@
       color: #334155;
       padding: 2px 7px;
       border-radius: 10px;
-    }
-    .proc-arrow {
-      font-size: 11px;
-      color: var(--text-muted);
-      transition: transform 0.2s;
-    }
-    .proc-arrow.collapsed {
-      transform: rotate(-90deg);
     }
 
     .proc-del-link {
@@ -273,10 +278,10 @@
       background: #fafbfc;
     }
     .process-body.hidden {
-      display: none;
+      display: none !important;
     }
 
-    /* 4. ОБЪЕКТЫ / ПРОЕКТЫ */
+    /* 4. ОБЪЕКТЫ */
     .object-card {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -766,7 +771,7 @@
     .fab-btn.copy { background: #16a34a; }
     .fab-btn.send { background: #0284c7; }
 
-    /* 7. УНИВЕРСАЛЬНОЕ МОДАЛЬНОЕ ОКНО */
+    /* 7. МОДАЛЬНОЕ ОКНО */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -850,12 +855,6 @@
       background: #eff6ff;
       border-color: var(--brand-border);
       color: var(--brand);
-    }
-    .preset-btn.active {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #991b1b;
-      font-weight: 700;
     }
 
     .modal-input {
@@ -976,7 +975,7 @@
     </button>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР ДАТЫ ИЗ КАЛЕНДАРЯ -->
+  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР ДАТЫ -->
   <div class="modal-overlay" id="dateModalOverlay" onclick="closeDateModal(event)">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -1009,11 +1008,11 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР РИСКА / ЗАДЕРЖКИ С ВАРИАНТАМИ -->
+  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР РИСКА -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title">🚨 Укажите причину задержки</div>
+        <div class="modal-title">🚨 Причина задержки</div>
         <button class="modal-close" onclick="closeRiskModal()">✕</button>
       </div>
       <div class="modal-step-name" id="riskModalStepTitle">Этап...</div>
@@ -1055,7 +1054,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v14_always_open';
+    const STORAGE_KEY = 'manager_daily_tracker_v15_collapsed_default';
 
     if (tg) {
       tg.ready();
@@ -1134,11 +1133,12 @@
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
+    // По умолчанию collapsed: true (свернуто)
     let state = [
       {
         id: 1,
         title: "Дополнительные зем участки",
-        collapsed: false,
+        collapsed: true,
         showArchive: false,
         objects: [
           {
@@ -1149,9 +1149,9 @@
             steps: [
               { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
               { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
-              { id: 1003, text: "Утверждение ЗУП МИО", date: "", done: false, blocker: null },
-              { id: 1004, text: "Постановление акима", date: "", done: false, blocker: null },
-              { id: 1005, text: "Акт на землю, регистрация", date: "", done: false, blocker: null }
+              { id: 1003, text: "Утверждение ЗУП МИО", date: "до 20.09.2026", done: false, blocker: null },
+              { id: 1004, text: "Постановление акима", date: "до 30.09.2026", done: false, blocker: null },
+              { id: 1005, text: "Акт на землю, регистрация", date: "до 11.10.2026", done: false, blocker: null }
             ]
           },
           {
@@ -1160,8 +1160,8 @@
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 2001, text: "Акт сверки НАО", date: "", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "", done: false, blocker: null }
+              { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
+              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: false, blocker: null }
             ]
           }
         ]
@@ -1175,7 +1175,7 @@
           if (Array.isArray(p)) {
             state = p.map(pr => ({
               ...pr,
-              collapsed: false, // ГАРАНТИЯ: ВСЕГДА РАЗВЕРНУТ ПРИ ОБНОВЛЕНИИ
+              collapsed: true, // ВСЕГДА СВЕРНУТ ПРИ ЗАГРУЗКЕ И ОБНОВЛЕНИИ
               showArchive: pr.showArchive || false,
               objects: (pr.objects || []).map(o => ({
                 ...o,
@@ -1196,13 +1196,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v13_modal_calendar') || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v14_always_open') || localStorage.getItem('manager_daily_tracker_v13_modal_calendar');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v13_modal_calendar') || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v14_always_open') || localStorage.getItem('manager_daily_tracker_v13_modal_calendar');
         if (local) parseVal(local);
         render();
       }
@@ -1243,7 +1243,7 @@
       state.push({
         id: Date.now(),
         title: val,
-        collapsed: false,
+        collapsed: false, // только что созданный процесс открыт для заполнения
         showArchive: false,
         objects: []
       });
@@ -1258,7 +1258,7 @@
       if (p) {
         p.collapsed = !p.collapsed;
         haptic();
-        saveData();
+        render();
       }
     }
 
@@ -1644,7 +1644,8 @@
 
       state.forEach(proc => {
         const card = document.createElement('div');
-        card.className = 'process-section';
+        const isCollapsed = !!proc.collapsed;
+        card.className = `process-section ${!isCollapsed ? 'is-open' : ''}`;
 
         const activeObjects = proc.objects.filter(o => !o.archived);
         const archivedObjects = proc.objects.filter(o => o.archived);
@@ -1660,11 +1661,8 @@
           });
         });
 
-        // Всегда развернут: класс 'hidden' не добавляется
-        const isCollapsed = false;
-
         card.innerHTML = `
-          <!-- ЗАМЕТНЫЙ СТИКЕР-ЗАГОЛОВОК ПРОЦЕССА -->
+          <!-- КОМПАКТНЫЙ СТИКЕР: НАЖАТИЕ РАСКРЫВАЕТ / СВОРАЧИВАЕТ -->
           <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
@@ -1674,7 +1672,7 @@
             <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
-          <div class="process-body">
+          <div class="process-body ${isCollapsed ? 'hidden' : ''}">
             ${activeObjects.map(obj => {
               const dCount = obj.steps.filter(s => s.done).length;
               const tCount = obj.steps.length;
@@ -1726,12 +1724,12 @@
 
                           <div class="step-footer-line">
                             <div class="step-actions-left">
-                              <!-- КНОПКА КАЛЕНДАРЯ -->
+                              <!-- КАЛЕНДАРЬ ПО КЛИКУ -->
                               <button type="button" class="step-date-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
                                 ${dateMeta.text}
                               </button>
 
-                              <!-- КНОПКА РИСКА -->
+                              <!-- РИСКИ ПО КЛИКУ -->
                               <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                 ${hasBlock ? '🚨 Задержка' : '+ риск'}
                               </button>
