@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Трекер Отчетов по Процессам</title>
+  <title>Трекер Процессов и Объектов</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -14,18 +14,14 @@
       --text-muted: #64748b;
       --border: #e2e8f0;
       
-      /* Мягкие, приятные для глаз оттенки */
-      --done-bg: #f0fdf4;
-      --done-border: #22c55e;
-      --done-text: #166534;
-      --done-badge: #dcfce7;
-
-      --plan-bg: #fffbeb;
-      --plan-border: #f59e0b;
-      --plan-text: #92400e;
-      --plan-badge: #fef3c7;
-
       --accent-green: #16a34a;
+      --accent-green-bg: #f0fdf4;
+      --accent-green-border: #86efac;
+      
+      --accent-amber: #d97706;
+      --accent-amber-bg: #fffbeb;
+      --accent-amber-border: #fde68a;
+
       --accent-blue: #0284c7;
       --danger: #ef4444;
       --radius: 12px;
@@ -71,7 +67,7 @@
     }
 
     .app-title {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -91,27 +87,36 @@
     /* Статистика */
     .stats-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
       margin-bottom: 14px;
+    }
+    @media (max-width: 500px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stat-box.all { display: none; }
     }
 
     .stat-box {
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-radius: 10px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
     .stat-box.done {
-      background: var(--done-bg);
-      border-left: 4px solid var(--done-border);
-      color: var(--done-text);
+      background: var(--accent-green-bg);
+      border-left: 4px solid var(--accent-green);
+      color: #166534;
     }
     .stat-box.plan {
-      background: var(--plan-bg);
-      border-left: 4px solid var(--plan-border);
-      color: var(--plan-text);
+      background: var(--accent-amber-bg);
+      border-left: 4px solid var(--accent-amber);
+      color: #92400e;
+    }
+    .stat-box.all {
+      background: #f1f5f9;
+      border-left: 4px solid #64748b;
+      color: #334155;
     }
     .stat-label {
       font-size: 12px;
@@ -121,7 +126,7 @@
       opacity: 0.85;
     }
     .stat-value {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
     }
 
@@ -170,7 +175,7 @@
       border: 1px solid var(--border);
     }
 
-    /* Создание процесса */
+    /* Добавление процесса */
     .add-proc-card {
       background: var(--card-bg);
       border: 1px dashed #cbd5e1;
@@ -233,7 +238,7 @@
       transform: rotate(-90deg);
     }
 
-    .proc-menu-btn {
+    .proc-del-btn {
       background: transparent;
       border: none;
       color: var(--danger);
@@ -243,7 +248,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .proc-menu-btn:hover {
+    .proc-del-btn:hover {
       background: #fef2f2;
     }
 
@@ -255,218 +260,239 @@
       display: none;
     }
 
-    /* Колонки со стикерами */
-    .lanes-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* Список карточек объектов во всю ширину */
+    .objects-list {
+      display: flex;
+      flex-direction: column;
       gap: 12px;
-      margin-top: 12px;
+      margin-top: 14px;
       margin-bottom: 14px;
     }
-    @media (max-width: 620px) {
-      .lanes-grid { grid-template-columns: 1fr; }
+
+    /* Карточка объекта */
+    .obj-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .obj-card.fully-done {
+      background: #f9fdfa;
+      border-color: var(--accent-green-border);
     }
 
-    .lane {
-      background: #f8fafc;
-      border: 1px solid #eef2f6;
-      border-radius: 10px;
-      padding: 10px;
-      min-height: 90px;
-    }
-    .lane-header {
+    .obj-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #e2e8f0;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .lane-header.done { color: var(--done-text); }
-    .lane-header.plan { color: var(--plan-text); }
-
-    /* Стикер */
-    .sticker {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      display: flex;
-      flex-direction: column;
       gap: 8px;
     }
-    .sticker.done {
-      background: var(--done-bg);
-      border-left: 5px solid var(--done-border);
-      color: var(--done-text);
-    }
-    .sticker.plan {
-      background: var(--plan-bg);
-      border-left: 5px solid var(--plan-border);
-      color: var(--plan-text);
-    }
-
-    .sticker-text-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .sticker-text {
-      font-size: 16px;
-      line-height: 1.4;
+    .obj-title {
+      font-size: 17px;
       font-weight: 700;
-      word-break: break-word;
+      color: #0f172a;
       cursor: pointer;
+      flex: 1;
+    }
+    .obj-right-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .progress-pill {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 10px;
-      background: rgba(0,0,0,0.06);
-      color: inherit;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: #f1f5f9;
+      color: #475569;
       white-space: nowrap;
     }
-
-    /* Подзадачи (этапы) */
-    .subtasks-box {
-      margin-top: 4px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+    .progress-pill.done {
+      background: var(--accent-green-bg);
+      color: #15803d;
     }
-    .subtask-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #334155;
-    }
-    .subtask-item input[type="checkbox"] {
-      width: 17px;
-      height: 17px;
-      cursor: pointer;
-      accent-color: var(--accent-green);
-    }
-    .subtask-item span {
-      flex: 1;
-      cursor: pointer;
-      line-height: 1.35;
-    }
-    .subtask-item.checked span {
-      text-decoration: line-through;
-      opacity: 0.55;
-    }
-    .subtask-del-btn {
+    .obj-del-btn {
       background: none;
       border: none;
       color: #94a3b8;
-      font-size: 13px;
+      font-size: 16px;
       cursor: pointer;
-      padding: 2px 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
-    .subtask-del-btn:hover {
+    .obj-del-btn:hover {
       color: var(--danger);
+      background: #fef2f2;
     }
 
-    /* Поле добавления подзадачи */
-    .add-subtask-row {
+    /* Список шагов / этапов внутри объекта */
+    .steps-container {
       display: flex;
+      flex-direction: column;
       gap: 6px;
-      margin-top: 4px;
-    }
-    .add-subtask-row input {
-      flex: 1;
-      padding: 5px 8px;
-      font-size: 13px;
-      border: 1px dashed #cbd5e1;
-      border-radius: 5px;
-      background: rgba(255,255,255,0.7);
-      outline: none;
-    }
-    .add-subtask-row input:focus {
-      background: #fff;
-      border-color: var(--accent-blue);
-    }
-    .add-subtask-row button {
-      padding: 4px 8px;
-      font-size: 12px;
-      font-weight: 700;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 5px;
-      cursor: pointer;
-      color: #334155;
     }
 
-    .sticker-foot {
+    .step-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      border-top: 1px dashed rgba(0,0,0,0.08);
-      padding-top: 6px;
-      font-size: 12px;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+    }
+    .step-row.completed {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green-border);
     }
 
-    .date-badge {
+    .step-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .step-checkbox {
+      width: 19px;
+      height: 19px;
+      cursor: pointer;
+      accent-color: var(--accent-green);
+      flex-shrink: 0;
+    }
+    .step-text {
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      word-break: break-word;
+    }
+    .step-row.completed .step-text {
+      text-decoration: line-through;
+      color: #166534;
+      opacity: 0.75;
+    }
+
+    .step-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* Бейдж даты шага (нажмите, чтобы изменить дату) */
+    .step-date-pill {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-weight: 700;
-      background: rgba(255, 255, 255, 0.85);
-      padding: 4px 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(0,0,0,0.06);
-    }
-
-    .sticker-btns {
-      display: flex;
-      gap: 4px;
-    }
-    .pill-btn {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0,0,0,0.14);
-      border-radius: 6px;
-      padding: 4px 9px;
       font-size: 12px;
       font-weight: 700;
-      cursor: pointer;
-      color: #334155;
-    }
-    .pill-btn:hover {
+      padding: 4px 8px;
+      border-radius: 6px;
       background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+    }
+    .step-row.completed .step-date-pill {
+      background: #ffffff;
+      border-color: var(--accent-green-border);
+      color: #166534;
     }
 
-    /* Инлайн редактирование задачи */
-    .inline-edit-box {
+    .step-del-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 3px 5px;
+      border-radius: 4px;
+    }
+    .step-del-btn:hover {
+      color: var(--danger);
+    }
+
+    /* Добавление шага к объекту */
+    .add-step-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 4px 0;
+      margin-top: 4px;
     }
-    .inline-edit-box input {
-      padding: 8px 10px;
+    .add-step-inputs {
+      display: flex;
+      gap: 6px;
+    }
+    .add-step-inputs input.step-title-input {
+      flex: 1;
+      padding: 9px 12px;
       font-size: 15px;
-      border: 1px solid var(--accent-blue);
+      border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
     }
-    .inline-edit-actions {
-      display: flex;
-      gap: 6px;
-      justify-content: flex-end;
+    .add-step-inputs input.step-date-input {
+      width: 140px;
+      padding: 9px 10px;
+      font-size: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+    }
+    @media (max-width: 480px) {
+      .add-step-inputs { flex-direction: column; }
+      .add-step-inputs input.step-date-input { width: 100%; }
     }
 
-    /* Форма создания задачи */
-    .task-toggle-btn {
+    .add-step-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .quick-date-buttons {
+      display: flex;
+      gap: 4px;
+    }
+    .mini-date-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+    }
+    .mini-date-btn:hover {
+      background: #f1f5f9;
+    }
+    .add-step-btn {
+      background: #334155;
+      color: #ffffff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Добавление объекта в процесс */
+    .add-obj-toggle-btn {
       width: 100%;
       background: #f1f5f9;
       color: #475569;
@@ -481,77 +507,33 @@
       justify-content: center;
       gap: 6px;
     }
-    .task-toggle-btn:hover {
+    .add-obj-toggle-btn:hover {
       background: #e2e8f0;
     }
 
-    .new-task-form {
+    .new-obj-form {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 12px;
-      margin-top: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
-
-    .form-row-text input {
-      width: 100%;
-      padding: 11px 13px;
-      font-size: 16px;
+    .new-obj-form input {
+      padding: 10px 12px;
+      font-size: 15px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
     }
-
-    .form-row-dates {
+    .new-obj-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-    .form-row-dates input[type="date"] {
-      padding: 8px 10px;
-      font-size: 15px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      background: #fff;
-    }
-    .date-quick-btn {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #334155;
-      cursor: pointer;
-    }
-    .date-quick-btn:hover {
-      background: #f1f5f9;
-    }
-
-    .form-row-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .form-row-bottom select {
-      padding: 9px 12px;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      background: #ffffff;
-    }
-    .form-submit-btns {
-      display: flex;
+      justify-content: flex-end;
       gap: 6px;
     }
 
-    /* Очистка внизу процесса */
+    /* Очистка */
     .proc-footer-actions {
       display: flex;
       justify-content: flex-end;
@@ -572,7 +554,7 @@
       color: var(--danger);
     }
 
-    /* Тост оповещений */
+    /* Тост */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -595,11 +577,11 @@
 <body>
 
   <div class="container">
-    <!-- Шапка приложения -->
+    <!-- Верхний блок -->
     <div class="top-card">
       <div class="header-row">
         <div class="app-title">
-          <span>📋</span> Трекер процессов
+          <span>📋</span> Трекер процессов и объектов
         </div>
         <div class="cloud-pill" id="syncStatus">● Telegram Cloud</div>
       </div>
@@ -607,11 +589,15 @@
       <div class="stats-row">
         <div class="stat-box done">
           <span class="stat-label">Сделано</span>
-          <span class="stat-value" id="countDone">0 задач</span>
+          <span class="stat-value" id="countDone">0 шагов</span>
         </div>
         <div class="stat-box plan">
-          <span class="stat-label">В планах</span>
-          <span class="stat-value" id="countPlan">0 задач</span>
+          <span class="stat-label">В работе / План</span>
+          <span class="stat-value" id="countPlan">0 шагов</span>
+        </div>
+        <div class="stat-box all">
+          <span class="stat-label">Объектов</span>
+          <span class="stat-value" id="countObjects">0</span>
         </div>
       </div>
 
@@ -625,13 +611,13 @@
       </div>
     </div>
 
-    <!-- Создание направления/процесса -->
+    <!-- Новое направление / процесс -->
     <div class="add-proc-card">
       <input type="text" id="newProcInput" placeholder="Новое направление (напр. Оформление сервитута)..." onkeydown="if(event.key==='Enter') addProcess()">
       <button class="btn btn-neutral" onclick="addProcess()">+ Процесс</button>
     </div>
 
-    <!-- Дерево процессов -->
+    <!-- Список процессов -->
     <div id="processesList"></div>
   </div>
 
@@ -639,52 +625,45 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'tma_tree_tracker_v3_subtasks';
+    const STORAGE_KEY = 'tma_unified_object_tree_v4';
 
     if (tg) {
       tg.ready();
       tg.expand();
     }
 
-    function getTodayISO() {
+    function getTodayStr() {
       const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const y = d.getFullYear();
+      return `${day}.${m}.${y}`;
     }
 
-    function getTomorrowISO() {
+    function getTomorrowStr() {
       const d = new Date();
       d.setDate(d.getDate() + 1);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const y = d.getFullYear();
+      return `${day}.${m}.${y}`;
     }
 
-    function formatDateRU(isoStr) {
-      if (!isoStr) return '';
-      const p = isoStr.split('-');
-      if (p.length === 3) return `${p[2]}.${p[1]}.${p[0]}`;
-      return isoStr;
-    }
-
+    // Структура данных: Процесс -> Объекты (на всю ширину) -> Шаги со сроками
     let state = [
       {
         id: 1,
         title: "по изменению границ СЭЗ",
         collapsed: false,
-        openForm: false,
-        tasks: [
+        openObjForm: false,
+        objects: [
           {
             id: 101,
-            text: "Дорожная карта",
-            date: getTodayISO(),
-            status: "plan",
-            subtasks: [
-              { id: 1001, text: "Сбор исходных данных и схем", done: true },
-              { id: 1002, text: "Согласование проекта в акимате", done: false }
+            title: "Дорожная карта",
+            steps: [
+              { id: 1001, text: "Акт сверки НАО", date: "08.09.2026", done: true },
+              { id: 1002, text: "Экспликация Гипрозем", date: "08.09 – 12.09", done: false },
+              { id: 1003, text: "Постановление акимата", date: "до 18.09", done: false }
             ]
           }
         ]
@@ -693,43 +672,39 @@
         id: 2,
         title: "Дополнительные зем участки",
         collapsed: false,
-        openForm: false,
-        tasks: [
+        openObjForm: false,
+        objects: [
           {
             id: 201,
-            text: "Жылыой - ЛЭС",
-            date: getTodayISO(),
-            status: "plan",
-            subtasks: [
-              { id: 2001, text: "Рекогносцировка на местности", done: true },
-              { id: 2002, text: "Схема расположения земельного участка", done: true },
-              { id: 2003, text: "Земельно-кадастровый план", done: false }
+            title: "Жылыой - ЛЭС",
+            steps: [
+              { id: 2001, text: "Акт сверки НАО", date: "08.09.2026", done: true },
+              { id: 2002, text: "Экспликация Гипрозем", date: "до 12.09", done: false }
             ]
           },
           {
             id: 202,
-            text: "Жылыой - ВП",
-            date: getTodayISO(),
-            status: "plan",
-            subtasks: []
+            title: "Жылыой - ВП",
+            steps: [
+              { id: 3001, text: "Акт сверки НАО", date: "08.09.2026", done: false },
+              { id: 3002, text: "Экспликация Гипрозем", date: "до 15.09", done: false }
+            ]
           }
         ]
       }
     ];
 
-    let editingTaskId = null;
-
     async function loadData() {
-      // Подгружаем v3, если нет — пробуем старый v2
-      const readFromVal = (val) => {
+      const tryParse = (val) => {
         try {
           const parsed = JSON.parse(val);
           if (Array.isArray(parsed)) {
             state = parsed.map(p => ({
               ...p,
-              tasks: (p.tasks || []).map(t => ({
-                ...t,
-                subtasks: t.subtasks || []
+              openObjForm: false,
+              objects: (p.objects || []).map(o => ({
+                ...o,
+                steps: o.steps || []
               }))
             }));
           }
@@ -739,16 +714,16 @@
       if (tg?.CloudStorage) {
         tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
           if (!err && val) {
-            readFromVal(val);
+            tryParse(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('tma_tree_date_tracker_state_v2');
-            if (local) readFromVal(local);
+            const local = localStorage.getItem(STORAGE_KEY);
+            if (local) tryParse(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('tma_tree_date_tracker_state_v2');
-        if (local) readFromVal(local);
+        const local = localStorage.getItem(STORAGE_KEY);
+        if (local) tryParse(local);
         render();
       }
     }
@@ -782,8 +757,8 @@
         id: Date.now(),
         title: val,
         collapsed: false,
-        openForm: false,
-        tasks: []
+        openObjForm: false,
+        objects: []
       });
 
       input.value = '';
@@ -801,158 +776,173 @@
     }
 
     function deleteProcess(procId) {
-      if (confirm("Удалить этот процесс и все его задачи?")) {
+      if (confirm("Удалить этот процесс и все его объекты?")) {
         state = state.filter(p => p.id !== procId);
         haptic();
         saveData();
       }
     }
 
-    function toggleTaskForm(procId) {
+    function toggleObjForm(procId) {
       const proc = state.find(p => p.id === procId);
       if (proc) {
-        proc.openForm = !proc.openForm;
+        proc.openObjForm = !proc.openObjForm;
         render();
       }
     }
 
-    function setQuickDate(procId, when) {
-      const input = document.getElementById(`date-in-${procId}`);
+    function addObject(procId) {
+      const input = document.getElementById(`new-obj-in-${procId}`);
       if (!input) return;
-      input.value = (when === 'today') ? getTodayISO() : getTomorrowISO();
-    }
-
-    function addTask(procId) {
-      const txt = document.getElementById(`txt-in-${procId}`).value.trim();
-      const dt = document.getElementById(`date-in-${procId}`).value || getTodayISO();
-      const st = document.getElementById(`status-in-${procId}`).value;
-
-      if (!txt) return;
+      const title = input.value.trim();
+      if (!title) return;
 
       const proc = state.find(p => p.id === procId);
       if (proc) {
-        proc.tasks.push({
+        proc.objects.push({
           id: Date.now(),
-          text: txt,
-          date: dt,
-          status: st,
-          subtasks: []
+          title: title,
+          steps: []
         });
-        proc.openForm = false;
+        proc.openObjForm = false;
         haptic();
         saveData();
       }
     }
 
-    function toggleTaskStatus(procId, taskId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const t = proc.tasks.find(x => x.id === taskId);
-      if (t) {
-        t.status = (t.status === 'done') ? 'plan' : 'done';
-        haptic();
-        saveData();
-      }
-    }
-
-    function deleteTask(procId, taskId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      proc.tasks = proc.tasks.filter(x => x.id !== taskId);
-      haptic();
-      saveData();
-    }
-
-    /* Подзадачи (этапы) */
-    function addSubtask(procId, taskId) {
-      const input = document.getElementById(`sub-in-${taskId}`);
-      if (!input) return;
-      const val = input.value.trim();
-      if (!val) return;
-
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const t = proc.tasks.find(x => x.id === taskId);
-      if (!t) return;
-
-      if (!t.subtasks) t.subtasks = [];
-      t.subtasks.push({
-        id: Date.now(),
-        text: val,
-        done: false
-      });
-
-      input.value = '';
-      haptic();
-      saveData();
-    }
-
-    function toggleSubtask(procId, taskId, subId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const t = proc.tasks.find(x => x.id === taskId);
-      if (!t || !t.subtasks) return;
-      const s = t.subtasks.find(x => x.id === subId);
-      if (s) {
-        s.done = !s.done;
-        haptic();
-        saveData();
-      }
-    }
-
-    function deleteSubtask(procId, taskId, subId) {
-      const proc = state.find(p => p.id === procId);
-      if (!proc) return;
-      const t = proc.tasks.find(x => x.id === taskId);
-      if (!t || !t.subtasks) return;
-      t.subtasks = t.subtasks.filter(x => x.id !== subId);
-      haptic();
-      saveData();
-    }
-
-    function startEditTask(taskId) {
-      editingTaskId = taskId;
-      render();
-    }
-
-    function cancelEditTask() {
-      editingTaskId = null;
-      render();
-    }
-
-    function saveEditTask(procId, taskId) {
-      const txtInput = document.getElementById(`edit-txt-${taskId}`);
-      const dtInput = document.getElementById(`edit-dt-${taskId}`);
-      if (!txtInput) return;
-
-      const newTxt = txtInput.value.trim();
-      const newDt = dtInput.value;
-
-      if (!newTxt) return;
-
-      const proc = state.find(p => p.id === procId);
-      if (proc) {
-        const t = proc.tasks.find(x => x.id === taskId);
-        if (t) {
-          t.text = newTxt;
-          if (newDt) t.date = newDt;
-          editingTaskId = null;
+    function deleteObject(procId, objId) {
+      if (confirm("Удалить этот объект?")) {
+        const proc = state.find(p => p.id === procId);
+        if (proc) {
+          proc.objects = proc.objects.filter(o => o.id !== objId);
           haptic();
           saveData();
         }
       }
     }
 
-    function clearDoneTasks(procId) {
+    function editObjectTitle(procId, objId) {
       const proc = state.find(p => p.id === procId);
       if (!proc) return;
-      const count = proc.tasks.filter(t => t.status === 'done').length;
+      const obj = proc.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      const newTitle = prompt("Название объекта / проекта:", obj.title);
+      if (newTitle !== null && newTitle.trim() !== '') {
+        obj.title = newTitle.trim();
+        haptic();
+        saveData();
+      }
+    }
+
+    function setQuickDateInput(objId, val) {
+      const dInput = document.getElementById(`step-date-${objId}`);
+      if (dInput) dInput.value = val;
+    }
+
+    function addStep(procId, objId) {
+      const tInput = document.getElementById(`step-txt-${objId}`);
+      const dInput = document.getElementById(`step-date-${objId}`);
+      if (!tInput) return;
+
+      const txt = tInput.value.trim();
+      const dt = (dInput ? dInput.value.trim() : '') || getTodayStr();
+      if (!txt) return;
+
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const obj = proc.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      obj.steps.push({
+        id: Date.now(),
+        text: txt,
+        date: dt,
+        done: false
+      });
+
+      tInput.value = '';
+      if (dInput) dInput.value = getTodayStr();
+
+      haptic();
+      saveData();
+    }
+
+    function toggleStep(procId, objId, stepId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const obj = proc.objects.find(o => o.id === objId);
+      if (!obj) return;
+      const step = obj.steps.find(s => s.id === stepId);
+      if (step) {
+        step.done = !step.done;
+        // Если отметили сделанным сегодня, можно обновить дату или оставить прежнюю
+        haptic();
+        saveData();
+      }
+    }
+
+    function editStepText(procId, objId, stepId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const obj = proc.objects.find(o => o.id === objId);
+      if (!obj) return;
+      const step = obj.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const newTxt = prompt("Описание шага / этапа:", step.text);
+      if (newTxt !== null && newTxt.trim() !== '') {
+        step.text = newTxt.trim();
+        haptic();
+        saveData();
+      }
+    }
+
+    function editStepDate(procId, objId, stepId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const obj = proc.objects.find(o => o.id === objId);
+      if (!obj) return;
+      const step = obj.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const newDate = prompt("Укажите дату или промежуток (напр. 08.09.2026, до 15.09, 08.09-12.09):", step.date);
+      if (newDate !== null && newDate.trim() !== '') {
+        step.date = newDate.trim();
+        haptic();
+        saveData();
+      }
+    }
+
+    function deleteStep(procId, objId, stepId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const obj = proc.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      obj.steps = obj.steps.filter(s => s.id !== stepId);
+      haptic();
+      saveData();
+    }
+
+    function clearDoneSteps(procId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+
+      let count = 0;
+      proc.objects.forEach(o => {
+        count += o.steps.filter(s => s.done).length;
+      });
+
       if (count === 0) {
-        showToast("В этом процессе нет выполненных задач");
+        showToast("Нет выполненных шагов для очистки");
         return;
       }
-      if (confirm(`Очистить выполненные задачи (${count} шт.)?`)) {
-        proc.tasks = proc.tasks.filter(t => t.status !== 'done');
+
+      if (confirm(`Удалить все выполненные шаги (${count} шт.) в этом процессе?`)) {
+        proc.objects.forEach(o => {
+          o.steps = o.steps.filter(s => !s.done);
+        });
         haptic();
         saveData();
       }
@@ -962,77 +952,23 @@
       const root = document.getElementById('processesList');
       root.innerHTML = '';
 
-      let totalDone = 0;
-      let totalPlan = 0;
+      let totalDoneSteps = 0;
+      let totalPlanSteps = 0;
+      let totalObjects = 0;
 
       state.forEach(proc => {
-        const doneTasks = proc.tasks.filter(t => t.status === 'done');
-        const planTasks = proc.tasks.filter(t => t.status === 'plan');
-
-        totalDone += doneTasks.length;
-        totalPlan += planTasks.length;
-
         const card = document.createElement('div');
         card.className = 'process-card';
 
-        const renderSticker = (t) => {
-          if (editingTaskId === t.id) {
-            return `
-              <div class="sticker ${t.status}">
-                <div class="inline-edit-box">
-                  <input type="text" id="edit-txt-${t.id}" value="${escapeHtml(t.text)}">
-                  <input type="date" id="edit-dt-${t.id}" value="${t.date}">
-                  <div class="inline-edit-actions">
-                    <button class="pill-btn" onclick="cancelEditTask()">Отмена</button>
-                    <button class="pill-btn" style="background:#0284c7; color:#fff;" onclick="saveEditTask(${proc.id}, ${t.id})">Сохранить</button>
-                  </div>
-                </div>
-              </div>
-            `;
-          }
-
-          const subs = t.subtasks || [];
-          const doneSubs = subs.filter(s => s.done).length;
-          const totalSubs = subs.length;
-
-          return `
-            <div class="sticker ${t.status}">
-              <div class="sticker-text-row">
-                <div class="sticker-text" onclick="startEditTask(${t.id})" title="Нажмите, чтобы переименовать">
-                  ${escapeHtml(t.text)}
-                </div>
-                ${totalSubs > 0 ? `<div class="progress-pill">${doneSubs}/${totalSubs} закрыто</div>` : ''}
-              </div>
-
-              <!-- Чеклист этапов/подзадач -->
-              <div class="subtasks-box">
-                ${subs.map(s => `
-                  <div class="subtask-item ${s.done ? 'checked' : ''}">
-                    <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSubtask(${proc.id}, ${t.id}, ${s.id})">
-                    <span onclick="toggleSubtask(${proc.id}, ${t.id}, ${s.id})">${escapeHtml(s.text)}</span>
-                    <button class="subtask-del-btn" onclick="deleteSubtask(${proc.id}, ${t.id}, ${s.id})">✕</button>
-                  </div>
-                `).join('')}
-
-                <div class="add-subtask-row">
-                  <input type="text" id="sub-in-${t.id}" placeholder="+ шаг / этап..." onkeydown="if(event.key==='Enter') addSubtask(${proc.id}, ${t.id})">
-                  <button type="button" onclick="addSubtask(${proc.id}, ${t.id})">+</button>
-                </div>
-              </div>
-
-              <div class="sticker-foot">
-                <span class="date-badge">📅 ${formatDateRU(t.date)}</span>
-                <div class="sticker-btns">
-                  <button class="pill-btn" onclick="startEditTask(${t.id})" title="Редактировать">✏️</button>
-                  <button class="pill-btn" onclick="toggleTaskStatus(${proc.id}, ${t.id})">
-                    ${t.status === 'done' ? '➔ В план' : '✔ Сделано'}
-                  </button>
-                  <button class="pill-btn" style="color:var(--danger);" onclick="deleteTask(${proc.id}, ${t.id})">✕</button>
-                </div>
-              </div>
-            </div>
-          `;
-        };
+        let procStepsCount = 0;
+        proc.objects.forEach(o => {
+          totalObjects++;
+          o.steps.forEach(s => {
+            procStepsCount++;
+            if (s.done) totalDoneSteps++;
+            else totalPlanSteps++;
+          });
+        });
 
         const isCollapsed = proc.collapsed;
 
@@ -1041,60 +977,90 @@
             <div class="proc-title-wrap">
               <span class="proc-toggle-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
               <span>📂 ${escapeHtml(proc.title)}</span>
-              <span style="font-size:13px; color:var(--text-muted); font-weight:normal;">(${proc.tasks.length})</span>
+              <span style="font-size:13px; color:var(--text-muted); font-weight:normal;">(${proc.objects.length} объектов)</span>
             </div>
-            <button class="proc-menu-btn" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
+            <button class="proc-del-btn" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
           <div class="proc-content ${isCollapsed ? 'hidden' : ''}">
-            <div class="lanes-grid">
-              <div class="lane">
-                <div class="lane-header done">
-                  <span>🟢 Сделано</span>
-                  <span>${doneTasks.length}</span>
-                </div>
-                ${doneTasks.length > 0 ? doneTasks.map(renderSticker).join('') : '<div style="color:#94a3b8; font-size:13px; font-style:italic; padding:8px 4px;">Нет задач</div>'}
-              </div>
+            <div class="objects-list">
+              ${proc.objects.map(obj => {
+                const doneCount = obj.steps.filter(s => s.done).length;
+                const totalCount = obj.steps.length;
+                const isFullyDone = totalCount > 0 && doneCount === totalCount;
 
-              <div class="lane">
-                <div class="lane-header plan">
-                  <span>🟡 В планах</span>
-                  <span>${planTasks.length}</span>
-                </div>
-                ${planTasks.length > 0 ? planTasks.map(renderSticker).join('') : '<div style="color:#94a3b8; font-size:13px; font-style:italic; padding:8px 4px;">Нет задач</div>'}
-              </div>
+                return `
+                  <div class="obj-card ${isFullyDone ? 'fully-done' : ''}">
+                    <div class="obj-header">
+                      <div class="obj-title" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Нажмите, чтобы изменить название">
+                        📌 ${escapeHtml(obj.title)}
+                      </div>
+                      <div class="obj-right-meta">
+                        ${totalCount > 0 ? `
+                          <div class="progress-pill ${isFullyDone ? 'done' : ''}">
+                            ${doneCount}/${totalCount} ${isFullyDone ? 'завершено' : 'закрыто'}
+                          </div>
+                        ` : ''}
+                        <button class="obj-del-btn" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕</button>
+                      </div>
+                    </div>
+
+                    <!-- Шаги объекта -->
+                    <div class="steps-container">
+                      ${obj.steps.map(step => `
+                        <div class="step-row ${step.done ? 'completed' : ''}">
+                          <div class="step-left">
+                            <input type="checkbox" class="step-checkbox" ${step.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${step.id})">
+                            <span class="step-text" onclick="editStepText(${proc.id}, ${obj.id}, ${step.id})" title="Нажмите, чтобы изменить текст">${escapeHtml(step.text)}</span>
+                          </div>
+                          <div class="step-right">
+                            <span class="step-date-pill" onclick="editStepDate(${proc.id}, ${obj.id}, ${step.id})" title="Нажмите, чтобы изменить дату или срок">
+                              📅 ${escapeHtml(step.date || 'Без даты')}
+                            </span>
+                            <button class="step-del-btn" onclick="deleteStep(${proc.id}, ${obj.id}, ${step.id})" title="Удалить шаг">✕</button>
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+
+                    <!-- Форма добавления нового шага -->
+                    <div class="add-step-box">
+                      <div class="add-step-inputs">
+                        <input type="text" class="step-title-input" id="step-txt-${obj.id}" placeholder="+ шаг / этап..." onkeydown="if(event.key==='Enter') addStep(${proc.id}, ${obj.id})">
+                        <input type="text" class="step-date-input" id="step-date-${obj.id}" value="${getTodayStr()}" placeholder="Срок / диапазон">
+                      </div>
+                      <div class="add-step-bottom">
+                        <div class="quick-date-buttons">
+                          <button type="button" class="mini-date-btn" onclick="setQuickDateInput(${obj.id}, '${getTodayStr()}')">Сегодня</button>
+                          <button type="button" class="mini-date-btn" onclick="setQuickDateInput(${obj.id}, '${getTomorrowStr()}')">Завтра</button>
+                          <button type="button" class="mini-date-btn" onclick="setQuickDateInput(${obj.id}, 'до ${getTomorrowStr()}')">Диапазон</button>
+                        </div>
+                        <button type="button" class="add-step-btn" onclick="addStep(${proc.id}, ${obj.id})">Добавить шаг</button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
 
-            ${!proc.openForm ? `
-              <button class="task-toggle-btn" onclick="toggleTaskForm(${proc.id})">
-                + Добавить стикер в этот процесс
+            <!-- Добавление нового объекта -->
+            ${!proc.openObjForm ? `
+              <button class="add-obj-toggle-btn" onclick="toggleObjForm(${proc.id})">
+                + Добавить объект / проект в этот процесс
               </button>
             ` : `
-              <div class="new-task-form">
-                <div class="form-row-text">
-                  <input type="text" id="txt-in-${proc.id}" placeholder="Название объекта или задачи..." onkeydown="if(event.key==='Enter') addTask(${proc.id})">
-                </div>
-                <div class="form-row-dates">
-                  <input type="date" id="date-in-${proc.id}" value="${getTodayISO()}">
-                  <button class="date-quick-btn" type="button" onclick="setQuickDate(${proc.id}, 'today')">Сегодня</button>
-                  <button class="date-quick-btn" type="button" onclick="setQuickDate(${proc.id}, 'tomorrow')">Завтра</button>
-                </div>
-                <div class="form-row-bottom">
-                  <select id="status-in-${proc.id}">
-                    <option value="done">🟢 Сделано</option>
-                    <option value="plan" selected>🟡 В планах</option>
-                  </select>
-                  <div class="form-submit-btns">
-                    <button class="btn btn-subtle" style="padding:8px 12px; font-size:13px;" onclick="toggleTaskForm(${proc.id})">Отмена</button>
-                    <button class="btn btn-neutral" style="padding:8px 14px; font-size:13px;" onclick="addTask(${proc.id})">Добавить</button>
-                  </div>
+              <div class="new-obj-form">
+                <input type="text" id="new-obj-in-${proc.id}" placeholder="Название объекта (напр. Жылыой - ЛЭС)..." onkeydown="if(event.key==='Enter') addObject(${proc.id})">
+                <div class="new-obj-actions">
+                  <button class="btn btn-subtle" style="padding:7px 12px; font-size:13px;" onclick="toggleObjForm(${proc.id})">Отмена</button>
+                  <button class="btn btn-neutral" style="padding:7px 14px; font-size:13px;" onclick="addObject(${proc.id})">Создать объект</button>
                 </div>
               </div>
             `}
 
             <div class="proc-footer-actions">
-              <button class="btn-archive" onclick="clearDoneTasks(${proc.id})">
-                🧹 Очистить выполненное в этом процессе
+              <button class="btn-archive" onclick="clearDoneSteps(${proc.id})">
+                🧹 Очистить закрытые шаги в этом процессе
               </button>
             </div>
           </div>
@@ -1103,65 +1069,86 @@
         root.appendChild(card);
       });
 
-      document.getElementById('countDone').textContent = `${totalDone} задач`;
-      document.getElementById('countPlan').textContent = `${totalPlan} задач`;
+      document.getElementById('countDone').textContent = `${totalDoneSteps} шагов`;
+      document.getElementById('countPlan').textContent = `${totalPlanSteps} шагов`;
+      document.getElementById('countObjects').textContent = totalObjects;
     }
 
+    /* Формирование древовидного отчета: автоматическое разделение на СДЕЛАНО и В РАБОТЕ */
     function buildTreeReport() {
-      const todayRU = formatDateRU(getTodayISO());
-      let grandDone = 0;
-      let grandPlan = 0;
+      const todayStr = getTodayStr();
+      let totalDone = 0;
+      let totalPlan = 0;
 
       state.forEach(p => {
-        grandDone += p.tasks.filter(t => t.status === 'done').length;
-        grandPlan += p.tasks.filter(t => t.status === 'plan').length;
+        p.objects.forEach(o => {
+          o.steps.forEach(s => {
+            if (s.done) totalDone++;
+            else totalPlan++;
+          });
+        });
       });
 
-      let txt = `📅 Отчет по процессам на ${todayRU} | Выполнено: ${grandDone} | В планах: ${grandPlan}
+      let txt = `📅 Отчет по процессам на ${todayStr} | Выполнено: ${totalDone} | В работе: ${totalPlan}
 
 `;
 
       state.forEach(p => {
-        const doneList = p.tasks.filter(t => t.status === 'done');
-        const planList = p.tasks.filter(t => t.status === 'plan');
+        // Проверяем, есть ли шаги в процессе
+        const doneObjects = [];
+        const planObjects = [];
 
-        if (doneList.length === 0 && planList.length === 0) return;
+        p.objects.forEach(obj => {
+          const doneSteps = obj.steps.filter(s => s.done);
+          const planSteps = obj.steps.filter(s => !s.done);
+
+          if (doneSteps.length > 0) {
+            doneObjects.push({ title: obj.title, steps: doneSteps });
+          }
+          if (planSteps.length > 0) {
+            planObjects.push({ title: obj.title, steps: planSteps });
+          }
+        });
+
+        if (doneObjects.length === 0 && planObjects.length === 0) return;
 
         txt += `📂 Процесс: ${p.title}
 `;
 
-        const renderTaskTree = (t, isLastTask, parentPrefix) => {
-          const subs = t.subtasks || [];
-          const progressStr = subs.length > 0 ? ` (${subs.filter(s=>s.done).length}/${subs.length})` : '';
-          const taskLine = `${parentPrefix}${isLastTask ? '└── ' : '├── '}${t.text}${progressStr} [${t.status === 'done' ? 'Дата' : 'Срок'}: ${formatDateRU(t.date)}]
-`;
-          
-          let subLines = '';
-          const subPrefix = parentPrefix + (isLastTask ? '    ' : '│   ');
-          subs.forEach((s, sIdx) => {
-            const isLastSub = sIdx === subs.length - 1;
-            const icon = s.done ? '✔ ' : '⏳ ';
-            subLines += `${subPrefix}${isLastSub ? '└── ' : '├── '}${icon}${s.text}
-`;
-          });
+        const hasPlan = planObjects.length > 0;
 
-          return taskLine + subLines;
-        };
-
-        if (doneList.length > 0) {
-          const hasPlan = planList.length > 0;
-          txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО (${doneList.length})
+        if (doneObjects.length > 0) {
+          txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО:
 `;
-          doneList.forEach((t, idx) => {
-            txt += renderTaskTree(t, idx === doneList.length - 1, hasPlan ? '│   ' : '    ');
+          doneObjects.forEach((obj, oIdx) => {
+            const isLastObj = oIdx === doneObjects.length - 1;
+            const p1 = hasPlan ? '│   ' : '    ';
+            txt += `${p1}${isLastObj ? '└──' : '├──'} 📌 ${obj.title}
+`;
+            
+            obj.steps.forEach((s, sIdx) => {
+              const isLastStep = sIdx === obj.steps.length - 1;
+              const p2 = p1 + (isLastObj ? '    ' : '│   ');
+              txt += `${p2}${isLastStep ? '└──' : '├──'} ✔ ${s.text} [${s.date}]
+`;
+            });
           });
         }
 
-        if (planList.length > 0) {
-          txt += `└── 🟡 В ПЛАНАХ (${planList.length})
+        if (planObjects.length > 0) {
+          txt += `└── 🟡 В РАБОТЕ / ПЛАНЫ:
 `;
-          planList.forEach((t, idx) => {
-            txt += renderTaskTree(t, idx === planList.length - 1, '    ');
+          planObjects.forEach((obj, oIdx) => {
+            const isLastObj = oIdx === planObjects.length - 1;
+            txt += `    ${isLastObj ? '└──' : '├──'} 📌 ${obj.title}
+`;
+            
+            obj.steps.forEach((s, sIdx) => {
+              const isLastStep = sIdx === obj.steps.length - 1;
+              const p2 = '    ' + (isLastObj ? '    ' : '│   ');
+              txt += `${p2}${isLastStep ? '└──' : '├──'} ⏳ ${s.text} [Срок: ${s.date}]
+`;
+            });
           });
         }
 
