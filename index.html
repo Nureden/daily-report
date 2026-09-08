@@ -1584,6 +1584,18 @@
       saveData();
     }
 
+    function clearBlocker(procId, objId, stepId) {
+      const p = state.find(x => x.id == procId);
+      const obj = p?.objects.find(o => o.id == objId);
+      const step = obj?.steps.find(s => s.id == stepId);
+      if (!step) return;
+
+      step.blocker = null;
+      showToast("Задержка снята");
+      haptic();
+      saveData();
+    }
+
     function clearRiskFromModal() {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -1928,7 +1940,7 @@
                                 <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                   🚨 ${escapeHtml(s.blocker)}
                                 </span>
-                                <button class="blocker-clear-btn" onclick="clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
+                                <button class="blocker-clear-btn" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
                               </div>
                             ` : ''}
                           </div>
