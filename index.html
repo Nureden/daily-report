@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #f1f5f9;
+      --bg: #e2e8f0;
       --card-bg: #ffffff;
       --text-main: #0f172a;
       --text-muted: #64748b;
@@ -63,7 +63,7 @@
       border-radius: var(--radius);
       padding: 12px 14px;
       margin-bottom: 12px;
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
     }
 
@@ -203,10 +203,10 @@
     }
 
     /* ==============================================================
-       УРОВЕНЬ 1: НАПРАВЛЕНИЕ / ПРОЦЕСС (СТИЛЬ ПАПКИ С ВЫРАЖЕННЫМ ФОНОМ)
+       УРОВЕНЬ 1: ПАПКА ПРОЦЕССА (ВЫДЕЛЕННЫЙ ТЕМНЫЙ СТИКЕР)
        ============================================================== */
     .process-section {
-      background: #e2e8f0; /* Контрастный серый контур для всей папки */
+      background: #e2e8f0;
       border-radius: 14px;
       border: 1px solid #cbd5e1;
       margin-bottom: 16px;
@@ -219,7 +219,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #1e293b; /* Глубокий премиальный заголовок папки */
+      background: #1e293b;
       color: #ffffff;
       cursor: pointer;
       user-select: none;
@@ -272,7 +272,6 @@
       background: rgba(239, 68, 68, 0.2);
     }
 
-    /* Тело процесса: контрастный серо-голубой фон (#eef2f6), чтобы белые объекты отчетливо читались */
     .process-body {
       padding: 10px;
       display: flex;
@@ -285,13 +284,13 @@
     }
 
     /* ==============================================================
-       УРОВЕНЬ 2: ОБЪЕКТ / УЧАСТОК (БЕЛЫЙ БИЛЕТ С ЦВЕТНЫМ АКЦЕНТОМ)
+       УРОВЕНЬ 2: ОБЪЕКТ / УЧАСТОК (БЕЛЫЙ БИЛЕТ С СИНИМ КАНТОМ)
        ============================================================== */
     .object-card {
-      background: #ffffff; /* Чистый белый цвет, парящий над серой папкой */
+      background: #ffffff;
       border-radius: 10px;
       border: 1px solid #cbd5e1;
-      border-left: 5px solid #2563eb; /* Яркий маркер объекта */
+      border-left: 5px solid #2563eb;
       padding: 10px 12px;
       display: flex;
       flex-direction: column;
@@ -401,7 +400,7 @@
     }
 
     /* ==============================================================
-       УРОВЕНЬ 3: ШАГИ / ПОДЗАДАЧИ (АККУРАТНЫЕ ПЛАШКИ ВНУТРИ БИЛЕТА)
+       УРОВЕНЬ 3: ШАГИ / ПОДЗАДАЧИ (ПЛАШКИ ВНУТРИ БИЛЕТА)
        ============================================================== */
     .steps-list {
       display: flex;
@@ -701,7 +700,6 @@
       cursor: pointer;
     }
 
-    /* Кнопки внизу процесса */
     .proc-add-actions {
       display: flex;
       gap: 6px;
@@ -725,7 +723,6 @@
       color: #1e40af;
     }
 
-    /* Архив */
     .archive-section {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -1083,10 +1080,10 @@
   <script>
     const tg = window.Telegram?.WebApp;
     
-    // ЕДИНЫЙ ПОСТОЯННЫЙ КЛЮЧ ХРАНЕНИЯ
+    // ЕДИНЫЙ ПОСТОЯННЫЙ КЛЮЧ
     const MAIN_STORAGE_KEY = 'manager_projects_permanent_data';
 
-    // Список всех старых ключей для автоматического поиска и полного восстановления данных
+    // Список всех старых версий для автоматического восстановления
     const LEGACY_STORAGE_KEYS = [
       'manager_daily_tracker_v16_subtask_collapse',
       'manager_daily_tracker_v15_collapsed_default',
@@ -1180,6 +1177,7 @@
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
+    // Начальный шаблон на случай абсолютно чистого первого входа
     let state = [
       {
         id: 1,
@@ -1209,92 +1207,161 @@
             showAddForm: false,
             steps: [
               { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: true, blocker: null },
-              { id: 2003, text: "Утверждение ЗУП МИО", date: "до 23.09.2026", done: false, blocker: null }
+              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: true, blocker: null }
             ]
           }
         ]
       }
     ];
 
-    function countTotalObjects(arr) {
-      if (!Array.isArray(arr)) return 0;
-      let c = 0;
-      arr.forEach(p => { c += (p.objects || []).length; });
-      return c;
+    /* УМНОЕ ОБЪЕДИНЕНИЕ ВСЕХ СТАРЫХ КЛЮЧЕЙ — НИ ОДНА РАБОТА НЕ ПРОПАДАЕТ */
+    function mergeStatesList(list) {
+      const merged = {};
+
+      list.forEach(st => {
+        if (!Array.isArray(st)) return;
+        st.forEach(p => {
+          const pTitle = (p.title || '').trim();
+          if (!pTitle) return;
+          const pKey = pTitle.toLowerCase();
+
+          if (!merged[pKey]) {
+            merged[pKey] = {
+              id: p.id || Date.now() + Math.random(),
+              title: pTitle,
+              collapsed: false,
+              showArchive: false,
+              objectsMap: {}
+            };
+          }
+
+          (p.objects || []).forEach(o => {
+            const oTitle = (o.title || '').trim();
+            if (!oTitle) return;
+            const oKey = oTitle.toLowerCase();
+            const oMap = merged[pKey].objectsMap;
+
+            if (!oMap[oKey]) {
+              oMap[oKey] = {
+                id: o.id || Date.now() + Math.random(),
+                title: oTitle,
+                archived: !!o.archived,
+                collapsed: true,
+                showAddForm: false,
+                stepsMap: {}
+              };
+            }
+
+            (o.steps || []).forEach(s => {
+              const sText = (s.text || '').trim();
+              if (!sText) return;
+              const sKey = sText.toLowerCase();
+              const sMap = oMap[oKey].stepsMap;
+
+              if (!sMap[sKey]) {
+                sMap[sKey] = {
+                  id: s.id || Date.now() + Math.random(),
+                  text: sText,
+                  date: s.date || '',
+                  done: !!s.done,
+                  blocker: s.blocker || null
+                };
+              } else {
+                if (s.done) sMap[sKey].done = true;
+                if (s.date && !sMap[sKey].date) sMap[sKey].date = s.date;
+                if (s.blocker) sMap[sKey].blocker = s.blocker;
+              }
+            });
+          });
+        });
+      });
+
+      const res = [];
+      Object.values(merged).forEach(p => {
+        const objs = [];
+        Object.values(p.objectsMap).forEach(o => {
+          o.steps = Object.values(o.stepsMap);
+          delete o.stepsMap;
+          objs.push(o);
+        });
+        p.objects = objs;
+        delete p.objectsMap;
+        res.push(p);
+      });
+
+      return res;
     }
 
-    function safelyParseState(raw) {
+    function parseRaw(raw) {
       try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(pr => ({
-            ...pr,
-            collapsed: false, // Направления открыты в виде папок
-            showArchive: pr.showArchive || false,
-            objects: (pr.objects || []).map(o => ({
-              ...o,
-              collapsed: o.collapsed !== undefined ? o.collapsed : true, // Подзадачи свернуты
-              archived: !!o.archived,
-              showAddForm: false,
-              steps: (o.steps || []).map(s => ({
-                ...s,
-                blocker: s.blocker || null
-              }))
-            }))
-          }));
-        }
+        const p = JSON.parse(raw);
+        if (Array.isArray(p) && p.length > 0) return p;
       } catch(e) {}
       return null;
     }
 
-    /* АВТОМАТИЧЕСКИЙ ПОИСК И ВОССТАНОВЛЕНИЕ ДАННЫХ */
+    /* ЗАГРУЗКА И НАДЕЖНОЕ СОХРАНЕНИЕ */
     async function loadData() {
-      const allKeysToCheck = [MAIN_STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
-      let bestCandidate = null;
-      let maxObjCount = -1;
+      const isMigrated = localStorage.getItem('tma_migrated_v17_permanent');
 
-      allKeysToCheck.forEach(k => {
-        const localRaw = localStorage.getItem(k);
-        if (localRaw) {
-          const parsed = safelyParseState(localRaw);
-          if (parsed) {
-            const count = countTotalObjects(parsed);
-            if (count > maxObjCount) {
-              maxObjCount = count;
-              bestCandidate = parsed;
+      // Если уже перешли на постоянный ключ — загружаем напрямую без лишних проверок
+      if (isMigrated) {
+        const localDirect = localStorage.getItem(MAIN_STORAGE_KEY);
+        if (localDirect) {
+          const parsed = parseRaw(localDirect);
+          if (parsed) state = parsed;
+        }
+
+        if (tg?.CloudStorage) {
+          tg.CloudStorage.getItem(MAIN_STORAGE_KEY, (err, val) => {
+            if (!err && val) {
+              const cloudParsed = parseRaw(val);
+              if (cloudParsed) {
+                state = cloudParsed;
+                render();
+              }
             }
-          }
+          });
+        }
+        render();
+        return;
+      }
+
+      // Единоразовое объединение всех слотов памяти
+      const candidates = [];
+      const allKeys = [MAIN_STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
+
+      allKeys.forEach(k => {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          const parsed = parseRaw(raw);
+          if (parsed) candidates.push(parsed);
         }
       });
 
       if (tg?.CloudStorage) {
-        tg.CloudStorage.getItems(allKeysToCheck, (err, values) => {
+        tg.CloudStorage.getItems(allKeys, (err, values) => {
           if (!err && values) {
-            allKeysToCheck.forEach(k => {
+            allKeys.forEach(k => {
               if (values[k]) {
-                const parsed = safelyParseState(values[k]);
-                if (parsed) {
-                  const count = countTotalObjects(parsed);
-                  if (count >= maxObjCount) {
-                    maxObjCount = count;
-                    bestCandidate = parsed;
-                  }
-                }
+                const parsed = parseRaw(values[k]);
+                if (parsed) candidates.push(parsed);
               }
             });
           }
 
-          if (bestCandidate && countTotalObjects(bestCandidate) >= countTotalObjects(state)) {
-            state = bestCandidate;
+          if (candidates.length > 0) {
+            state = mergeStatesList(candidates);
           }
+          localStorage.setItem('tma_migrated_v17_permanent', 'true');
           saveData();
           render();
         });
       } else {
-        if (bestCandidate && countTotalObjects(bestCandidate) >= countTotalObjects(state)) {
-          state = bestCandidate;
+        if (candidates.length > 0) {
+          state = mergeStatesList(candidates);
         }
+        localStorage.setItem('tma_migrated_v17_permanent', 'true');
         saveData();
         render();
       }
@@ -1343,6 +1410,7 @@
       input.value = '';
       haptic();
       saveData();
+      showToast("Направление добавлено!");
     }
 
     function toggleProcessCollapse(procId) {
@@ -1546,6 +1614,7 @@
         });
         haptic();
         saveData();
+        showToast("Объект создан!");
       }
     }
 
@@ -1642,6 +1711,7 @@
 
       haptic();
       saveData();
+      showToast("Этап добавлен!");
     }
 
     function deleteObject(procId, objId) {
@@ -1669,6 +1739,7 @@
       }
     }
 
+    /* ДОБАВЛЕНИЕ ЭТАПА — МГНОВЕННОЕ СОХРАНЕНИЕ */
     function addStepToObject(procId, objId) {
       const tInput = document.getElementById(`txt-${objId}`);
       const dInput = document.getElementById(`date-cal-${objId}`);
@@ -1678,12 +1749,17 @@
       const isoDate = dInput ? dInput.value : '';
       const dispDate = isoToDisplay(isoDate);
 
-      if (!txt) return;
+      if (!txt) {
+        showToast("Введите название этапа");
+        return;
+      }
 
       const p = state.find(x => x.id === procId);
       if (!p) return;
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
+
+      if (!obj.steps) obj.steps = [];
 
       obj.steps.push({
         id: Date.now(),
@@ -1696,6 +1772,7 @@
       tInput.value = '';
       haptic();
       saveData();
+      showToast("Этап успешно добавлен!");
     }
 
     function toggleStep(procId, objId, stepId) {
@@ -1758,7 +1835,7 @@
 
         activeObjects.forEach(o => {
           totalActiveObjs++;
-          o.steps.forEach(s => {
+          (o.steps || []).forEach(s => {
             if (s.done) totalDone++;
             else {
               totalPlan++;
@@ -1768,6 +1845,7 @@
         });
 
         card.innerHTML = `
+          <!-- УРОВЕНЬ 1: ТЕМНЫЙ ЗАГОЛОВОК ПАПКИ -->
           <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
@@ -1777,15 +1855,17 @@
             <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
+          <!-- ТЕЛО ПАПКИ: КОНТРАСТНЫЙ СЕРЫЙ ФОН -->
           <div class="process-body ${isCollapsed ? 'hidden' : ''}">
             ${activeObjects.map(obj => {
-              const dCount = obj.steps.filter(s => s.done).length;
-              const tCount = obj.steps.length;
+              const dCount = (obj.steps || []).filter(s => s.done).length;
+              const tCount = (obj.steps || []).length;
               const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
               const isAllDone = tCount > 0 && dCount === tCount;
               const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
 
               return `
+                <!-- УРОВЕНЬ 2: БЕЛЫЙ БИЛЕТ ОБЪЕКТА С СИНИМ КАНТОМ -->
                 <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
                   <div class="obj-header" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})">
                     <div class="obj-title-wrap">
@@ -1808,6 +1888,7 @@
                     </div>
                   ` : ''}
 
+                  <!-- УРОВЕНЬ 3: РАСКРЫВАЮЩИЕСЯ ПОДЗАДАЧИ -->
                   <div class="obj-body ${isObjCollapsed ? 'hidden' : ''}">
                     ${isAllDone ? `
                       <div class="all-done-banner">
@@ -1819,7 +1900,7 @@
                     ` : ''}
 
                     <div class="steps-list">
-                      ${obj.steps.map(s => {
+                      ${(obj.steps || []).map(s => {
                         const hasBlock = !s.done && !!s.blocker;
                         const dateMeta = analyzeDeadline(s.date, s.done);
 
@@ -1940,8 +2021,8 @@
 
       const blockers = [];
       state.forEach(p => {
-        p.objects.filter(o => !o.archived).forEach(o => {
-          o.steps.forEach(s => {
+        (p.objects || []).filter(o => !o.archived).forEach(o => {
+          (o.steps || []).forEach(s => {
             if (!s.done && s.blocker) {
               blockers.push({
                 proc: p.title,
@@ -1957,7 +2038,7 @@
 
       const archivedList = [];
       state.forEach(p => {
-        p.objects.filter(o => o.archived).forEach(o => {
+        (p.objects || []).filter(o => o.archived).forEach(o => {
           archivedList.push({ proc: p.title, obj: o.title });
         });
       });
@@ -1986,8 +2067,8 @@
         let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
 `;
         state.forEach(p => {
-          p.objects.filter(o => !o.archived).forEach(o => {
-            const todayDoneSteps = o.steps.filter(s => s.done);
+          (p.objects || []).filter(o => !o.archived).forEach(o => {
+            const todayDoneSteps = (o.steps || []).filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
               doneTxt += `• ${o.title} (${p.title}):
@@ -2019,8 +2100,8 @@
         let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:
 `;
         state.forEach(p => {
-          p.objects.filter(o => !o.archived).forEach(o => {
-            const regularSteps = o.steps.filter(s => !s.done && !s.blocker);
+          (p.objects || []).filter(o => !o.archived).forEach(o => {
+            const regularSteps = (o.steps || []).filter(s => !s.done && !s.blocker);
             if (regularSteps.length > 0) {
               hasPlan = true;
               planTxt += `• ${o.title} (${p.title}):
@@ -2056,7 +2137,7 @@
         }
 
         state.forEach(p => {
-          const active = p.objects.filter(o => !o.archived);
+          const active = (p.objects || []).filter(o => !o.archived);
           txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
 `;
           if (active.length === 0) {
@@ -2067,11 +2148,11 @@
           }
 
           active.forEach(o => {
-            const d = o.steps.filter(s => s.done).length;
-            const t = o.steps.length;
+            const d = (o.steps || []).filter(s => s.done).length;
+            const t = (o.steps || []).length;
             txt += `📌 ${o.title} [готовность: ${d}/${t}]
 `;
-            o.steps.forEach(s => {
+            (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
