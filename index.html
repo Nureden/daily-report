@@ -44,7 +44,7 @@
       color: var(--text-main);
       padding: 14px;
       padding-bottom: 90px;
-      font-size: 16px; /* Комфортный базовый размер */
+      font-size: 16px;
       line-height: 1.5;
     }
 
@@ -170,7 +170,7 @@
       border: 1px solid var(--border);
     }
 
-    /* Добавление процесса */
+    /* Создание процесса */
     .add-proc-card {
       background: var(--card-bg);
       border: 1px dashed #cbd5e1;
@@ -185,7 +185,7 @@
       padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 16px;
       outline: none;
       color: var(--text-main);
     }
@@ -294,12 +294,11 @@
       background: #ffffff;
       border-radius: 8px;
       padding: 12px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       display: flex;
       flex-direction: column;
       gap: 8px;
-      position: relative;
     }
     .sticker.done {
       background: var(--done-bg);
@@ -312,12 +311,100 @@
       color: var(--plan-text);
     }
 
+    .sticker-text-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
     .sticker-text {
-      font-size: 15px;
-      line-height: 1.45;
-      font-weight: 600;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: 700;
       word-break: break-word;
       cursor: pointer;
+    }
+    .progress-pill {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.06);
+      color: inherit;
+      white-space: nowrap;
+    }
+
+    /* Подзадачи (этапы) */
+    .subtasks-box {
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .subtask-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #334155;
+    }
+    .subtask-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+      accent-color: var(--accent-green);
+    }
+    .subtask-item span {
+      flex: 1;
+      cursor: pointer;
+      line-height: 1.35;
+    }
+    .subtask-item.checked span {
+      text-decoration: line-through;
+      opacity: 0.55;
+    }
+    .subtask-del-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+    .subtask-del-btn:hover {
+      color: var(--danger);
+    }
+
+    /* Поле добавления подзадачи */
+    .add-subtask-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .add-subtask-row input {
+      flex: 1;
+      padding: 5px 8px;
+      font-size: 13px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.7);
+      outline: none;
+    }
+    .add-subtask-row input:focus {
+      background: #fff;
+      border-color: var(--accent-blue);
+    }
+    .add-subtask-row button {
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #334155;
     }
 
     .sticker-foot {
@@ -334,10 +421,10 @@
       align-items: center;
       gap: 4px;
       font-weight: 700;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 8px;
       border-radius: 6px;
-      border: 1px solid rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.06);
     }
 
     .sticker-btns {
@@ -345,10 +432,10 @@
       gap: 4px;
     }
     .pill-btn {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(0,0,0,0.12);
-      border-radius: 5px;
-      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0,0,0,0.14);
+      border-radius: 6px;
+      padding: 4px 9px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -386,7 +473,7 @@
       border: 1px dashed #cbd5e1;
       padding: 10px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -411,8 +498,8 @@
 
     .form-row-text input {
       width: 100%;
-      padding: 10px 12px;
-      font-size: 15px;
+      padding: 11px 13px;
+      font-size: 16px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
@@ -426,7 +513,7 @@
     }
     .form-row-dates input[type="date"] {
       padding: 8px 10px;
-      font-size: 14px;
+      font-size: 15px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       background: #fff;
@@ -436,7 +523,7 @@
       border: 1px solid #cbd5e1;
       padding: 8px 12px;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       color: #334155;
       cursor: pointer;
@@ -452,8 +539,9 @@
       gap: 8px;
     }
     .form-row-bottom select {
-      padding: 8px 10px;
+      padding: 9px 12px;
       font-size: 14px;
+      font-weight: 600;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       background: #ffffff;
@@ -463,7 +551,7 @@
       gap: 6px;
     }
 
-    /* Очистка / архив внизу процесса */
+    /* Очистка внизу процесса */
     .proc-footer-actions {
       display: flex;
       justify-content: flex-end;
@@ -473,7 +561,7 @@
       background: transparent;
       border: none;
       color: #64748b;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       padding: 4px 8px;
@@ -551,7 +639,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'tma_tree_date_tracker_state_v2';
+    const STORAGE_KEY = 'tma_tree_tracker_v3_subtasks';
 
     if (tg) {
       tg.ready();
@@ -585,23 +673,46 @@
     let state = [
       {
         id: 1,
-        title: "Согласование земельно-кадастровых материалов",
+        title: "по изменению границ СЭЗ",
         collapsed: false,
         openForm: false,
         tasks: [
-          { id: 101, text: "Сверка контуров и координатная привязка участков", date: getTodayISO(), status: "done" },
-          { id: 102, text: "Подготовка сопроводительных писем смежникам", date: getTodayISO(), status: "done" },
-          { id: 103, text: "Выезд на контрольное полевое обследование", date: getTomorrowISO(), status: "plan" }
+          {
+            id: 101,
+            text: "Дорожная карта",
+            date: getTodayISO(),
+            status: "plan",
+            subtasks: [
+              { id: 1001, text: "Сбор исходных данных и схем", done: true },
+              { id: 1002, text: "Согласование проекта в акимате", done: false }
+            ]
+          }
         ]
       },
       {
         id: 2,
-        title: "Экспертиза проектных коридоров коммуникаций",
+        title: "Дополнительные зем участки",
         collapsed: false,
         openForm: false,
         tasks: [
-          { id: 201, text: "Анализ наложений с охранными зонами", date: getTodayISO(), status: "done" },
-          { id: 202, text: "Составление сводной ведомости пересечений трассы", date: getTomorrowISO(), status: "plan" }
+          {
+            id: 201,
+            text: "Жылыой - ЛЭС",
+            date: getTodayISO(),
+            status: "plan",
+            subtasks: [
+              { id: 2001, text: "Рекогносцировка на местности", done: true },
+              { id: 2002, text: "Схема расположения земельного участка", done: true },
+              { id: 2003, text: "Земельно-кадастровый план", done: false }
+            ]
+          },
+          {
+            id: 202,
+            text: "Жылыой - ВП",
+            date: getTodayISO(),
+            status: "plan",
+            subtasks: []
+          }
         ]
       }
     ];
@@ -609,19 +720,35 @@
     let editingTaskId = null;
 
     async function loadData() {
+      // Подгружаем v3, если нет — пробуем старый v2
+      const readFromVal = (val) => {
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed)) {
+            state = parsed.map(p => ({
+              ...p,
+              tasks: (p.tasks || []).map(t => ({
+                ...t,
+                subtasks: t.subtasks || []
+              }))
+            }));
+          }
+        } catch(e) {}
+      };
+
       if (tg?.CloudStorage) {
         tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
           if (!err && val) {
-            try { state = JSON.parse(val); } catch(e){}
+            readFromVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY);
-            if (local) state = JSON.parse(local);
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('tma_tree_date_tracker_state_v2');
+            if (local) readFromVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY);
-        if (local) state = JSON.parse(local);
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('tma_tree_date_tracker_state_v2');
+        if (local) readFromVal(local);
         render();
       }
     }
@@ -674,7 +801,7 @@
     }
 
     function deleteProcess(procId) {
-      if (confirm("Удалить этот процесс и все задачи?")) {
+      if (confirm("Удалить этот процесс и все его задачи?")) {
         state = state.filter(p => p.id !== procId);
         haptic();
         saveData();
@@ -708,9 +835,10 @@
           id: Date.now(),
           text: txt,
           date: dt,
-          status: st
+          status: st,
+          subtasks: []
         });
-        proc.openForm = false; // закрываем форму после добавления
+        proc.openForm = false;
         haptic();
         saveData();
       }
@@ -731,6 +859,53 @@
       const proc = state.find(p => p.id === procId);
       if (!proc) return;
       proc.tasks = proc.tasks.filter(x => x.id !== taskId);
+      haptic();
+      saveData();
+    }
+
+    /* Подзадачи (этапы) */
+    function addSubtask(procId, taskId) {
+      const input = document.getElementById(`sub-in-${taskId}`);
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const t = proc.tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      if (!t.subtasks) t.subtasks = [];
+      t.subtasks.push({
+        id: Date.now(),
+        text: val,
+        done: false
+      });
+
+      input.value = '';
+      haptic();
+      saveData();
+    }
+
+    function toggleSubtask(procId, taskId, subId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const t = proc.tasks.find(x => x.id === taskId);
+      if (!t || !t.subtasks) return;
+      const s = t.subtasks.find(x => x.id === subId);
+      if (s) {
+        s.done = !s.done;
+        haptic();
+        saveData();
+      }
+    }
+
+    function deleteSubtask(procId, taskId, subId) {
+      const proc = state.find(p => p.id === procId);
+      if (!proc) return;
+      const t = proc.tasks.find(x => x.id === taskId);
+      if (!t || !t.subtasks) return;
+      t.subtasks = t.subtasks.filter(x => x.id !== subId);
       haptic();
       saveData();
     }
@@ -816,9 +991,35 @@
             `;
           }
 
+          const subs = t.subtasks || [];
+          const doneSubs = subs.filter(s => s.done).length;
+          const totalSubs = subs.length;
+
           return `
             <div class="sticker ${t.status}">
-              <div class="sticker-text" onclick="startEditTask(${t.id})" title="Нажмите, чтобы изменить">${escapeHtml(t.text)}</div>
+              <div class="sticker-text-row">
+                <div class="sticker-text" onclick="startEditTask(${t.id})" title="Нажмите, чтобы переименовать">
+                  ${escapeHtml(t.text)}
+                </div>
+                ${totalSubs > 0 ? `<div class="progress-pill">${doneSubs}/${totalSubs} закрыто</div>` : ''}
+              </div>
+
+              <!-- Чеклист этапов/подзадач -->
+              <div class="subtasks-box">
+                ${subs.map(s => `
+                  <div class="subtask-item ${s.done ? 'checked' : ''}">
+                    <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSubtask(${proc.id}, ${t.id}, ${s.id})">
+                    <span onclick="toggleSubtask(${proc.id}, ${t.id}, ${s.id})">${escapeHtml(s.text)}</span>
+                    <button class="subtask-del-btn" onclick="deleteSubtask(${proc.id}, ${t.id}, ${s.id})">✕</button>
+                  </div>
+                `).join('')}
+
+                <div class="add-subtask-row">
+                  <input type="text" id="sub-in-${t.id}" placeholder="+ шаг / этап..." onkeydown="if(event.key==='Enter') addSubtask(${proc.id}, ${t.id})">
+                  <button type="button" onclick="addSubtask(${proc.id}, ${t.id})">+</button>
+                </div>
+              </div>
+
               <div class="sticker-foot">
                 <span class="date-badge">📅 ${formatDateRU(t.date)}</span>
                 <div class="sticker-btns">
@@ -864,7 +1065,6 @@
               </div>
             </div>
 
-            <!-- Компактная кнопка или форма -->
             ${!proc.openForm ? `
               <button class="task-toggle-btn" onclick="toggleTaskForm(${proc.id})">
                 + Добавить стикер в этот процесс
@@ -872,7 +1072,7 @@
             ` : `
               <div class="new-task-form">
                 <div class="form-row-text">
-                  <input type="text" id="txt-in-${proc.id}" placeholder="Текст задачи..." onkeydown="if(event.key==='Enter') addTask(${proc.id})">
+                  <input type="text" id="txt-in-${proc.id}" placeholder="Название объекта или задачи..." onkeydown="if(event.key==='Enter') addTask(${proc.id})">
                 </div>
                 <div class="form-row-dates">
                   <input type="date" id="date-in-${proc.id}" value="${getTodayISO()}">
@@ -925,18 +1125,35 @@
         const doneList = p.tasks.filter(t => t.status === 'done');
         const planList = p.tasks.filter(t => t.status === 'plan');
 
+        if (doneList.length === 0 && planList.length === 0) return;
+
         txt += `📂 Процесс: ${p.title}
 `;
+
+        const renderTaskTree = (t, isLastTask, parentPrefix) => {
+          const subs = t.subtasks || [];
+          const progressStr = subs.length > 0 ? ` (${subs.filter(s=>s.done).length}/${subs.length})` : '';
+          const taskLine = `${parentPrefix}${isLastTask ? '└── ' : '├── '}${t.text}${progressStr} [${t.status === 'done' ? 'Дата' : 'Срок'}: ${formatDateRU(t.date)}]
+`;
+          
+          let subLines = '';
+          const subPrefix = parentPrefix + (isLastTask ? '    ' : '│   ');
+          subs.forEach((s, sIdx) => {
+            const isLastSub = sIdx === subs.length - 1;
+            const icon = s.done ? '✔ ' : '⏳ ';
+            subLines += `${subPrefix}${isLastSub ? '└── ' : '├── '}${icon}${s.text}
+`;
+          });
+
+          return taskLine + subLines;
+        };
 
         if (doneList.length > 0) {
           const hasPlan = planList.length > 0;
           txt += `${hasPlan ? '├──' : '└──'} 🟢 СДЕЛАНО (${doneList.length})
 `;
           doneList.forEach((t, idx) => {
-            const isLast = idx === doneList.length - 1;
-            const prefix = hasPlan ? '│   ' : '    ';
-            txt += `${prefix}${isLast ? '└──' : '├──'} ${t.text} [Дата: ${formatDateRU(t.date)}]
-`;
+            txt += renderTaskTree(t, idx === doneList.length - 1, hasPlan ? '│   ' : '    ');
           });
         }
 
@@ -944,9 +1161,7 @@
           txt += `└── 🟡 В ПЛАНАХ (${planList.length})
 `;
           planList.forEach((t, idx) => {
-            const isLast = idx === planList.length - 1;
-            txt += `    ${isLast ? '└──' : '├──'} ${t.text} [Срок: ${formatDateRU(t.date)}]
-`;
+            txt += renderTaskTree(t, idx === planList.length - 1, '    ');
           });
         }
 
@@ -978,7 +1193,6 @@
       const report = buildTreeReport();
       haptic();
 
-      // Telegram Share Link
       const shareUrl = `https://t.me/share/url?text=${encodeURIComponent(report)}`;
       if (tg?.openTelegramLink) {
         tg.openTelegramLink(shareUrl);
