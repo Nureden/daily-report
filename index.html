@@ -204,7 +204,7 @@
       white-space: nowrap;
     }
 
-    /* 3. ПРОЦЕСС КАК ЗАМЕТНЫЙ СТИКЕР */
+    /* 3. ПРОЦЕСС КАК ПОЛНОЦЕННЫЙ СТИКЕР (ВСЕГДА РАЗВЕРНУТ) */
     .process-section {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -776,7 +776,7 @@
       background: rgba(15, 23, 42, 0.6);
       display: none;
       justify-content: center;
-      align-items: flex-end; /* Mobile bottom sheet style */
+      align-items: flex-end;
       z-index: 1000;
       backdrop-filter: blur(2px);
     }
@@ -1055,7 +1055,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v13_modal_calendar';
+    const STORAGE_KEY = 'manager_daily_tracker_v14_always_open';
 
     if (tg) {
       tg.ready();
@@ -1063,8 +1063,6 @@
     }
 
     let reportMode = 'executive';
-
-    // Активные ссылки для модалок
     let activeModalTarget = { procId: null, objId: null, stepId: null };
 
     const STANDARD_WORKFLOW = [
@@ -1145,22 +1143,25 @@
         objects: [
           {
             id: 101,
-            title: "Жылыой - Дорога Сарыкамыс",
+            title: "Жылыой - ЛЭС",
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 1001, text: "Постановление акима", date: `до ${getTodayStr()}`, done: false, blocker: null },
-              { id: 1002, text: "Акт на землю, регистрация", date: "до 13.10.2026", done: false, blocker: null },
-              { id: 1003, text: "Акт сверки НАО", date: "", done: false, blocker: null }
+              { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
+              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
+              { id: 1003, text: "Утверждение ЗУП МИО", date: "", done: false, blocker: null },
+              { id: 1004, text: "Постановление акима", date: "", done: false, blocker: null },
+              { id: 1005, text: "Акт на землю, регистрация", date: "", done: false, blocker: null }
             ]
           },
           {
             id: 102,
-            title: "Жылыой - ВЛ",
+            title: "Жылыой - ВП",
             archived: false,
             showAddForm: false,
             steps: [
-              { id: 2001, text: "Постановление акима", date: "до 03.10.2026", done: false, blocker: null }
+              { id: 2001, text: "Акт сверки НАО", date: "", done: false, blocker: null },
+              { id: 2002, text: "Экспликация Гипрозем", date: "", done: false, blocker: null }
             ]
           }
         ]
@@ -1174,7 +1175,7 @@
           if (Array.isArray(p)) {
             state = p.map(pr => ({
               ...pr,
-              collapsed: false, // Всегда открыт как стикер по умолчанию
+              collapsed: false, // ГАРАНТИЯ: ВСЕГДА РАЗВЕРНУТ ПРИ ОБНОВЛЕНИИ
               showArchive: pr.showArchive || false,
               objects: (pr.objects || []).map(o => ({
                 ...o,
@@ -1195,13 +1196,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v13_modal_calendar') || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v13_modal_calendar') || localStorage.getItem('manager_daily_tracker_v12_calendar') || localStorage.getItem('manager_daily_tracker_v11_reglament');
         if (local) parseVal(local);
         render();
       }
@@ -1311,7 +1312,7 @@
       }
     }
 
-    /* 8. ЛОГИКА МОДАЛЬНОГО ОКНА ДАТЫ */
+    /* МОДАЛКА ВЫБОРА ДАТЫ */
     function openDateModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1371,7 +1372,7 @@
       saveData();
     }
 
-    /* 9. ЛОГИКА МОДАЛЬНОГО ОКНА РИСКОВ / БЛОКЕРОВ */
+    /* МОДАЛКА ВЫБОРА РИСКОВ */
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1659,7 +1660,8 @@
           });
         });
 
-        const isCollapsed = proc.collapsed;
+        // Всегда развернут: класс 'hidden' не добавляется
+        const isCollapsed = false;
 
         card.innerHTML = `
           <!-- ЗАМЕТНЫЙ СТИКЕР-ЗАГОЛОВОК ПРОЦЕССА -->
@@ -1672,7 +1674,7 @@
             <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
-          <div class="process-body ${isCollapsed ? 'hidden' : ''}">
+          <div class="process-body">
             ${activeObjects.map(obj => {
               const dCount = obj.steps.filter(s => s.done).length;
               const tCount = obj.steps.length;
@@ -1724,12 +1726,12 @@
 
                           <div class="step-footer-line">
                             <div class="step-actions-left">
-                              <!-- КНОПКА КАЛЕНДАРЯ: НАЖИМАЕТСЯ НАПРЯМУЮ -->
+                              <!-- КНОПКА КАЛЕНДАРЯ -->
                               <button type="button" class="step-date-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
                                 ${dateMeta.text}
                               </button>
 
-                              <!-- КНОПКА РИСКА: ОТКРЫВАЕТ ВАРИАНТЫ -->
+                              <!-- КНОПКА РИСКА -->
                               <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                 ${hasBlock ? '🚨 Задержка' : '+ риск'}
                               </button>
@@ -1750,7 +1752,7 @@
                     }).join('')}
                   </div>
 
-                  <!-- РАСКРЫВАЮЩАЯСЯ ФОРМА С КАЛЕНДАРЕМ -->
+                  <!-- РАСКРЫВАЮЩАЯСЯ ФОРМА -->
                   ${!obj.showAddForm ? `
                     <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
                       + Добавить этап / шаблоны
@@ -1830,7 +1832,7 @@
       document.getElementById('mTotal').textContent = totalActiveObjs;
     }
 
-    /* 10. ФОРМИРОВАНИЕ ОТЧЕТА ДЛЯ TELEGRAM */
+    /* ФОРМИРОВАНИЕ ОТЧЕТА ДЛЯ TELEGRAM */
     function generateTelegramReport() {
       const today = getTodayStr();
 
