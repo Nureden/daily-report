@@ -204,7 +204,7 @@
       white-space: nowrap;
     }
 
-    /* 3. ПРОЦЕСС КАК КОМПАКТНЫЙ СТИКЕР (СВОРАЧИВАЕМЫЙ) */
+    /* 3. ПРОЦЕСС КАК КОМПАКТНЫЙ СТИКЕР */
     .process-section {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -281,7 +281,7 @@
       display: none !important;
     }
 
-    /* 4. ОБЪЕКТЫ (ПОДЗАДАЧИ ТЕПЕРЬ СВОРАЧИВАЮТСЯ ПО КЛИКУ НА ОБЪЕКТ) */
+    /* 4. ОБЪЕКТЫ (СВОРАЧИВАЕМЫЕ ПОДЗАДАЧИ) */
     .object-card {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -365,7 +365,6 @@
       border-color: var(--danger-border);
     }
 
-    /* Тонкий прогресс-бар объекта */
     .progress-bar-bg {
       width: 100%;
       height: 4px;
@@ -383,7 +382,6 @@
       background: var(--done);
     }
 
-    /* ТЕЛО ОБЪЕКТА (СПИСОК ПОДЗАДАЧ) */
     .obj-body {
       display: flex;
       flex-direction: column;
@@ -597,7 +595,6 @@
       white-space: nowrap;
     }
 
-    /* Форма добавления шага */
     .step-add-toggle-btn {
       background: #ffffff;
       border: 1px dashed var(--border);
@@ -694,7 +691,6 @@
       cursor: pointer;
     }
 
-    /* Кнопки процессов */
     .proc-add-actions {
       display: flex;
       gap: 6px;
@@ -717,7 +713,6 @@
       color: var(--brand);
     }
 
-    /* Архив */
     .archive-section {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -917,7 +912,6 @@
       cursor: pointer;
     }
 
-    /* Тост */
     .toast {
       position: fixed;
       top: 16px;
@@ -1075,7 +1069,26 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v16_subtask_collapse';
+    
+    // ЕДИНЫЙ ПОСТОЯННЫЙ КЛЮЧ ХРАНЕНИЯ — БОЛЬШЕ НИКОГДА НЕ ИЗМЕНИТСЯ
+    const MAIN_STORAGE_KEY = 'manager_projects_permanent_data';
+
+    // Список всех старых ключей для автоматического поиска и полного восстановления данных
+    const LEGACY_STORAGE_KEYS = [
+      'manager_daily_tracker_v16_subtask_collapse',
+      'manager_daily_tracker_v15_collapsed_default',
+      'manager_daily_tracker_v14_always_open',
+      'manager_daily_tracker_v13_modal_calendar',
+      'manager_daily_tracker_v12_calendar',
+      'manager_daily_tracker_v11_reglament',
+      'manager_daily_tracker_v10_refined',
+      'manager_daily_tracker_v9_mobile',
+      'manager_daily_tracker_v8_archive',
+      'manager_daily_tracker_v7_blockers',
+      'manager_daily_tracker_v6_auto',
+      'manager_daily_tracker_v5',
+      'tma_unified_object_tree_v4'
+    ];
 
     if (tg) {
       tg.ready();
@@ -1154,7 +1167,7 @@
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
-    // По умолчанию collapsed: true и для процессов, и для объектов (подзадачи свернуты)
+    // Исходное состояние
     let state = [
       {
         id: 1,
@@ -1192,53 +1205,97 @@
       }
     ];
 
-    async function loadData() {
-      const parseVal = (val) => {
-        try {
-          const p = JSON.parse(val);
-          if (Array.isArray(p)) {
-            state = p.map(pr => ({
-              ...pr,
-              collapsed: true, // Процессы свернуты по умолчанию при обновлении
-              showArchive: pr.showArchive || false,
-              objects: (pr.objects || []).map(o => ({
-                ...o,
-                collapsed: o.collapsed !== undefined ? o.collapsed : true, // Подзадачи объектов тоже свернуты по умолчанию
-                archived: !!o.archived,
-                showAddForm: false,
-                steps: (o.steps || []).map(s => ({
-                  ...s,
-                  blocker: s.blocker || null
-                }))
-              }))
-            }));
-          }
-        } catch(e) {}
-      };
+    function countTotalObjects(arr) {
+      if (!Array.isArray(arr)) return 0;
+      let c = 0;
+      arr.forEach(p => { c += (p.objects || []).length; });
+      return c;
+    }
 
-      if (tg?.CloudStorage) {
-        tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
-          if (!err && val) {
-            parseVal(val);
-          } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v15_collapsed_default');
-            if (local) parseVal(local);
+    function safelyParseState(raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(pr => ({
+            ...pr,
+            collapsed: true, // Процессы свернуты по умолчанию
+            showArchive: pr.showArchive || false,
+            objects: (pr.objects || []).map(o => ({
+              ...o,
+              collapsed: o.collapsed !== undefined ? o.collapsed : true, // Подзадачи объектов свернуты по умолчанию
+              archived: !!o.archived,
+              showAddForm: false,
+              steps: (o.steps || []).map(s => ({
+                ...s,
+                blocker: s.blocker || null
+              }))
+            }))
+          }));
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    /* АВТОМАТИЧЕСКИЙ ПОИСК И ВОССТАНОВЛЕНИЕ ИЗ ВСЕХ СТАРЫХ КЛЮЧЕЙ */
+    async function loadData() {
+      const allKeysToCheck = [MAIN_STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
+      let bestCandidate = null;
+      let maxObjCount = -1;
+
+      // 1. Проверяем все ключи в localStorage
+      allKeysToCheck.forEach(k => {
+        const localRaw = localStorage.getItem(k);
+        if (localRaw) {
+          const parsed = safelyParseState(localRaw);
+          if (parsed) {
+            const count = countTotalObjects(parsed);
+            if (count > maxObjCount) {
+              maxObjCount = count;
+              bestCandidate = parsed;
+            }
           }
+        }
+      });
+
+      // 2. Проверяем Telegram CloudStorage
+      if (tg?.CloudStorage) {
+        tg.CloudStorage.getItems(allKeysToCheck, (err, values) => {
+          if (!err && values) {
+            allKeysToCheck.forEach(k => {
+              if (values[k]) {
+                const parsed = safelyParseState(values[k]);
+                if (parsed) {
+                  const count = countTotalObjects(parsed);
+                  if (count >= maxObjCount) {
+                    maxObjCount = count;
+                    bestCandidate = parsed;
+                  }
+                }
+              }
+            });
+          }
+
+          if (bestCandidate && countTotalObjects(bestCandidate) >= countTotalObjects(state)) {
+            state = bestCandidate;
+          }
+          saveData(); // Сохраняем в постоянный ключ
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v15_collapsed_default');
-        if (local) parseVal(local);
+        if (bestCandidate && countTotalObjects(bestCandidate) >= countTotalObjects(state)) {
+          state = bestCandidate;
+        }
+        saveData();
         render();
       }
     }
 
     function saveData() {
       const json = JSON.stringify(state);
-      localStorage.setItem(STORAGE_KEY, json);
+      localStorage.setItem(MAIN_STORAGE_KEY, json);
 
       if (tg?.CloudStorage) {
-        tg.CloudStorage.setItem(STORAGE_KEY, json, (err, ok) => {
+        tg.CloudStorage.setItem(MAIN_STORAGE_KEY, json, (err, ok) => {
           const tag = document.getElementById('syncTag');
           if (ok && tag) {
             tag.textContent = "● Синхронизировано";
@@ -1287,7 +1344,6 @@
       }
     }
 
-    /* СВОРАЧИВАНИЕ / РАЗВОРАЧИВАНИЕ ПОДЗАДАЧ ОБЪЕКТА */
     function toggleObjectCollapse(procId, objId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
@@ -1349,7 +1405,7 @@
       }
     }
 
-    /* МОДАЛКА ВЫБОРА ДАТЫ */
+    /* МОДАЛКА ДАТЫ */
     function openDateModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1409,7 +1465,7 @@
       saveData();
     }
 
-    /* МОДАЛКА ВЫБОРА РИСКОВ */
+    /* МОДАЛКА РИСКОВ */
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1474,7 +1530,7 @@
           id: Date.now(),
           title: name.trim(),
           archived: false,
-          collapsed: false, // новый созданный объект сразу открыт
+          collapsed: false,
           showAddForm: false,
           steps: []
         });
@@ -1702,7 +1758,6 @@
         });
 
         card.innerHTML = `
-          <!-- КОМПАКТНЫЙ СТИКЕР-ЗАГОЛОВОК ПРОЦЕССА -->
           <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
@@ -1722,7 +1777,6 @@
 
               return `
                 <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
-                  <!-- КЛИК ПО ШАПКЕ ОБЪЕКТА СВОРАЧИВАЕТ/РАЗВОРАЧИВАЕТ ЕГО ПОДЗАДАЧИ -->
                   <div class="obj-header" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})">
                     <div class="obj-title-wrap">
                       <span class="obj-collapse-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
@@ -1744,7 +1798,6 @@
                     </div>
                   ` : ''}
 
-                  <!-- ТЕЛО ОБЪЕКТА (СВОРАЧИВАЕМЫЕ ПОДЗАДАЧИ) -->
                   <div class="obj-body ${isObjCollapsed ? 'hidden' : ''}">
                     ${isAllDone ? `
                       <div class="all-done-banner">
@@ -1755,7 +1808,6 @@
                       </div>
                     ` : ''}
 
-                    <!-- СПИСОК ШАГОВ / ПОДЗАДАЧ -->
                     <div class="steps-list">
                       ${obj.steps.map(s => {
                         const hasBlock = !s.done && !!s.blocker;
@@ -1793,7 +1845,6 @@
                       }).join('')}
                     </div>
 
-                    <!-- РАСКРЫВАЮЩАЯСЯ ФОРМА ДОБАВЛЕНИЯ -->
                     ${!obj.showAddForm ? `
                       <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
                         + Добавить этап / шаблоны
@@ -1834,7 +1885,6 @@
               </button>
             </div>
 
-            <!-- АРХИВ -->
             ${archivedObjects.length > 0 ? `
               <div class="archive-section">
                 <div class="archive-header" onclick="toggleArchiveView(${proc.id})">
