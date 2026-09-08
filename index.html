@@ -8,32 +8,32 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #e2e8f0;
+      --bg: #f4f6f9;
       --card-bg: #ffffff;
-      --text-main: #0f172a;
+      --text-main: #1e293b;
       --text-muted: #64748b;
       --text-subtle: #94a3b8;
-      --border: #cbd5e1;
-      --border-subtle: #e2e8f0;
+      --border: #e2e8f0;
+      --border-subtle: #f1f5f9;
 
-      --brand: #1d4ed8;
-      --brand-light: #eff6ff;
-      --brand-border: #bfdbfe;
+      --brand: #2563eb;
+      --brand-light: #f8fafc;
+      --brand-border: #cbd5e1;
 
-      --done: #15803d;
+      --done: #16a34a;
       --done-bg: #f0fdf4;
       --done-border: #bbf7d0;
 
-      --amber: #b45309;
+      --amber: #d97706;
       --amber-bg: #fffbeb;
       --amber-border: #fde68a;
 
-      --danger: #b91c1c;
+      --danger: #dc2626;
       --danger-bg: #fef2f2;
       --danger-border: #fca5a5;
 
-      --neutral-dark: #1e293b;
-      --radius: 12px;
+      --neutral-dark: #334155;
+      --radius: 14px;
     }
 
     * {
@@ -47,7 +47,7 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 8px 10px 105px 10px;
+      padding: 10px 12px 105px 12px;
       font-size: 15px;
       line-height: 1.45;
     }
@@ -61,21 +61,21 @@
     .dashboard-card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
       border: 1px solid var(--border);
-      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
 
     .dash-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .dash-title {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -86,7 +86,7 @@
     .sync-badge {
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 3px 10px;
       border-radius: 20px;
       background: #f1f5f9;
       color: #475569;
@@ -99,19 +99,19 @@
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
     @media (max-width: 480px) {
       .metrics-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     .metric-card {
-      padding: 8px 10px;
-      border-radius: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
-      border: 1px solid transparent;
+      border: 1px solid var(--border);
       background: #f8fafc;
       color: var(--neutral-dark);
     }
@@ -131,9 +131,9 @@
       border-color: var(--amber-border);
     }
     .metric-card.is-blue {
-      background: var(--brand-light);
+      background: #eff6ff;
       color: #1d4ed8;
-      border-color: var(--brand-border);
+      border-color: #bfdbfe;
     }
 
     .metric-lbl {
@@ -141,10 +141,10 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      opacity: 0.85;
+      opacity: 0.8;
     }
     .metric-num {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       margin-top: 2px;
     }
@@ -155,11 +155,11 @@
     }
     .report-mode-btn {
       flex: 1;
-      padding: 7px 8px;
+      padding: 8px 10px;
       font-size: 12px;
       font-weight: 700;
       border-radius: 8px;
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       background: #f8fafc;
       color: var(--text-muted);
       cursor: pointer;
@@ -175,15 +175,15 @@
     /* 2. БЫСТРЫЙ ВВОД НАПРАВЛЕНИЯ */
     .quick-add-bar {
       display: flex;
-      gap: 6px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 16px;
     }
     .quick-add-bar input {
       flex: 1;
-      padding: 10px 12px;
-      font-size: 14px;
+      padding: 11px 14px;
+      font-size: 15px;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       background: #ffffff;
       outline: none;
     }
@@ -193,56 +193,59 @@
     .btn-dark {
       background: var(--neutral-dark);
       color: #ffffff;
-      padding: 10px 16px;
+      padding: 11px 18px;
       border: none;
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
     }
 
     /* ==============================================================
-       УРОВЕНЬ 1: ПАПКА ПРОЦЕССА (ВЫДЕЛЕННЫЙ ТЕМНЫЙ СТИКЕР)
+       УРОВЕНЬ 1: ПАПКА ПРОЦЕССА (СВЕРНУТА ПО УМОЛЧАНИЮ)
        ============================================================== */
     .process-section {
-      background: #e2e8f0;
-      border-radius: 14px;
-      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
       margin-bottom: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
     }
 
     .process-sticker-header {
-      padding: 12px 14px;
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #1e293b;
-      color: #ffffff;
+      background: #ffffff;
       cursor: pointer;
       user-select: none;
+      border-bottom: 1px solid transparent;
+      border-left: 5px solid var(--brand);
+    }
+    .process-section.is-open .process-sticker-header {
+      border-bottom-color: var(--border-subtle);
     }
 
     .proc-title-group {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 800;
-      color: #ffffff;
+      color: #0f172a;
     }
     .proc-folder-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 14px;
+      gap: 6px;
     }
     .proc-arrow {
       display: inline-block;
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--text-muted);
       transition: transform 0.2s ease;
     }
     .proc-arrow.collapsed {
@@ -252,54 +255,55 @@
     .proc-tag-count {
       font-size: 11px;
       font-weight: 700;
-      background: rgba(255, 255, 255, 0.15);
-      color: #e2e8f0;
+      background: #f1f5f9;
+      color: #475569;
       padding: 2px 8px;
       border-radius: 10px;
     }
 
     .proc-del-link {
-      color: #f87171;
+      color: var(--text-subtle);
       font-size: 12px;
       font-weight: 600;
       background: none;
       border: none;
       cursor: pointer;
-      padding: 3px 6px;
-      border-radius: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
     }
     .proc-del-link:hover {
-      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      background: var(--danger-bg);
     }
 
     .process-body {
-      padding: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      background: #e2e8f0;
+      background: #f8fafc;
     }
     .process-body.hidden {
       display: none !important;
     }
 
     /* ==============================================================
-       УРОВЕНЬ 2: ОБЪЕКТ / УЧАСТОК (БЕЛЫЙ БИЛЕТ С СИНИМ КАНТОМ)
+       УРОВЕНЬ 2: ОБЪЕКТ / УЧАСТОК
        ============================================================== */
     .object-card {
       background: #ffffff;
       border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      border-left: 5px solid #2563eb;
-      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--brand);
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
     .object-card.completed-obj {
-      border-left-color: #16a34a;
-      background: #fdfefe;
+      border-left-color: var(--done);
+      background: #fcfdfc;
     }
 
     .obj-header {
@@ -334,7 +338,7 @@
     .obj-tools {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       flex-shrink: 0;
     }
     .badge-percent {
@@ -354,9 +358,9 @@
 
     .btn-icon-tool {
       background: #f8fafc;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 3px 6px;
+      padding: 4px 7px;
       font-size: 12px;
       cursor: pointer;
       color: #475569;
@@ -373,7 +377,7 @@
     .progress-bar-bg {
       width: 100%;
       height: 4px;
-      background: #e2e8f0;
+      background: #f1f5f9;
       border-radius: 4px;
       overflow: hidden;
     }
@@ -393,14 +397,14 @@
       gap: 8px;
       margin-top: 4px;
       padding-top: 6px;
-      border-top: 1px dashed #e2e8f0;
+      border-top: 1px dashed var(--border);
     }
     .obj-body.hidden {
       display: none !important;
     }
 
     /* ==============================================================
-       УРОВЕНЬ 3: ШАГИ / ПОДЗАДАЧИ (ПЛАШКИ ВНУТРИ БИЛЕТА)
+       УРОВЕНЬ 3: ШАГИ / ПОДЗАДАЧИ
        ============================================================== */
     .steps-list {
       display: flex;
@@ -412,10 +416,10 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      padding: 8px 10px;
+      padding: 9px 11px;
       border-radius: 8px;
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
     }
     .step-item.is-done {
       background: var(--done-bg);
@@ -429,12 +433,12 @@
     .step-header-line {
       display: flex;
       align-items: flex-start;
-      gap: 9px;
+      gap: 10px;
       width: 100%;
     }
     .step-chk {
-      width: 18px;
-      height: 18px;
+      width: 19px;
+      height: 19px;
       cursor: pointer;
       accent-color: var(--done);
       margin-top: 1px;
@@ -454,14 +458,14 @@
     .step-item.is-done .step-title {
       text-decoration: line-through;
       color: var(--done);
-      opacity: 0.7;
+      opacity: 0.75;
     }
 
     .step-footer-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-left: 27px;
+      padding-left: 29px;
     }
 
     .step-actions-left {
@@ -478,9 +482,9 @@
       font-size: 11px;
       font-weight: 700;
       padding: 3px 8px;
-      border-radius: 5px;
+      border-radius: 6px;
       background: #ffffff;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       color: #334155;
       cursor: pointer;
       user-select: none;
@@ -509,14 +513,14 @@
       color: var(--brand);
       border-style: dashed;
       border-color: var(--brand-border);
-      background: var(--brand-light);
+      background: #eff6ff;
     }
 
     .btn-blocker-trigger {
       background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 5px;
-      padding: 3px 7px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
@@ -539,9 +543,9 @@
       background: none;
       border: none;
       color: var(--text-subtle);
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
-      padding: 2px 5px;
+      padding: 2px 6px;
       border-radius: 4px;
     }
     .mini-del:hover {
@@ -557,11 +561,11 @@
       background: #ffffff;
       border: 1px solid #fca5a5;
       border-radius: 6px;
-      padding: 5px 8px;
+      padding: 6px 10px;
       font-size: 12px;
       color: #991b1b;
       font-weight: 600;
-      margin-left: 27px;
+      margin-left: 29px;
     }
     .blocker-banner span.reason-text {
       flex: 1;
@@ -581,7 +585,7 @@
       background: var(--done-bg);
       border: 1px dashed var(--done-border);
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 9px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -596,7 +600,7 @@
       background: var(--done);
       color: #ffffff;
       border: none;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 700;
@@ -649,9 +653,9 @@
       cursor: pointer;
     }
     .tpl-chip:hover {
-      background: var(--brand-light);
-      border-color: var(--brand-border);
-      color: var(--brand);
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
     }
     .tpl-chip.preset-all {
       background: var(--done-bg);
@@ -718,9 +722,9 @@
       text-align: center;
     }
     .btn-new-obj.template {
-      background: #dbeafe;
-      border-color: #93c5fd;
-      color: #1e40af;
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
     }
 
     .archive-section {
@@ -820,7 +824,7 @@
       width: 100%;
       max-width: 500px;
       border-radius: 16px 16px 0 0;
-      padding: 16px;
+      padding: 18px;
       box-shadow: 0 -8px 24px rgba(0,0,0,0.15);
       display: flex;
       flex-direction: column;
@@ -866,7 +870,7 @@
       text-align: left;
       background: #f8fafc;
       border: 1px solid var(--border);
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
@@ -879,8 +883,8 @@
     }
     .preset-btn:hover {
       background: #eff6ff;
-      border-color: var(--brand-border);
-      color: var(--brand);
+      border-color: #bfdbfe;
+      color: #1d4ed8;
     }
 
     .modal-input {
@@ -905,7 +909,7 @@
       background: var(--brand);
       color: #fff;
       border: none;
-      padding: 10px;
+      padding: 11px;
       border-radius: 8px;
       font-size: 14px;
       font-weight: 700;
@@ -915,7 +919,7 @@
       background: #fee2e2;
       color: #991b1b;
       border: 1px solid #fca5a5;
-      padding: 10px 14px;
+      padding: 11px 14px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 700;
@@ -1079,11 +1083,8 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    
-    // ЕДИНЫЙ ПОСТОЯННЫЙ КЛЮЧ
     const MAIN_STORAGE_KEY = 'manager_projects_permanent_data';
 
-    // Список всех старых версий для автоматического восстановления
     const LEGACY_STORAGE_KEYS = [
       'manager_daily_tracker_v16_subtask_collapse',
       'manager_daily_tracker_v15_collapsed_default',
@@ -1177,12 +1178,11 @@
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
-    // Начальный шаблон на случай абсолютно чистого первого входа
     let state = [
       {
         id: 1,
         title: "Дополнительные зем участки",
-        collapsed: false,
+        collapsed: true, // Свернуто по умолчанию
         showArchive: false,
         objects: [
           {
@@ -1207,14 +1207,14 @@
             showAddForm: false,
             steps: [
               { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: true, blocker: null }
+              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: true, blocker: null },
+              { id: 2003, text: "Утверждение ЗУП МИО", date: "до 23.09.2026", done: false, blocker: null }
             ]
           }
         ]
       }
     ];
 
-    /* УМНОЕ ОБЪЕДИНЕНИЕ ВСЕХ СТАРЫХ КЛЮЧЕЙ — НИ ОДНА РАБОТА НЕ ПРОПАДАЕТ */
     function mergeStatesList(list) {
       const merged = {};
 
@@ -1229,7 +1229,7 @@
             merged[pKey] = {
               id: p.id || Date.now() + Math.random(),
               title: pTitle,
-              collapsed: false,
+              collapsed: true, // Всегда свернуты по умолчанию
               showArchive: false,
               objectsMap: {}
             };
@@ -1300,34 +1300,7 @@
       return null;
     }
 
-    /* ЗАГРУЗКА И НАДЕЖНОЕ СОХРАНЕНИЕ */
     async function loadData() {
-      const isMigrated = localStorage.getItem('tma_migrated_v17_permanent');
-
-      // Если уже перешли на постоянный ключ — загружаем напрямую без лишних проверок
-      if (isMigrated) {
-        const localDirect = localStorage.getItem(MAIN_STORAGE_KEY);
-        if (localDirect) {
-          const parsed = parseRaw(localDirect);
-          if (parsed) state = parsed;
-        }
-
-        if (tg?.CloudStorage) {
-          tg.CloudStorage.getItem(MAIN_STORAGE_KEY, (err, val) => {
-            if (!err && val) {
-              const cloudParsed = parseRaw(val);
-              if (cloudParsed) {
-                state = cloudParsed;
-                render();
-              }
-            }
-          });
-        }
-        render();
-        return;
-      }
-
-      // Единоразовое объединение всех слотов памяти
       const candidates = [];
       const allKeys = [MAIN_STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
 
@@ -1353,7 +1326,6 @@
           if (candidates.length > 0) {
             state = mergeStatesList(candidates);
           }
-          localStorage.setItem('tma_migrated_v17_permanent', 'true');
           saveData();
           render();
         });
@@ -1361,7 +1333,6 @@
         if (candidates.length > 0) {
           state = mergeStatesList(candidates);
         }
-        localStorage.setItem('tma_migrated_v17_permanent', 'true');
         saveData();
         render();
       }
@@ -1402,7 +1373,7 @@
       state.push({
         id: Date.now(),
         title: val,
-        collapsed: false,
+        collapsed: false, // Новый процесс открыт для заполнения
         showArchive: false,
         objects: []
       });
@@ -1483,7 +1454,6 @@
       }
     }
 
-    /* МОДАЛКА ДАТЫ */
     function openDateModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1543,7 +1513,6 @@
       saveData();
     }
 
-    /* МОДАЛКА РИСКОВ */
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1598,16 +1567,8 @@
 
     function clearRiskFromModal() {
       const { procId, objId, stepId } = activeModalTarget;
-      const p = state.find(x => x.id === procId);
-      const obj = p?.objects.find(o => o.id === objId);
-      const step = obj?.steps.find(s => s.id === stepId);
-      if (!step) return;
-
-      step.blocker = null;
+      clearBlocker(procId, objId, stepId);
       closeRiskModal();
-      showToast("Задержка снята");
-      haptic();
-      saveData();
     }
 
     function promptAddObject(procId) {
@@ -1671,7 +1632,7 @@
         archived: false,
         collapsed: false,
         showAddForm: false,
-        steps: src.steps.map((s, i) => ({
+        steps: (src.steps || []).map((s, i) => ({
           id: Date.now() + i + 1,
           text: s.text,
           date: s.date,
@@ -1751,7 +1712,6 @@
       }
     }
 
-    /* ДОБАВЛЕНИЕ ЭТАПА — МГНОВЕННОЕ СОХРАНЕНИЕ */
     function addStepToObject(procId, objId) {
       const tInput = document.getElementById(`txt-${objId}`);
       const dInput = document.getElementById(`date-cal-${objId}`);
@@ -1839,11 +1799,11 @@
 
       state.forEach(proc => {
         const card = document.createElement('div');
-        const isCollapsed = !!proc.collapsed;
+        const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true; // ВСЕГДА СВЕРНУТО ПО УМОЛЧАНИЮ
         card.className = `process-section ${!isCollapsed ? 'is-open' : ''}`;
 
-        const activeObjects = proc.objects.filter(o => !o.archived);
-        const archivedObjects = proc.objects.filter(o => o.archived);
+        const activeObjects = (proc.objects || []).filter(o => !o.archived);
+        const archivedObjects = (proc.objects || []).filter(o => o.archived);
 
         activeObjects.forEach(o => {
           totalActiveObjs++;
@@ -1857,7 +1817,6 @@
         });
 
         card.innerHTML = `
-          <!-- УРОВЕНЬ 1: ТЕМНЫЙ ЗАГОЛОВОК ПАПКИ -->
           <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
@@ -1867,7 +1826,6 @@
             <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
-          <!-- ТЕЛО ПАПКИ: КОНТРАСТНЫЙ СЕРЫЙ ФОН -->
           <div class="process-body ${isCollapsed ? 'hidden' : ''}">
             ${activeObjects.map(obj => {
               const dCount = (obj.steps || []).filter(s => s.done).length;
@@ -1877,7 +1835,6 @@
               const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
 
               return `
-                <!-- УРОВЕНЬ 2: БЕЛЫЙ БИЛЕТ ОБЪЕКТА С СИНИМ КАНТОМ -->
                 <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
                   <div class="obj-header" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})">
                     <div class="obj-title-wrap">
@@ -1900,7 +1857,6 @@
                     </div>
                   ` : ''}
 
-                  <!-- УРОВЕНЬ 3: РАСКРЫВАЮЩИЕСЯ ПОДЗАДАЧИ -->
                   <div class="obj-body ${isObjCollapsed ? 'hidden' : ''}">
                     ${isAllDone ? `
                       <div class="all-done-banner">
@@ -2056,132 +2012,100 @@
       });
 
       if (reportMode === 'executive') {
-        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}
-
-`;
+        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:
-`;
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj} (${b.proc}):
-`;
-            txt += `  ⚠️ ${b.step} [${b.date}]
-`;
-            txt += `     └ Причина: ${b.reason}
-`;
+            txt += `• ${b.obj} (${b.proc}):\n`;
+            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
+            txt += `     └ Причина: ${b.reason}\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
-`;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:\n`;
         state.forEach(p => {
           (p.objects || []).filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = (o.steps || []).filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
-              doneTxt += `• ${o.title} (${p.title}):
-`;
+              doneTxt += `• ${o.title} (${p.title}):\n`;
               todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]
-`;
+                doneTxt += `  - ${s.text} [закрыто]\n`;
               });
             }
           });
         });
-        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов
-`;
-        txt += doneTxt + `
-`;
+        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
+        txt += doneTxt + `\n`;
 
         if (archivedList.length > 0) {
-          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):
-`;
+          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):\n`;
           archivedList.forEach(a => {
-            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто
-`;
+            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:
-`;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:\n`;
         state.forEach(p => {
           (p.objects || []).filter(o => !o.archived).forEach(o => {
             const regularSteps = (o.steps || []).filter(s => !s.done && !s.blocker);
             if (regularSteps.length > 0) {
               hasPlan = true;
-              planTxt += `• ${o.title} (${p.title}):
-`;
+              planTxt += `• ${o.title} (${p.title}):\n`;
               regularSteps.forEach(s => {
                 const dateStr = s.date ? ` [${s.date}]` : '';
-                planTxt += `  - ${s.text}${dateStr}
-`;
+                planTxt += `  - ${s.text}${dateStr}\n`;
               });
             }
           });
         });
-        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!
-`;
+        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
         txt += planTxt;
 
         return txt.trim();
 
       } else {
-        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}
-
-`;
+        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):
-`;
+          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date || 'без даты'}]
-`;
+            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date || 'без даты'}]\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         state.forEach(p => {
           const active = (p.objects || []).filter(o => !o.archived);
-          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
-`;
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
           if (active.length === 0) {
-            txt += `  (все объекты завершены и в архиве)
-
-`;
+            txt += `  (все объекты завершены и в архиве)\n\n`;
             return;
           }
 
           active.forEach(o => {
             const d = (o.steps || []).filter(s => s.done).length;
             const t = (o.steps || []).length;
-            txt += `📌 ${o.title} [готовность: ${d}/${t}]
-`;
+            txt += `📌 ${o.title} [готовность: ${d}/${t}]\n`;
             (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}
-`;
+              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
           });
-          txt += `
-`;
+          txt += `\n`;
         });
 
         if (archivedList.length > 0) {
-          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):
-`;
+          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):\n`;
           archivedList.forEach(a => {
-            txt += `• ${a.obj} (${a.proc})
-`;
+            txt += `• ${a.obj} (${a.proc})\n`;
           });
         }
 
