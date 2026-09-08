@@ -8,29 +8,35 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
+      /* Мягкая управленческая палитра (Slate & Steel) */
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --text-main: #0f172a;
       --text-muted: #64748b;
+      --text-subtle: #94a3b8;
       --border: #e2e8f0;
-      
-      --accent: #2563eb;
-      --accent-light: #eff6ff;
+      --border-subtle: #f1f5f9;
 
-      --done: #16a34a;
+      --brand: #2563eb;
+      --brand-hover: #1d4ed8;
+      --brand-subtle: #eff6ff;
+      --brand-border: #bfdbfe;
+
+      --done: #15803d;
       --done-bg: #f0fdf4;
       --done-border: #bbf7d0;
 
-      --work: #d97706;
-      --work-bg: #fffbeb;
-      --work-border: #fde68a;
+      --amber: #b45309;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
 
-      --danger: #dc2626;
+      --danger: #b91c1c;
       --danger-bg: #fef2f2;
       --danger-border: #fca5a5;
 
+      --neutral-dark: #334155;
       --radius: 12px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     * {
@@ -58,7 +64,7 @@
     .dashboard-card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 14px;
+      padding: 12px 14px;
       margin-bottom: 10px;
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -72,11 +78,12 @@
     }
 
     .dash-title {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       display: flex;
       align-items: center;
       gap: 6px;
+      color: #0f172a;
     }
 
     .sync-badge {
@@ -84,6 +91,10 @@
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 20px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .sync-badge.active {
       background: #e0f2fe;
       color: #0369a1;
     }
@@ -103,37 +114,42 @@
       border-radius: 8px;
       display: flex;
       flex-direction: column;
+      border: 1px solid transparent;
+      background: #f8fafc;
+      color: var(--neutral-dark);
     }
-    .metric-card.red {
+    .metric-card.has-danger {
       background: var(--danger-bg);
-      color: #991b1b;
-      border: 1px solid var(--danger-border);
+      color: var(--danger);
+      border-color: var(--danger-border);
     }
-    .metric-card.green {
+    .metric-card.is-green {
       background: var(--done-bg);
-      color: #166534;
-      border: 1px solid var(--done-border);
+      color: var(--done);
+      border-color: var(--done-border);
     }
-    .metric-card.amber {
-      background: var(--work-bg);
-      color: #92400e;
-      border: 1px solid var(--work-border);
+    .metric-card.is-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border-color: var(--amber-border);
     }
-    .metric-card.blue {
-      background: var(--accent-light);
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
+    .metric-card.is-blue {
+      background: var(--brand-subtle);
+      color: #1d4ed8;
+      border-color: var(--brand-border);
     }
+
     .metric-lbl {
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.4px;
       opacity: 0.85;
     }
     .metric-num {
       font-size: 18px;
       font-weight: 800;
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
     .report-modes {
@@ -142,7 +158,7 @@
     }
     .report-mode-btn {
       flex: 1;
-      padding: 8px 6px;
+      padding: 7px 8px;
       font-size: 12px;
       font-weight: 700;
       border-radius: 8px;
@@ -151,12 +167,12 @@
       color: var(--text-muted);
       cursor: pointer;
       text-align: center;
-      white-space: nowrap;
+      transition: all 0.15s;
     }
     .report-mode-btn.active {
-      background: var(--text-main);
+      background: var(--neutral-dark);
       color: #ffffff;
-      border-color: var(--text-main);
+      border-color: var(--neutral-dark);
     }
 
     /* 2. БЫСТРЫЙ ВВОД НАПРАВЛЕНИЯ */
@@ -167,7 +183,7 @@
     }
     .quick-add-bar input {
       flex: 1;
-      padding: 10px 12px;
+      padding: 9px 12px;
       font-size: 14px;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -175,15 +191,15 @@
       outline: none;
     }
     .quick-add-bar input:focus {
-      border-color: var(--accent);
+      border-color: var(--brand);
     }
     .btn-dark {
-      background: #1e293b;
+      background: var(--neutral-dark);
       color: #ffffff;
-      padding: 10px 14px;
+      padding: 9px 14px;
       border: none;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
@@ -207,14 +223,14 @@
       background: #ffffff;
       cursor: pointer;
       user-select: none;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .proc-title-group {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
     }
     .proc-arrow {
@@ -227,7 +243,7 @@
     }
 
     .proc-del-link {
-      color: #94a3b8;
+      color: var(--text-subtle);
       font-size: 12px;
       background: none;
       border: none;
@@ -259,7 +275,7 @@
     }
     .object-card.completed-obj {
       background: #fcfdfc;
-      border-color: #86efac;
+      border-color: var(--done-border);
     }
 
     .obj-header {
@@ -269,7 +285,7 @@
       gap: 8px;
     }
     .obj-name {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       color: #0f172a;
       flex: 1;
@@ -285,7 +301,7 @@
     }
     .badge-percent {
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 700;
       padding: 2px 7px;
       border-radius: 12px;
       background: #f1f5f9;
@@ -294,13 +310,13 @@
     }
     .badge-percent.green {
       background: var(--done-bg);
-      color: #15803d;
+      color: var(--done);
       border: 1px solid var(--done-border);
     }
 
     .btn-icon-tool {
       background: none;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       border-radius: 6px;
       padding: 3px 6px;
       font-size: 12px;
@@ -312,22 +328,22 @@
     }
     .btn-icon-tool.del:hover {
       color: var(--danger);
-      background: #fef2f2;
-      border-color: #fecaca;
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
     }
 
     /* Прогресс-бар */
     .progress-bar-bg {
       width: 100%;
-      height: 5px;
+      height: 4px;
       background: #f1f5f9;
-      border-radius: 6px;
+      border-radius: 4px;
       overflow: hidden;
     }
     .progress-bar-fill {
       height: 100%;
-      background: var(--accent);
-      border-radius: 6px;
+      background: var(--brand);
+      border-radius: 4px;
       transition: width 0.3s ease;
     }
     .progress-bar-fill.done {
@@ -338,17 +354,17 @@
     .steps-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .step-item {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      padding: 9px 10px;
+      gap: 5px;
+      padding: 8px 10px;
       border-radius: 8px;
       background: #f8fafc;
-      border: 1px solid #f1f5f9;
+      border: 1px solid var(--border-subtle);
     }
     .step-item.is-done {
       background: var(--done-bg);
@@ -359,23 +375,23 @@
       border-color: var(--danger-border);
     }
 
-    /* Верхняя строка шага */
+    /* Верхняя строка шага: Чекбокс + Текст */
     .step-header-line {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 9px;
       width: 100%;
     }
     .step-chk {
-      width: 19px;
-      height: 19px;
+      width: 18px;
+      height: 18px;
       cursor: pointer;
       accent-color: var(--done);
       margin-top: 1px;
       flex-shrink: 0;
     }
     .step-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer;
@@ -387,30 +403,31 @@
     }
     .step-item.is-done .step-title {
       text-decoration: line-through;
-      color: #166534;
+      color: var(--done);
       opacity: 0.7;
     }
 
-    /* Нижняя строка шага */
+    /* Нижняя строка шага: Дата, Блокер, Удаление */
     .step-footer-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-left: 29px;
+      padding-left: 27px;
     }
 
     .step-actions-left {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
     }
 
+    /* Умные индикаторы даты */
     .step-date-tag {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
+      padding: 2px 7px;
+      border-radius: 5px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #334155;
@@ -418,42 +435,52 @@
       user-select: none;
       white-space: nowrap;
     }
-    .step-item.is-done .step-date-tag {
-      border-color: #86efac;
-      color: #166534;
-    }
-    .step-item.has-blocker .step-date-tag {
+    .step-date-tag.overdue {
+      background: #fee2e2;
       border-color: #fca5a5;
       color: #991b1b;
     }
+    .step-date-tag.urgent {
+      background: #fef3c7;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .step-date-tag.done {
+      background: #ffffff;
+      border-color: var(--done-border);
+      color: var(--done);
+    }
 
+    /* Спокойная кнопка риска/блокера */
     .btn-blocker-trigger {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 3px 7px;
-      font-size: 12px;
-      font-weight: 700;
+      border-radius: 5px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
-      color: #475569;
+      color: #64748b;
       white-space: nowrap;
     }
     .btn-blocker-trigger:hover {
       background: #f1f5f9;
+      color: #0f172a;
     }
     .btn-blocker-trigger.active {
       background: #fee2e2;
-      border-color: #f87171;
+      border-color: #fca5a5;
       color: #991b1b;
+      font-weight: 700;
     }
 
     .mini-del {
       background: none;
       border: none;
-      color: #94a3b8;
-      font-size: 14px;
+      color: var(--text-subtle);
+      font-size: 13px;
       cursor: pointer;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 4px;
     }
     .mini-del:hover {
@@ -461,20 +488,20 @@
       background: rgba(0,0,0,0.04);
     }
 
-    /* Блокер */
+    /* Плашка блокера */
     .blocker-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       background: #ffffff;
       border: 1px solid #fca5a5;
       border-radius: 6px;
-      padding: 5px 8px;
+      padding: 4px 8px;
       font-size: 12px;
       color: #991b1b;
       font-weight: 600;
-      margin-left: 29px;
+      margin-left: 27px;
     }
     .blocker-banner span.reason-text {
       flex: 1;
@@ -484,16 +511,16 @@
       background: none;
       border: none;
       color: #991b1b;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       padding: 2px 4px;
     }
 
-    /* 100% готовность */
+    /* Баннер 100% готовности */
     .all-done-banner {
-      background: #f0fdf4;
-      border: 1px dashed #86efac;
+      background: var(--done-bg);
+      border: 1px dashed var(--done-border);
       border-radius: 8px;
       padding: 8px 10px;
       display: flex;
@@ -502,15 +529,15 @@
       gap: 8px;
     }
     .all-done-banner span {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      color: #166534;
+      color: var(--done);
     }
     .btn-finish-work {
-      background: #16a34a;
+      background: var(--done);
       color: #ffffff;
       border: none;
-      padding: 6px 10px;
+      padding: 5px 10px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 700;
@@ -518,42 +545,27 @@
       white-space: nowrap;
     }
 
-    /* Шаблоны */
-    .template-chips-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
+    /* Компактная раскрывающаяся форма добавления шага */
+    .step-add-toggle-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
       margin-top: 2px;
     }
-    .tpl-chip {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #1e293b;
-      padding: 4px 7px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-    }
-    .tpl-chip:hover {
-      background: #eff6ff;
-      border-color: #93c5fd;
-      color: #1d4ed8;
-    }
-    .tpl-chip.preset-all {
-      background: #f0fdf4;
-      border-color: #86efac;
-      color: #15803d;
-      font-weight: 700;
+    .step-add-toggle-btn:hover {
+      background: #f8fafc;
+      color: var(--text-main);
     }
 
-    /* Добавление шага */
     .step-fast-add {
       background: #f8fafc;
-      border: 1px dashed #cbd5e1;
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px;
       display: flex;
@@ -561,23 +573,52 @@
       gap: 6px;
       margin-top: 2px;
     }
+
+    .template-chips-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+    .tpl-chip {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 3px 6px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tpl-chip:hover {
+      background: var(--brand-subtle);
+      border-color: var(--brand-border);
+      color: var(--brand);
+    }
+    .tpl-chip.preset-all {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+      color: var(--done);
+      font-weight: 700;
+    }
+
     .sfa-row-1 {
       display: flex;
       gap: 6px;
     }
     .sfa-row-1 input[type="text"] {
       flex: 1;
-      padding: 8px 10px;
-      font-size: 14px;
-      border: 1px solid #cbd5e1;
+      padding: 7px 9px;
+      font-size: 13px;
+      border: 1px solid var(--border);
       border-radius: 6px;
       outline: none;
     }
     .sfa-row-1 input.date-input {
       width: 120px;
-      padding: 8px 6px;
-      font-size: 13px;
-      border: 1px solid #cbd5e1;
+      padding: 7px 6px;
+      font-size: 12px;
+      border: 1px solid var(--border);
       border-radius: 6px;
       outline: none;
       background: #fff;
@@ -595,27 +636,27 @@
     }
     .chip {
       background: #ffffff;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       padding: 3px 6px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 700;
-      color: #334155;
+      font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
     }
 
     .btn-add-step {
-      background: #334155;
+      background: var(--neutral-dark);
       color: #ffffff;
       border: none;
-      padding: 6px 12px;
+      padding: 5px 12px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
     }
 
-    /* Кнопки объектов */
+    /* Кнопки внизу процесса */
     .proc-add-actions {
       display: flex;
       gap: 6px;
@@ -623,9 +664,9 @@
     .btn-new-obj {
       flex: 1;
       background: #f8fafc;
-      color: #475569;
-      border: 1px dashed #cbd5e1;
-      padding: 9px 6px;
+      color: var(--neutral-dark);
+      border: 1px dashed var(--border);
+      padding: 8px 6px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 700;
@@ -633,15 +674,15 @@
       text-align: center;
     }
     .btn-new-obj.template {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
+      background: var(--brand-subtle);
+      border-color: var(--brand-border);
+      color: var(--brand);
     }
 
     /* Архив */
     .archive-section {
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px 10px;
     }
@@ -666,20 +707,20 @@
       align-items: center;
       padding: 6px 8px;
       background: #ffffff;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 13px;
     }
     .btn-restore {
       background: none;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 11px;
       cursor: pointer;
     }
 
-    /* Плавающая панель */
+    /* 6. ПЛАВАЮЩАЯ ПАНЕЛЬ */
     .floating-action-bar {
       position: fixed;
       bottom: 0;
@@ -688,7 +729,7 @@
       background: #ffffff;
       border-top: 1px solid var(--border);
       padding: 10px 14px;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
       display: flex;
       gap: 8px;
       z-index: 100;
@@ -702,7 +743,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 12px;
+      padding: 11px;
       font-size: 14px;
       font-weight: 700;
       border-radius: 10px;
@@ -740,23 +781,23 @@
         <div class="dash-title">
           <span>📊</span> Мониторинг проектов
         </div>
-        <div class="sync-badge" id="syncTag">● Синхронизировано</div>
+        <div class="sync-badge active" id="syncTag">● Синхронизировано</div>
       </div>
 
       <div class="metrics-grid">
-        <div class="metric-card red">
+        <div class="metric-card" id="mBlockersCard">
           <span class="metric-lbl">Задержки</span>
           <span class="metric-num" id="mBlockers">0</span>
         </div>
-        <div class="metric-card green">
+        <div class="metric-card is-green">
           <span class="metric-lbl">Сделано</span>
           <span class="metric-num" id="mDone">0</span>
         </div>
-        <div class="metric-card amber">
+        <div class="metric-card is-amber">
           <span class="metric-lbl">В работе</span>
           <span class="metric-num" id="mPlan">0</span>
         </div>
-        <div class="metric-card blue">
+        <div class="metric-card is-blue">
           <span class="metric-lbl">Объектов</span>
           <span class="metric-num" id="mTotal">0</span>
         </div>
@@ -796,7 +837,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v9_mobile';
+    const STORAGE_KEY = 'manager_daily_tracker_v10_refined';
 
     if (tg) {
       tg.ready();
@@ -830,6 +871,36 @@
       return `${day}.${m}.${y}`;
     }
 
+    /* Умный парсинг дат и расчет срочности */
+    function analyzeDeadline(dateStr, isDone) {
+      if (isDone) return { cls: 'done', text: dateStr };
+      if (!dateStr) return { cls: '', text: 'Без даты' };
+
+      // Извлекаем день, месяц, год (напр. 10.09.2026 или до 10.09.2026)
+      const match = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!match) return { cls: '', text: dateStr };
+
+      const day = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1;
+      const year = match[3] ? parseInt(match[3], 10) : new Date().getFullYear();
+
+      const target = new Date(year, month, day);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      target.setHours(0,0,0,0);
+
+      const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        return { cls: 'overdue', text: `🔴 Просрочено (${dateStr})` };
+      } else if (diffDays === 0) {
+        return { cls: 'urgent', text: `🟠 Сегодня (${dateStr})` };
+      } else if (diffDays <= 2) {
+        return { cls: 'urgent', text: `🟡 ${diffDays} дн. (${dateStr})` };
+      }
+      return { cls: '', text: `📅 ${dateStr}` };
+    }
+
     let state = [
       {
         id: 1,
@@ -841,6 +912,7 @@
             id: 101,
             title: "Жылыой - ЛЭС",
             archived: false,
+            showAddForm: false,
             steps: [
               { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
               { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
@@ -853,6 +925,7 @@
             id: 102,
             title: "Жылыой - ВП",
             archived: false,
+            showAddForm: false,
             steps: [
               { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
               { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: false, blocker: null }
@@ -873,6 +946,7 @@
               objects: (pr.objects || []).map(o => ({
                 ...o,
                 archived: !!o.archived,
+                showAddForm: false,
                 steps: (o.steps || []).map(s => ({
                   ...s,
                   blocker: s.blocker || null
@@ -888,13 +962,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v8_archive');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v9_mobile') || localStorage.getItem('manager_daily_tracker_v8_archive');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v8_archive');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v9_mobile') || localStorage.getItem('manager_daily_tracker_v8_archive');
         if (local) parseVal(local);
         render();
       }
@@ -909,7 +983,7 @@
           const tag = document.getElementById('syncTag');
           if (ok && tag) {
             tag.textContent = "● Синхронизировано";
-            tag.style.color = "#15803d";
+            tag.classList.add('active');
           }
         });
       }
@@ -924,7 +998,7 @@
       reportMode = m;
       document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
       document.getElementById('modeFull').classList.toggle('active', m === 'full');
-      showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный статус-отчет");
+      showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный отчет");
     }
 
     function addProcess() {
@@ -962,6 +1036,16 @@
       }
     }
 
+    function toggleAddStepForm(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      obj.showAddForm = !obj.showAddForm;
+      render();
+    }
+
     function archiveObject(procId, objId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
@@ -969,7 +1053,7 @@
       if (!obj) return;
 
       obj.archived = true;
-      showToast(`Объект «${obj.title}» закрыт и перенесен в архив!`);
+      showToast(`«${obj.title}» перенесен в архив!`);
       haptic();
       saveData();
     }
@@ -981,7 +1065,7 @@
       if (!obj) return;
 
       obj.archived = false;
-      showToast(`Объект «${obj.title}» возвращен в работу`);
+      showToast(`«${obj.title}» возвращен в работу`);
       haptic();
       saveData();
     }
@@ -1003,11 +1087,11 @@
       if (!step) return;
 
       const current = step.blocker || "Оплата не идет у подрядчика";
-      const reason = prompt("Причина задержки / блокер:", current);
+      const reason = prompt("Укажите причину задержки / блокер:", current);
 
       if (reason !== null) {
         step.blocker = reason.trim() === "" ? null : reason.trim();
-        showToast(step.blocker ? "Зафиксирована задержка!" : "Блокер снят");
+        showToast(step.blocker ? "Зафиксирована задержка!" : "Задержка снята");
         haptic();
         saveData();
       }
@@ -1021,7 +1105,7 @@
       const step = obj.steps.find(s => s.id === stepId);
       if (step) {
         step.blocker = null;
-        showToast("Блокер снят");
+        showToast("Задержка снята");
         haptic();
         saveData();
       }
@@ -1037,6 +1121,7 @@
           id: Date.now(),
           title: name.trim(),
           archived: false,
+          showAddForm: false,
           steps: []
         });
         haptic();
@@ -1054,6 +1139,7 @@
           id: Date.now(),
           title: name.trim(),
           archived: false,
+          showAddForm: false,
           steps: STANDARD_WORKFLOW.map((txt, idx) => ({
             id: Date.now() + idx,
             text: txt,
@@ -1081,6 +1167,7 @@
         id: Date.now(),
         title: newTitle.trim(),
         archived: false,
+        showAddForm: false,
         steps: src.steps.map((s, i) => ({
           id: Date.now() + i + 1,
           text: s.text,
@@ -1102,10 +1189,6 @@
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      if (obj.steps.length > 0) {
-        if (!confirm("Добавить 5 типовых этапов к текущим?")) return;
-      }
-
       STANDARD_WORKFLOW.forEach((stepText, idx) => {
         obj.steps.push({
           id: Date.now() + idx,
@@ -1116,7 +1199,7 @@
         });
       });
 
-      showToast("Типовые шаги добавлены!");
+      showToast("5 этапов добавлены!");
       haptic();
       saveData();
     }
@@ -1329,7 +1412,7 @@
                   <!-- БАННЕР 100% -->
                   ${isAllDone ? `
                     <div class="all-done-banner">
-                      <span>🎉 Все 100% этапов закрыты!</span>
+                      <span>🎉 Все этапы успешно закрыты!</span>
                       <button class="btn-finish-work" onclick="archiveObject(${proc.id}, ${obj.id})">
                         🏁 В архив
                       </button>
@@ -1340,29 +1423,30 @@
                   <div class="steps-list">
                     ${obj.steps.map(s => {
                       const hasBlock = !s.done && !!s.blocker;
+                      const dateMeta = analyzeDeadline(s.date, s.done);
 
                       return `
                         <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
-                          <!-- 1. ТЕКСТ ШАГА НА ВСЮ ШИРИНУ -->
+                          <!-- Строка 1: Чекбокс и полное название без переноса -->
                           <div class="step-header-line">
                             <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
                             <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
                           </div>
 
-                          <!-- 2. СТРОКА ДАТЫ, БЛОКЕРА И УДАЛЕНИЯ -->
+                          <!-- Строка 2: Дата, Риск и Удаление -->
                           <div class="step-footer-line">
                             <div class="step-actions-left">
-                              <span class="step-date-tag" onclick="editStepDate(${proc.id}, ${obj.id}, ${s.id})" title="Изменить срок">
-                                ${s.done ? '✔ ' : '📅 '}${escapeHtml(s.date)}
+                              <span class="step-date-tag ${dateMeta.cls}" onclick="editStepDate(${proc.id}, ${obj.id}, ${s.id})" title="Изменить срок">
+                                ${dateMeta.text}
                               </span>
                               <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
-                                ${hasBlock ? '⚠️ Задержка' : '⚠️ Проблема'}
+                                ${hasBlock ? '🚨 Задержка' : '+ риск'}
                               </button>
                             </div>
                             <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
                           </div>
 
-                          <!-- БЛОКЕР (ЕСЛИ ЕСТЬ) -->
+                          <!-- Плашка блокера -->
                           ${hasBlock ? `
                             <div class="blocker-banner">
                               <span class="reason-text" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
@@ -1376,41 +1460,49 @@
                     }).join('')}
                   </div>
 
-                  <!-- ШАБЛОНЫ ЭТАПОВ -->
-                  <div class="template-chips-bar">
-                    <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">
-                      ⚡ + Все 5 этапов
+                  <!-- АККУРАТНО СКЛАДЫВАЮЩАЯСЯ ФОРМА ДОБАВЛЕНИЯ -->
+                  ${!obj.showAddForm ? `
+                    <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
+                      + Добавить этап / шаблоны
                     </button>
-                    <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
-                    <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
-                    <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
-                    <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
-                    <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
-                  </div>
-
-                  <!-- ПОЛЕ ДОБАВЛЕНИЯ ШАГА -->
-                  <div class="step-fast-add">
-                    <div class="sfa-row-1">
-                      <input type="text" id="txt-${obj.id}" placeholder="+ Другой этап..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
-                      <input type="text" class="date-input" id="date-${obj.id}" value="${getTodayStr()}" placeholder="Срок">
-                    </div>
-                    <div class="sfa-row-2">
-                      <div class="quick-chips">
-                        <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getTodayStr()}')">Сегодня</button>
-                        <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до ${getTomorrowStr()}')">Завтра</button>
-                        <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до 30.09.2026')">Конец мес.</button>
+                  ` : `
+                    <div class="step-fast-add">
+                      <!-- Шаблоны этапов -->
+                      <div class="template-chips-bar">
+                        <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
+                        <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
                       </div>
-                      <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
+
+                      <div class="sfa-row-1">
+                        <input type="text" id="txt-${obj.id}" placeholder="Название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
+                        <input type="text" class="date-input" id="date-${obj.id}" value="${getTodayStr()}" placeholder="Срок">
+                      </div>
+
+                      <div class="sfa-row-2">
+                        <div class="quick-chips">
+                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, '${getTodayStr()}')">Сегодня</button>
+                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до ${getTomorrowStr()}')">Завтра</button>
+                          <button type="button" class="chip" onclick="setChipDate(${obj.id}, 'до 30.09.2026')">Конец мес.</button>
+                        </div>
+                        <div style="display:flex; gap:4px;">
+                          <button type="button" class="chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
+                          <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  `}
                 </div>
               `;
             }).join('')}
 
-            <!-- КНОПКИ ДОБАВЛЕНИЯ -->
+            <!-- КНОПКИ СОЗДАНИЯ ОБЪЕКТА -->
             <div class="proc-add-actions">
               <button class="btn-new-obj template" onclick="createObjectWithStandardWorkflow(${proc.id})">
-                ⚡ Создать объект с 5 этапами
+                ⚡ Создать объект сразу с 5 этапами
               </button>
               <button class="btn-new-obj" onclick="promptAddObject(${proc.id})">
                 + Пустой объект
@@ -1441,6 +1533,16 @@
 
         root.appendChild(card);
       });
+
+      // Динамический цвет плашки задержек
+      const bCard = document.getElementById('mBlockersCard');
+      if (bCard) {
+        if (totalBlockers > 0) {
+          bCard.className = 'metric-card has-danger';
+        } else {
+          bCard.className = 'metric-card';
+        }
+      }
 
       document.getElementById('mBlockers').textContent = totalBlockers;
       document.getElementById('mDone').textContent = totalDone;
@@ -1477,99 +1579,131 @@
       });
 
       if (reportMode === 'executive') {
-        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}\n\n`;
+        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}
+
+`;
 
         if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:\n`;
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:
+`;
           blockers.forEach(b => {
-            txt += `• ${b.obj} (${b.proc}):\n`;
-            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
-            txt += `     └ Причина: ${b.reason}\n`;
+            txt += `• ${b.obj} (${b.proc}):
+`;
+            txt += `  ⚠️ ${b.step} [${b.date}]
+`;
+            txt += `     └ Причина: ${b.reason}
+`;
           });
-          txt += `\n`;
+          txt += `
+`;
         }
 
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:\n`;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
+`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = o.steps.filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
-              doneTxt += `• ${o.title} (${p.title}):\n`;
+              doneTxt += `• ${o.title} (${p.title}):
+`;
               todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]\n`;
+                doneTxt += `  - ${s.text} [закрыто]
+`;
               });
             }
           });
         });
-        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
-        txt += doneTxt + `\n`;
+        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов
+`;
+        txt += doneTxt + `
+`;
 
         if (archivedList.length > 0) {
-          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):\n`;
+          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):
+`;
           archivedList.forEach(a => {
-            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто\n`;
+            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто
+`;
           });
-          txt += `\n`;
+          txt += `
+`;
         }
 
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:\n`;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:
+`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const regularSteps = o.steps.filter(s => !s.done && !s.blocker);
             if (regularSteps.length > 0) {
               hasPlan = true;
-              planTxt += `• ${o.title} (${p.title}):\n`;
+              planTxt += `• ${o.title} (${p.title}):
+`;
               regularSteps.forEach(s => {
-                planTxt += `  - ${s.text} [${s.date}]\n`;
+                planTxt += `  - ${s.text} [${s.date}]
+`;
               });
             }
           });
         });
-        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
+        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!
+`;
         txt += planTxt;
 
         return txt.trim();
 
       } else {
-        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}\n\n`;
+        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}
+
+`;
 
         if (blockers.length > 0) {
-          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):\n`;
+          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):
+`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]\n`;
+            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]
+`;
           });
-          txt += `\n`;
+          txt += `
+`;
         }
 
         state.forEach(p => {
           const active = p.objects.filter(o => !o.archived);
-          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
+`;
           if (active.length === 0) {
-            txt += `  (все объекты завершены и в архиве)\n\n`;
+            txt += `  (все объекты завершены и в архиве)
+
+`;
             return;
           }
 
           active.forEach(o => {
             const d = o.steps.filter(s => s.done).length;
             const t = o.steps.length;
-            txt += `📌 ${o.title} [готовность: ${d}/${t}]\n`;
+            txt += `📌 ${o.title} [готовность: ${d}/${t}]
+`;
             o.steps.forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : `[${s.date}]`;
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
+              txt += `  ${icon} ${s.text} ${status}${blockStr}
+`;
             });
           });
-          txt += `\n`;
+          txt += `
+`;
         });
 
         if (archivedList.length > 0) {
-          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):\n`;
+          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):
+`;
           archivedList.forEach(a => {
-            txt += `• ${a.obj} (${a.proc})\n`;
+            txt += `• ${a.obj} (${a.proc})
+`;
           });
         }
 
