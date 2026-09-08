@@ -8,14 +8,13 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #f1f5f9;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
       
       --accent: #2563eb;
-      --accent-hover: #1d4ed8;
       --accent-light: #eff6ff;
 
       --done: #16a34a;
@@ -31,7 +30,7 @@
       --danger-border: #fca5a5;
 
       --radius: 12px;
-      --shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     * {
@@ -45,10 +44,9 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 12px;
-      padding-bottom: 95px;
-      font-size: 16px;
-      line-height: 1.5;
+      padding: 8px 10px 100px 10px;
+      font-size: 15px;
+      line-height: 1.45;
     }
 
     .app-container {
@@ -56,35 +54,35 @@
       margin: 0 auto;
     }
 
-    /* Панель руководителя */
+    /* 1. ПАНЕЛЬ РУКОВОДИТЕЛЯ */
     .dashboard-card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
       border: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-sm);
     }
 
     .dash-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .dash-title {
-      font-size: 19px;
+      font-size: 17px;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .sync-badge {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 3px 9px;
+      padding: 3px 8px;
       border-radius: 20px;
       background: #e0f2fe;
       color: #0369a1;
@@ -93,61 +91,59 @@
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 6px;
+      margin-bottom: 10px;
     }
-    @media (max-width: 520px) {
+    @media (max-width: 480px) {
       .metrics-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     .metric-card {
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: 8px;
-      border: 1px solid transparent;
       display: flex;
       flex-direction: column;
     }
+    .metric-card.red {
+      background: var(--danger-bg);
+      color: #991b1b;
+      border: 1px solid var(--danger-border);
+    }
     .metric-card.green {
       background: var(--done-bg);
-      border-color: var(--done-border);
       color: #166534;
+      border: 1px solid var(--done-border);
     }
     .metric-card.amber {
       background: var(--work-bg);
-      border-color: var(--work-border);
       color: #92400e;
-    }
-    .metric-card.red {
-      background: var(--danger-bg);
-      border-color: var(--danger-border);
-      color: #991b1b;
+      border: 1px solid var(--work-border);
     }
     .metric-card.blue {
       background: var(--accent-light);
-      border-color: #bfdbfe;
       color: #1e40af;
+      border: 1px solid #bfdbfe;
     }
     .metric-lbl {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
       opacity: 0.85;
     }
     .metric-num {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     .report-modes {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
     .report-mode-btn {
       flex: 1;
-      padding: 8px 10px;
-      font-size: 13px;
+      padding: 8px 6px;
+      font-size: 12px;
       font-weight: 700;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -155,6 +151,7 @@
       color: var(--text-muted);
       cursor: pointer;
       text-align: center;
+      white-space: nowrap;
     }
     .report-mode-btn.active {
       background: var(--text-main);
@@ -162,18 +159,18 @@
       border-color: var(--text-main);
     }
 
-    /* Быстрое добавление направления */
+    /* 2. БЫСТРЫЙ ВВОД НАПРАВЛЕНИЯ */
     .quick-add-bar {
       display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
+      gap: 6px;
+      margin-bottom: 10px;
     }
     .quick-add-bar input {
       flex: 1;
-      padding: 12px 14px;
-      font-size: 15px;
+      padding: 10px 12px;
+      font-size: 14px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #ffffff;
       outline: none;
     }
@@ -183,27 +180,27 @@
     .btn-dark {
       background: #1e293b;
       color: #ffffff;
-      padding: 12px 18px;
+      padding: 10px 14px;
       border: none;
-      border-radius: 10px;
-      font-size: 15px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
     }
 
-    /* Процесс */
+    /* 3. КАРТОЧКА ПРОЦЕССА */
     .process-section {
       background: var(--card-bg);
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
       overflow: hidden;
     }
 
     .process-header {
-      padding: 14px 16px;
+      padding: 12px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -212,19 +209,16 @@
       user-select: none;
       border-bottom: 1px solid #f1f5f9;
     }
-    .process-header:hover {
-      background: #f8fafc;
-    }
 
     .proc-title-group {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 17px;
+      gap: 8px;
+      font-size: 16px;
       font-weight: 700;
     }
     .proc-arrow {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       transition: transform 0.2s;
     }
@@ -234,7 +228,7 @@
 
     .proc-del-link {
       color: #94a3b8;
-      font-size: 13px;
+      font-size: 12px;
       background: none;
       border: none;
       cursor: pointer;
@@ -244,25 +238,24 @@
     }
 
     .process-body {
-      padding: 14px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
     .process-body.hidden {
       display: none;
     }
 
-    /* Объект */
+    /* 4. ОБЪЕКТЫ / ПРОЕКТЫ */
     .object-card {
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .object-card.completed-obj {
       background: #fcfdfc;
@@ -273,24 +266,27 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .obj-name {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       color: #0f172a;
       flex: 1;
       cursor: pointer;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
     .obj-tools {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      flex-shrink: 0;
     }
     .badge-percent {
       font-size: 11px;
       font-weight: 800;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 12px;
       background: #f1f5f9;
       color: #475569;
@@ -306,8 +302,8 @@
       background: none;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      padding: 3px 7px;
-      font-size: 13px;
+      padding: 3px 6px;
+      font-size: 12px;
       cursor: pointer;
       color: #475569;
     }
@@ -316,61 +312,29 @@
     }
     .btn-icon-tool.del:hover {
       color: var(--danger);
-      border-color: #fecaca;
       background: #fef2f2;
-    }
-
-    /* Баннер завершения объекта на 100% */
-    .all-done-banner {
-      background: #f0fdf4;
-      border: 1px dashed #86efac;
-      border-radius: 8px;
-      padding: 10px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-    .all-done-banner span {
-      font-size: 13px;
-      font-weight: 700;
-      color: #166534;
-    }
-    .btn-finish-work {
-      background: #16a34a;
-      color: #ffffff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
-    }
-    .btn-finish-work:hover {
-      background: #15803d;
+      border-color: #fecaca;
     }
 
     /* Прогресс-бар */
     .progress-bar-bg {
       width: 100%;
-      height: 6px;
+      height: 5px;
       background: #f1f5f9;
-      border-radius: 10px;
+      border-radius: 6px;
       overflow: hidden;
     }
     .progress-bar-fill {
       height: 100%;
       background: var(--accent);
-      border-radius: 10px;
+      border-radius: 6px;
       transition: width 0.3s ease;
     }
     .progress-bar-fill.done {
       background: var(--done);
     }
 
-    /* Шаги */
+    /* 5. ШАГИ / ЭТАПЫ */
     .steps-list {
       display: flex;
       flex-direction: column;
@@ -395,24 +359,19 @@
       border-color: var(--danger-border);
     }
 
-    .step-main-row {
+    /* Верхняя строка шага */
+    .step-header-line {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .step-left {
-      display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
-      flex: 1;
+      width: 100%;
     }
     .step-chk {
-      width: 20px;
-      height: 20px;
+      width: 19px;
+      height: 19px;
       cursor: pointer;
       accent-color: var(--done);
+      margin-top: 1px;
       flex-shrink: 0;
     }
     .step-title {
@@ -421,7 +380,10 @@
       color: var(--text-main);
       cursor: pointer;
       line-height: 1.35;
-      word-break: break-word;
+      flex: 1;
+      word-break: normal;
+      overflow-wrap: break-word;
+      hyphens: none;
     }
     .step-item.is-done .step-title {
       text-decoration: line-through;
@@ -429,11 +391,19 @@
       opacity: 0.7;
     }
 
-    .step-aside {
+    /* Нижняя строка шага */
+    .step-footer-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-left: 29px;
+    }
+
+    .step-actions-left {
       display: flex;
       align-items: center;
-      gap: 5px;
-      flex-shrink: 0;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
     .step-date-tag {
@@ -461,11 +431,12 @@
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      padding: 3px 6px;
+      padding: 3px 7px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       color: #475569;
+      white-space: nowrap;
     }
     .btn-blocker-trigger:hover {
       background: #f1f5f9;
@@ -476,6 +447,21 @@
       color: #991b1b;
     }
 
+    .mini-del {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .mini-del:hover {
+      color: var(--danger);
+      background: rgba(0,0,0,0.04);
+    }
+
+    /* Блокер */
     .blocker-banner {
       display: flex;
       align-items: center;
@@ -484,10 +470,11 @@
       background: #ffffff;
       border: 1px solid #fca5a5;
       border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 13px;
+      padding: 5px 8px;
+      font-size: 12px;
       color: #991b1b;
       font-weight: 600;
+      margin-left: 29px;
     }
     .blocker-banner span.reason-text {
       flex: 1;
@@ -502,42 +489,54 @@
       cursor: pointer;
       padding: 2px 4px;
     }
-    .blocker-clear-btn:hover {
-      text-decoration: underline;
-    }
 
-    .mini-del {
-      background: none;
+    /* 100% готовность */
+    .all-done-banner {
+      background: #f0fdf4;
+      border: 1px dashed #86efac;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .all-done-banner span {
+      font-size: 13px;
+      font-weight: 700;
+      color: #166534;
+    }
+    .btn-finish-work {
+      background: #16a34a;
+      color: #ffffff;
       border: none;
-      color: #94a3b8;
-      font-size: 14px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      padding: 2px 4px;
-    }
-    .mini-del:hover {
-      color: var(--danger);
+      white-space: nowrap;
     }
 
-    /* Быстрые шаблоны этапов */
+    /* Шаблоны */
     .template-chips-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 4px;
       margin-top: 2px;
     }
     .tpl-chip {
       background: #ffffff;
       border: 1px solid #cbd5e1;
       color: #1e293b;
-      padding: 4px 8px;
+      padding: 4px 7px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.15s;
+      gap: 3px;
     }
     .tpl-chip:hover {
       background: #eff6ff;
@@ -550,20 +549,17 @@
       color: #15803d;
       font-weight: 700;
     }
-    .tpl-chip.preset-all:hover {
-      background: #dcfce7;
-    }
 
-    /* Форма добавления шага */
+    /* Добавление шага */
     .step-fast-add {
       background: #f8fafc;
       border: 1px dashed #cbd5e1;
       border-radius: 8px;
-      padding: 10px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 4px;
+      gap: 6px;
+      margin-top: 2px;
     }
     .sfa-row-1 {
       display: flex;
@@ -571,24 +567,20 @@
     }
     .sfa-row-1 input[type="text"] {
       flex: 1;
-      padding: 9px 12px;
-      font-size: 15px;
+      padding: 8px 10px;
+      font-size: 14px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
     }
     .sfa-row-1 input.date-input {
-      width: 140px;
-      padding: 9px 10px;
-      font-size: 14px;
+      width: 120px;
+      padding: 8px 6px;
+      font-size: 13px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
       background: #fff;
-    }
-    @media (max-width: 480px) {
-      .sfa-row-1 { flex-direction: column; }
-      .sfa-row-1 input.date-input { width: 100%; }
     }
 
     .sfa-row-2 {
@@ -599,121 +591,95 @@
     }
     .quick-chips {
       display: flex;
-      gap: 4px;
+      gap: 3px;
     }
     .chip {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 4px 8px;
+      padding: 3px 6px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #334155;
       cursor: pointer;
-    }
-    .chip:hover {
-      background: #f1f5f9;
     }
 
     .btn-add-step {
       background: #334155;
       color: #ffffff;
       border: none;
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
     }
 
-    /* Кнопки процессов */
+    /* Кнопки объектов */
     .proc-add-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
-    @media (max-width: 500px) {
-      .proc-add-actions { flex-direction: column; }
-    }
-
     .btn-new-obj {
       flex: 1;
       background: #f8fafc;
       color: #475569;
       border: 1px dashed #cbd5e1;
-      padding: 10px;
+      padding: 9px 6px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
-    }
-    .btn-new-obj:hover {
-      background: #f1f5f9;
     }
     .btn-new-obj.template {
       background: #eff6ff;
       border-color: #bfdbfe;
       color: #1d4ed8;
     }
-    .btn-new-obj.template:hover {
-      background: #dbeafe;
-    }
 
-    /* БЛОК АРХИВА ЗАКРЫТЫХ ОБЪЕКТОВ */
+    /* Архив */
     .archive-section {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 10px 12px;
-      margin-top: 4px;
+      padding: 8px 10px;
     }
     .archive-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
-      user-select: none;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
     }
     .archive-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 6px;
+      margin-top: 8px;
     }
     .archive-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 10px;
+      padding: 6px 8px;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      font-size: 14px;
-    }
-    .archive-item-title {
-      font-weight: 700;
-      color: #166534;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 13px;
     }
     .btn-restore {
       background: none;
       border: 1px solid #cbd5e1;
-      padding: 3px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
-      color: #334155;
-    }
-    .btn-restore:hover {
-      background: #f1f5f9;
     }
 
-    /* Плавающая нижняя панель */
+    /* Плавающая панель */
     .floating-action-bar {
       position: fixed;
       bottom: 0;
@@ -721,10 +687,10 @@
       right: 0;
       background: #ffffff;
       border-top: 1px solid var(--border);
-      padding: 12px 16px;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+      padding: 10px 14px;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
       display: flex;
-      gap: 10px;
+      gap: 8px;
       z-index: 100;
       max-width: 860px;
       margin: 0 auto;
@@ -735,39 +701,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 13px;
-      font-size: 15px;
+      gap: 6px;
+      padding: 12px;
+      font-size: 14px;
       font-weight: 700;
       border-radius: 10px;
       border: none;
       cursor: pointer;
       color: #ffffff;
-      transition: transform 0.1s;
     }
-    .fab-btn:active {
-      transform: scale(0.98);
-    }
-    .fab-btn.copy {
-      background: #16a34a;
-    }
-    .fab-btn.send {
-      background: #0284c7;
-    }
+    .fab-btn.copy { background: #16a34a; }
+    .fab-btn.send { background: #0284c7; }
 
     /* Тост */
     .toast {
       position: fixed;
-      top: 20px;
+      top: 16px;
       left: 50%;
       transform: translateX(-50%);
       background: #0f172a;
       color: #ffffff;
-      padding: 10px 20px;
+      padding: 8px 16px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
       display: none;
       z-index: 200;
       white-space: nowrap;
@@ -810,14 +767,14 @@
           ⚡ Сводка за сегодня
         </button>
         <button class="report-mode-btn" id="modeFull" onclick="setReportMode('full')">
-          📋 Полный статус-отчет
+          📋 Полный отчет
         </button>
       </div>
     </div>
 
-    <!-- ДОБАВЛЕНИЕ НОВОГО НАПРАВЛЕНИЯ -->
+    <!-- БЫСТРЫЙ ВВОД НАПРАВЛЕНИЯ -->
     <div class="quick-add-bar">
-      <input type="text" id="newProcInput" placeholder="Новое направление (напр. Оформление сервитута)..." onkeydown="if(event.key==='Enter') addProcess()">
+      <input type="text" id="newProcInput" placeholder="Новое направление (напр. Сервитуты)..." onkeydown="if(event.key==='Enter') addProcess()">
       <button class="btn-dark" onclick="addProcess()">+ Процесс</button>
     </div>
 
@@ -825,7 +782,7 @@
     <div id="processesRoot"></div>
   </div>
 
-  <!-- ПЛАВАЮЩАЯ ПАНЕЛЬ С КНОПКАМИ КОПИРОВАНИЯ -->
+  <!-- ПЛАВАЮЩАЯ ПАНЕЛЬ -->
   <div class="floating-action-bar">
     <button class="fab-btn copy" onclick="copyReport()">
       📋 Скопировать отчет
@@ -839,7 +796,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const STORAGE_KEY = 'manager_daily_tracker_v8_archive';
+    const STORAGE_KEY = 'manager_daily_tracker_v9_mobile';
 
     if (tg) {
       tg.ready();
@@ -886,10 +843,10 @@
             archived: false,
             steps: [
               { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1003, text: "Утверждение ЗУП МИО", date: "до 20.09.2026", done: true, blocker: null },
-              { id: 1004, text: "Постановление акима", date: "до 30.09.2026", done: true, blocker: null },
-              { id: 1005, text: "Акт на землю, регистрация", date: "до 11.10.2026", done: true, blocker: null }
+              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: false, blocker: "Оплата не идет у подрядчика" },
+              { id: 1003, text: "Утверждение ЗУП МИО", date: "до 20.09.2026", done: false, blocker: null },
+              { id: 1004, text: "Постановление акима", date: "до 30.09.2026", done: false, blocker: null },
+              { id: 1005, text: "Акт на землю, регистрация", date: "до 11.10.2026", done: false, blocker: null }
             ]
           },
           {
@@ -931,13 +888,13 @@
           if (!err && val) {
             parseVal(val);
           } else {
-            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v7_blockers');
+            const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v8_archive');
             if (local) parseVal(local);
           }
           render();
         });
       } else {
-        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v7_blockers');
+        const local = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_daily_tracker_v8_archive');
         if (local) parseVal(local);
         render();
       }
@@ -1005,7 +962,6 @@
       }
     }
 
-    /* АРХИВАЦИЯ И ЗАВЕРШЕНИЕ РАБОТЫ */
     function archiveObject(procId, objId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
@@ -1106,7 +1062,7 @@
             blocker: null
           }))
         });
-        showToast("Объект создан с 5 типовыми этапами!");
+        showToast("Создан объект с 5 этапами!");
         haptic();
         saveData();
       }
@@ -1135,7 +1091,7 @@
       };
 
       p.objects.push(cloned);
-      showToast("Структура объекта скопирована!");
+      showToast("Структура скопирована!");
       haptic();
       saveData();
     }
@@ -1336,11 +1292,9 @@
             <div class="proc-title-group">
               <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
               <span>📂 ${escapeHtml(proc.title)}</span>
-              <span style="font-size:13px; color:var(--text-muted); font-weight:normal;">(${activeObjects.length} в работе)</span>
+              <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(${activeObjects.length} в работе)</span>
             </div>
-            <div class="proc-meta-actions">
-              <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
-            </div>
+            <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
           </div>
 
           <div class="process-body ${isCollapsed ? 'hidden' : ''}">
@@ -1361,7 +1315,7 @@
                       ${tCount > 0 ? `
                         <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
                       ` : ''}
-                      <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Клонировать объект">📋 Копировать</button>
+                      <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать объект">📋</button>
                       <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕</button>
                     </div>
                   </div>
@@ -1372,43 +1326,47 @@
                     </div>
                   ` : ''}
 
-                  <!-- БАННЕР ЗАВЕРШЕНИЯ РАБОТЫ (ЕСЛИ 100%) -->
+                  <!-- БАННЕР 100% -->
                   ${isAllDone ? `
                     <div class="all-done-banner">
-                      <span>🎉 Все этапы успешно закрыты!</span>
+                      <span>🎉 Все 100% этапов закрыты!</span>
                       <button class="btn-finish-work" onclick="archiveObject(${proc.id}, ${obj.id})">
-                        🏁 Завершить и в архив
+                        🏁 В архив
                       </button>
                     </div>
                   ` : ''}
 
-                  <!-- Список шагов -->
+                  <!-- СПИСОК ШАГОВ (ДВУХУРОВНЕВАЯ МОБИЛЬНАЯ КОМПОНОВКА) -->
                   <div class="steps-list">
                     ${obj.steps.map(s => {
                       const hasBlock = !s.done && !!s.blocker;
 
                       return `
                         <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
-                          <div class="step-main-row">
-                            <div class="step-left">
-                              <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
-                              <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
-                            </div>
-                            <div class="step-aside">
-                              <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})" title="Указать задержку">
-                                ${hasBlock ? '⚠️ Задержка' : '⚠️'}
-                              </button>
+                          <!-- 1. ТЕКСТ ШАГА НА ВСЮ ШИРИНУ -->
+                          <div class="step-header-line">
+                            <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                            <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
+                          </div>
+
+                          <!-- 2. СТРОКА ДАТЫ, БЛОКЕРА И УДАЛЕНИЯ -->
+                          <div class="step-footer-line">
+                            <div class="step-actions-left">
                               <span class="step-date-tag" onclick="editStepDate(${proc.id}, ${obj.id}, ${s.id})" title="Изменить срок">
                                 ${s.done ? '✔ ' : '📅 '}${escapeHtml(s.date)}
                               </span>
-                              <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕</button>
+                              <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
+                                ${hasBlock ? '⚠️ Задержка' : '⚠️ Проблема'}
+                              </button>
                             </div>
+                            <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
                           </div>
 
+                          <!-- БЛОКЕР (ЕСЛИ ЕСТЬ) -->
                           ${hasBlock ? `
                             <div class="blocker-banner">
                               <span class="reason-text" onclick="promptToggleBlocker(${proc.id}, ${obj.id}, ${s.id})">
-                                🚨 Причина: ${escapeHtml(s.blocker)}
+                                🚨 ${escapeHtml(s.blocker)}
                               </span>
                               <button class="blocker-clear-btn" onclick="clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
                             </div>
@@ -1418,11 +1376,10 @@
                     }).join('')}
                   </div>
 
-                  <!-- Шаблоны этапов -->
+                  <!-- ШАБЛОНЫ ЭТАПОВ -->
                   <div class="template-chips-bar">
-                    <span style="font-size:11px; font-weight:700; color:var(--text-muted); align-self:center; margin-right:2px;">ШАБЛОНЫ:</span>
                     <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">
-                      ⚡ + Все 5 этапов регламента
+                      ⚡ + Все 5 этапов
                     </button>
                     <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
                     <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
@@ -1431,10 +1388,10 @@
                     <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
                   </div>
 
-                  <!-- Добавление нестандартного шага -->
+                  <!-- ПОЛЕ ДОБАВЛЕНИЯ ШАГА -->
                   <div class="step-fast-add">
                     <div class="sfa-row-1">
-                      <input type="text" id="txt-${obj.id}" placeholder="+ Другой шаг / примечание..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
+                      <input type="text" id="txt-${obj.id}" placeholder="+ Другой этап..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
                       <input type="text" class="date-input" id="date-${obj.id}" value="${getTodayStr()}" placeholder="Срок">
                     </div>
                     <div class="sfa-row-2">
@@ -1450,17 +1407,17 @@
               `;
             }).join('')}
 
-            <!-- КНОПКИ СОЗДАНИЯ -->
+            <!-- КНОПКИ ДОБАВЛЕНИЯ -->
             <div class="proc-add-actions">
               <button class="btn-new-obj template" onclick="createObjectWithStandardWorkflow(${proc.id})">
-                ⚡ Создать объект сразу с 5 этапами
+                ⚡ Создать объект с 5 этапами
               </button>
               <button class="btn-new-obj" onclick="promptAddObject(${proc.id})">
                 + Пустой объект
               </button>
             </div>
 
-            <!-- БЛОК АРХИВА ЗАКРЫТЫХ ОБЪЕКТОВ -->
+            <!-- АРХИВ -->
             ${archivedObjects.length > 0 ? `
               <div class="archive-section">
                 <div class="archive-header" onclick="toggleArchiveView(${proc.id})">
@@ -1471,8 +1428,8 @@
                   <div class="archive-list">
                     ${archivedObjects.map(ao => `
                       <div class="archive-item">
-                        <span class="archive-item-title">✔ 📌 ${escapeHtml(ao.title)} (закрыт 100%)</span>
-                        <button class="btn-restore" onclick="restoreObject(${proc.id}, ${ao.id})">↩ Вернуть в работу</button>
+                        <span style="font-weight:700; color:#166534;">✔ 📌 ${escapeHtml(ao.title)} (100%)</span>
+                        <button class="btn-restore" onclick="restoreObject(${proc.id}, ${ao.id})">↩ Вернуть</button>
                       </div>
                     `).join('')}
                   </div>
@@ -1491,11 +1448,10 @@
       document.getElementById('mTotal').textContent = totalActiveObjs;
     }
 
-    /* ФОРМИРОВАНИЕ ОТЧЕТА С ФИЛЬТРАЦИЕЙ АРХИВА */
+    /* ОТЧЕТ ДЛЯ TELEGRAM */
     function generateTelegramReport() {
       const today = getTodayStr();
 
-      // Блокеры только по активным объектам
       const blockers = [];
       state.forEach(p => {
         p.objects.filter(o => !o.archived).forEach(o => {
@@ -1513,7 +1469,6 @@
         });
       });
 
-      // Недавно закрытые / архивные объекты
       const archivedList = [];
       state.forEach(p => {
         p.objects.filter(o => o.archived).forEach(o => {
@@ -1522,136 +1477,99 @@
       });
 
       if (reportMode === 'executive') {
-        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}
+        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}\n\n`;
 
-`;
-
-        // 1. БЛОКЕРЫ
         if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:
-`;
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj} (${b.proc}):
-`;
-            txt += `  ⚠️ ${b.step} [${b.date}]
-`;
-            txt += `     └ Причина: ${b.reason}
-`;
+            txt += `• ${b.obj} (${b.proc}):\n`;
+            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
+            txt += `     └ Причина: ${b.reason}\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
-        // 2. СДЕЛАНО ЗА СЕГОДНЯ
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:
-`;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:\n`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = o.steps.filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
-              doneTxt += `• ${o.title} (${p.title}):
-`;
+              doneTxt += `• ${o.title} (${p.title}):\n`;
               todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]
-`;
+                doneTxt += `  - ${s.text} [закрыто]\n`;
               });
             }
           });
         });
-        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов
-`;
-        txt += doneTxt + `
-`;
+        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
+        txt += doneTxt + `\n`;
 
-        // 3. ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (АРХИВ)
         if (archivedList.length > 0) {
-          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):
-`;
+          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):\n`;
           archivedList.forEach(a => {
-            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто
-`;
+            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
-        // 4. В РАБОТЕ
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:
-`;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:\n`;
         state.forEach(p => {
           p.objects.filter(o => !o.archived).forEach(o => {
             const regularSteps = o.steps.filter(s => !s.done && !s.blocker);
             if (regularSteps.length > 0) {
               hasPlan = true;
-              planTxt += `• ${o.title} (${p.title}):
-`;
+              planTxt += `• ${o.title} (${p.title}):\n`;
               regularSteps.forEach(s => {
-                planTxt += `  - ${s.text} [${s.date}]
-`;
+                planTxt += `  - ${s.text} [${s.date}]\n`;
               });
             }
           });
         });
-        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!
-`;
+        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
         txt += planTxt;
 
         return txt.trim();
 
       } else {
-        // Полный отчет
-        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}
-
-`;
+        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):
-`;
+          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]
-`;
+            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]\n`;
           });
-          txt += `
-`;
+          txt += `\n`;
         }
 
         state.forEach(p => {
           const active = p.objects.filter(o => !o.archived);
-          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}
-`;
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
           if (active.length === 0) {
-            txt += `  (все объекты завершены и в архиве)
-
-`;
+            txt += `  (все объекты завершены и в архиве)\n\n`;
             return;
           }
 
           active.forEach(o => {
             const d = o.steps.filter(s => s.done).length;
             const t = o.steps.length;
-            txt += `📌 ${o.title} [готовность: ${d}/${t}]
-`;
+            txt += `📌 ${o.title} [готовность: ${d}/${t}]\n`;
             o.steps.forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : `[${s.date}]`;
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}
-`;
+              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
           });
-          txt += `
-`;
+          txt += `\n`;
         });
 
         if (archivedList.length > 0) {
-          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):
-`;
+          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):\n`;
           archivedList.forEach(a => {
-            txt += `• ${a.obj} (${a.proc})
-`;
+            txt += `• ${a.obj} (${a.proc})\n`;
           });
         }
 
