@@ -90,7 +90,6 @@
       border-radius: 20px;
       background: #e0f2fe;
       color: #0369a1;
-      cursor: pointer;
     }
 
     .metrics-grid {
@@ -184,9 +183,7 @@
       background: #ffffff;
       outline: none;
     }
-    .quick-add-bar input:focus {
-      border-color: var(--brand);
-    }
+    .quick-add-bar input:focus { border-color: var(--brand); }
     .btn-dark {
       background: var(--neutral-dark);
       color: #ffffff;
@@ -382,9 +379,7 @@
       border-radius: 4px;
       transition: width 0.3s ease;
     }
-    .progress-bar-fill.done {
-      background: var(--done);
-    }
+    .progress-bar-fill.done { background: var(--done); }
 
     .obj-body {
       display: flex;
@@ -1156,62 +1151,72 @@
 
     let state = [];
 
-    /* НАДЕЖНАЯ ЗАГРУЗКА БЕЗ СТИРАНИЙ */
+    function parseRaw(raw) {
+      try {
+        const p = JSON.parse(raw);
+        if (p && p.updatedAt && Array.isArray(p.data)) return { ts: p.updatedAt, data: p.data };
+        if (Array.isArray(p)) return { ts: 0, data: p };
+      } catch(e) {}
+      return null;
+    }
+
+    /* ЗАГРУЗКА: СТРОГОЕ СВОРАЧИВАНИЕ ВСЕХ ЭЛЕМЕНТОВ ПРИ СТАРТЕ */
     function loadData() {
       let localTimestamp = 0;
       let localState = null;
 
-      // 1. Проверяем локальное хранилище
       const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
       if (rawLocal) {
-        try {
-          const parsed = JSON.parse(rawLocal);
-          if (parsed.updatedAt && Array.isArray(parsed.data)) {
-            localTimestamp = parsed.updatedAt;
-            localState = parsed.data;
-          } else if (Array.isArray(parsed)) {
-            localState = parsed;
-          }
-        } catch(e) {}
+        const res = parseRaw(rawLocal);
+        if (res && res.data) {
+          localTimestamp = res.ts;
+          localState = res.data;
+        }
       }
 
       if (localState && localState.length > 0) {
-        state = localState;
+        // Принудительно сворачиваем все папки и объекты при старте
+        state = localState.map(p => ({
+          ...p,
+          collapsed: true,
+          objects: (p.objects || []).map(o => ({
+            ...o,
+            collapsed: true
+          }))
+        }));
         render();
       }
 
-      // 2. Проверяем CloudStorage Telegram с контролем времени
       if (tg?.CloudStorage) {
         tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
           if (!err && val) {
-            try {
-              const cloudParsed = JSON.parse(val);
-              const cloudTimestamp = cloudParsed.updatedAt || 0;
-              const cloudData = cloudParsed.data || (Array.isArray(cloudParsed) ? cloudParsed : null);
-
-              // Берем облако ТОЛЬКО если оно гарантированно новее локального
-              if (cloudData && cloudTimestamp > localTimestamp) {
-                state = cloudData;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: cloudTimestamp, data: state }));
-                render();
-              }
-            } catch(e) {}
+            const res = parseRaw(val);
+            if (res && res.data && res.ts > localTimestamp) {
+              state = res.data.map(p => ({
+                ...p,
+                collapsed: true,
+                objects: (p.objects || []).map(o => ({
+                  ...o,
+                  collapsed: true
+                }))
+              }));
+              localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: res.ts, data: state }));
+              render();
+            }
           }
         });
       }
     }
 
-    /* МОМЕНТАЛЬНОЕ СОХРАНЕНИЕ */
+    /* СОХРАНЕНИЕ */
     function saveData() {
       const now = Date.now();
       const payload = { updatedAt: now, data: state };
       const json = JSON.stringify(payload);
 
-      // Сразу пишем в постоянную память браузера
       localStorage.setItem(STORAGE_KEY, json);
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
-      // Отправляем в облако Telegram
       if (tg?.CloudStorage) {
         tg.CloudStorage.setItem(STORAGE_KEY, json);
       }
@@ -1659,18 +1664,17 @@
       saveData();
     }
 
-    /* РЕЗЕРВНАЯ КОПИЯ В 1 КЛИК */
     function exportBackup() {
       const str = JSON.stringify(state, null, 2);
       navigator.clipboard.writeText(str).then(() => {
-        showToast("Резервная копия скопирована в буфер!");
+        showToast("Бэкап скопирован в буфер!");
       }).catch(() => {
         prompt("Скопируйте текст бэкапа:", str);
       });
     }
 
     function importBackup() {
-      const str = prompt("Вставьте текст ранее сохраненной резервной копии:");
+      const str = prompt("Вставьте текст бэкапа:");
       if (!str) return;
       try {
         const parsed = JSON.parse(str);
@@ -1678,7 +1682,7 @@
         if (Array.isArray(data) && data.length > 0) {
           state = data;
           saveData();
-          showToast("Данные успешно восстановлены!");
+          showToast("Данные восстановлены!");
         } else {
           alert("Неверный формат данных!");
         }
@@ -1880,7 +1884,6 @@
       document.getElementById('mTotal').textContent = totalActiveObjs;
     }
 
-    /* ФОРМИРОВАНИЕ ОТЧЕТА С ТАБЛИЧНОЙ ВЫРАВНИВАЮЩЕЙСЯ СВОДКОЙ */
     function generateTelegramReport() {
       const today = getTodayStr();
 
@@ -1951,7 +1954,6 @@
         return txt.trim();
 
       } else {
-        // ТАБЛИЧНЫЙ ПОЛНЫЙ ОТЧЕТ
         let txt = `📋 СВОДНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
@@ -1987,7 +1989,6 @@
           });
           txt += `└───────────────────────┴───────┴────────────┘\n\n`;
 
-          // Вывод детальных шагов
           active.forEach(o => {
             txt += `📌 ${o.title}:\n`;
             (o.steps || []).forEach(s => {
