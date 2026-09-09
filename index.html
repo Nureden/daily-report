@@ -1922,7 +1922,7 @@
     }
 
     /* ==============================================================
-       МОДУЛЬ GOOGLE GEMINI AI (ИСПРАВЛЕННЫЙ ЭНДПОИНТ v1)
+       МОДУЛЬ GOOGLE GEMINI AI (ЭНДПОИНТ v1beta С МОДЕЛЬЮ gemini-1.5-flash)
        ============================================================== */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
@@ -1972,8 +1972,8 @@
 
       const key = rawKey.trim();
 
-      // Стабильный эндпоинт v1 для модели gemini-1.5-flash
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
+      // Стандартный рабочий эндпоинт v1beta для gemini-1.5-flash
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
       
       const bodyPayload = {
         contents: [
