@@ -1922,7 +1922,7 @@
     }
 
     /* ==============================================================
-       МОДУЛЬ GOOGLE GEMINI AI
+       МОДУЛЬ GOOGLE GEMINI AI (ИСПРАВЛЕННЫЙ ЭНДПОИНТ)
        ============================================================== */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
@@ -1964,13 +1964,17 @@
     }
 
     async function callGeminiApi(systemPrompt, userPrompt) {
-      const key = localStorage.getItem(GEMINI_KEY_STORAGE);
-      if (!key) {
-        alert("Пожалуйста, сначала укажите API-ключ Gemini во вкладке «⚙️ Ключ». Ключ можно бесплатно получить в Google AI Studio.");
+      const rawKey = localStorage.getItem(GEMINI_KEY_STORAGE);
+      if (!rawKey || !rawKey.trim()) {
+        alert("Пожалуйста, укажите API-ключ Gemini во вкладке «⚙️ Ключ». Ключ можно бесплатно получить в Google AI Studio.");
         return null;
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+      const key = rawKey.trim();
+
+      // Исправленный универсальный эндпоинт v1beta
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
+      
       const bodyPayload = {
         contents: [
           {
@@ -1989,14 +1993,16 @@
         });
 
         if (!response.ok) {
-          throw new Error(`Ошибка Google API HTTP ${response.status}`);
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.error?.message || `HTTP ${response.status}`;
+          throw new Error(errMsg);
         }
 
         const data = await response.json();
         return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ модели.";
       } catch (err) {
         console.error("Gemini API Error:", err);
-        return `⚠️ Не удалось связаться с Google AI: ${err.message}`;
+        return `⚠️ Ошибка Google AI: ${err.message}`;
       }
     }
 
@@ -2124,7 +2130,6 @@
           return;
         }
 
-        // Автоматическое обновление данных
         let updated = false;
         state.forEach(p => {
           (p.objects || []).forEach(o => {
