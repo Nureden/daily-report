@@ -6,6 +6,8 @@
   <title>Управленческий трекер проектов</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Библиотека для экспорта в Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #f4f6f9;
@@ -280,21 +282,26 @@
       white-space: nowrap;
     }
 
-    .proc-del-link {
-      color: var(--text-subtle);
+    .proc-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .proc-btn-tool {
+      color: var(--text-muted);
       font-size: 12px;
       font-weight: 600;
-      background: none;
-      border: none;
+      background: #f8fafc;
+      border: 1px solid var(--border);
       cursor: pointer;
       padding: 4px 8px;
       border-radius: 6px;
       white-space: nowrap;
     }
-    .proc-del-link:hover {
-      color: var(--danger);
-      background: var(--danger-bg);
-    }
+    .proc-btn-tool:hover { background: #f1f5f9; color: var(--text-main); }
+    .proc-btn-tool.del { color: var(--danger); }
+    .proc-btn-tool.del:hover { background: var(--danger-bg); border-color: var(--danger-border); }
 
     .process-body {
       padding: 12px;
@@ -391,7 +398,7 @@
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 3px 6px;
+      padding: 4px 7px;
       font-size: 12px;
       cursor: pointer;
       color: #475569;
@@ -404,8 +411,11 @@
       background: #e2e8f0;
       color: #0f172a;
     }
-    .btn-icon-tool.del:hover {
+    .btn-icon-tool.del {
       color: var(--danger);
+      font-weight: 700;
+    }
+    .btn-icon-tool.del:hover {
       background: var(--danger-bg);
       border-color: var(--danger-border);
     }
@@ -600,15 +610,15 @@
     .mini-del {
       background: none;
       border: none;
-      color: var(--text-subtle);
+      color: var(--danger);
       font-size: 14px;
       cursor: pointer;
       padding: 2px 6px;
       border-radius: 4px;
+      font-weight: 700;
     }
     .mini-del:hover {
-      color: var(--danger);
-      background: rgba(0,0,0,0.04);
+      background: var(--danger-bg);
     }
 
     .blocker-banner {
@@ -865,7 +875,7 @@
       justify-content: center;
       gap: 6px;
       padding: 11px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       border-radius: 10px;
       border: none;
@@ -873,6 +883,7 @@
       color: #ffffff;
     }
     .fab-btn.copy { background: #16a34a; }
+    .fab-btn.excel { background: #059669; }
     .fab-btn.send { background: #0284c7; }
 
     /* МОДАЛЬНЫЕ ОКНА */
@@ -1004,7 +1015,7 @@
       border-radius: 8px;
       padding: 12px;
       font-size: 13px;
-      line-height: 1.45;
+      line-height: 1.5;
       color: #1e293b;
       white-space: pre-wrap;
       max-height: 300px;
@@ -1092,10 +1103,13 @@
   <!-- ПЛАВАЮЩАЯ ПАНЕЛЬ -->
   <div class="floating-action-bar">
     <button class="fab-btn copy" onclick="copyReport()">
-      📋 Скопировать отчет
+      📋 Текст
+    </button>
+    <button class="fab-btn excel" onclick="exportToExcel()">
+      📊 Excel
     </button>
     <button class="fab-btn send" onclick="shareToTelegram()">
-      ✈️ Отправить в Telegram
+      ✈️ Telegram
     </button>
   </div>
 
@@ -1115,6 +1129,7 @@
           <div style="display:flex; gap:6px; margin-top:4px;">
             <input type="password" id="geminiApiKeyInput" class="modal-input" placeholder="AIzaSy...">
             <button class="btn-dark" style="padding: 10px 14px; font-size:13px;" onclick="saveGeminiApiKey()">Сохранить</button>
+            <button class="modal-btn-danger" style="padding: 10px 12px; font-size:12px;" onclick="clearGeminiApiKey()">Удалить</button>
           </div>
         </div>
 
@@ -1131,7 +1146,25 @@
 
         <div class="ai-output-box" id="aiOutput-analytics">Результат отчета появится здесь...</div>
 
-        <button class="btn-dark" style="background:#16a34a;" onclick="copyAiOutput('aiOutput-analytics')">📋 Скопировать текст отчета</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-dark" style="background:#16a34a; flex:1;" onclick="copyAiOutput('aiOutput-analytics')">📋 Скопировать текст</button>
+          <button class="modal-btn-danger" style="padding:9px 14px;" onclick="clearAiReport()">Очистить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
+  <div class="modal-overlay" id="confirmDeleteOverlay" onclick="closeConfirmModal(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:400px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color:var(--danger);">🗑 Подтверждение удаления</div>
+        <button class="modal-close" onclick="closeConfirmModal()">✕</button>
+      </div>
+      <p id="confirmDeleteMessage" style="font-size:14px; color:#334155; margin:6px 0;">Вы уверены, что хотите удалить?</p>
+      <div class="modal-actions">
+        <button class="modal-btn-danger" id="confirmDeleteBtn" style="flex:1;">Да, удалить</button>
+        <button class="btn-dark" style="background:#64748b; padding:10px 16px;" onclick="closeConfirmModal()">Отмена</button>
       </div>
     </div>
   </div>
@@ -1225,6 +1258,7 @@
 
     let reportMode = 'executive';
     let activeModalTarget = { procId: null, objId: null, stepId: null };
+    let deleteCallbackAction = null;
 
     const STANDARD_WORKFLOW = [
       "Акт сверки НАО",
@@ -1375,6 +1409,39 @@
       showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный отчет (Таблица)");
     }
 
+    /* ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ (БЕЗ СБОЕВ В TELEGRAM) */
+    function requestDelete(message, onConfirm) {
+      if (tg?.showConfirm) {
+        tg.showConfirm(message, (ok) => {
+          if (ok) {
+            onConfirm();
+            haptic();
+            saveData();
+          }
+        });
+      } else {
+        document.getElementById('confirmDeleteMessage').textContent = message;
+        deleteCallbackAction = onConfirm;
+        document.getElementById('confirmDeleteOverlay').style.display = 'flex';
+        haptic();
+      }
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      if (deleteCallbackAction) {
+        deleteCallbackAction();
+        haptic();
+        saveData();
+      }
+      closeConfirmModal();
+    });
+
+    function closeConfirmModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('confirmDeleteOverlay').style.display = 'none';
+      deleteCallbackAction = null;
+    }
+
     function addProcess() {
       const input = document.getElementById('newProcInput');
       const val = input.value.trim();
@@ -1392,6 +1459,28 @@
       haptic();
       saveData();
       showToast("Направление добавлено!");
+    }
+
+    function editProcessTitle(procId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const newTitle = prompt("Название направления:", p.title);
+      if (newTitle && newTitle.trim()) {
+        p.title = newTitle.trim();
+        haptic();
+        saveData();
+        showToast("Направление обновлено!");
+      }
+    }
+
+    function deleteProcess(procId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+
+      requestDelete(`Удалить направление «${p.title}» со всеми объектами?`, () => {
+        state = state.filter(x => x.id !== procId);
+        showToast("Направление удалено");
+      });
     }
 
     function toggleProcessCollapse(procId) {
@@ -1428,12 +1517,15 @@
       saveData();
     }
 
-    function deleteProcess(procId) {
-      if (confirm("Удалить это направление со всеми объектами?")) {
-        state = state.filter(x => x.id !== procId);
-        haptic();
-        saveData();
-      }
+    function deleteObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!p || !obj) return;
+
+      requestDelete(`Удалить объект «${obj.title}» навсегда?`, () => {
+        p.objects = p.objects.filter(o => o.id !== objId);
+        showToast("Объект удален");
+      });
     }
 
     function toggleAddStepForm(procId, objId) {
@@ -1714,17 +1806,6 @@
       showToast("Этап добавлен!");
     }
 
-    function deleteObject(procId, objId) {
-      if (confirm("Удалить данный объект навсегда?")) {
-        const p = state.find(x => x.id === procId);
-        if (p) {
-          p.objects = p.objects.filter(o => o.id !== objId);
-          haptic();
-          saveData();
-        }
-      }
-    }
-
     function editObjectTitle(procId, objId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
@@ -1810,6 +1891,7 @@
       obj.steps = obj.steps.filter(s => s.id !== stepId);
       haptic();
       saveData();
+      showToast("Этап удален");
     }
 
     function exportBackup() {
@@ -1840,7 +1922,74 @@
     }
 
     /* ==============================================================
-       AI-ОТЧЕТ (gemini-3.6-flash) — ЧИСТЫЙ ФОРМАТ
+       ВЫГРУЗКА В EXCEL (.xlsx)
+       ============================================================== */
+    function exportToExcel() {
+      haptic();
+
+      const rows = [];
+      state.forEach(p => {
+        (p.objects || []).forEach(o => {
+          const total = (o.steps || []).length;
+          const done = (o.steps || []).filter(s => s.done).length;
+          const pct = total > 0 ? `${Math.round((done / total) * 100)}%` : '0%';
+
+          if (!o.steps || o.steps.length === 0) {
+            rows.push({
+              "Направление": p.title,
+              "Объект": o.title,
+              "В архиве": o.archived ? "Да" : "Нет",
+              "Прогресс": pct,
+              "Этап": "—",
+              "Срок": "—",
+              "Статус": "Нет этапов",
+              "Задержка / Блокер": "—",
+              "Изменено": "—"
+            });
+          } else {
+            o.steps.forEach(s => {
+              rows.push({
+                "Направление": p.title,
+                "Объект": o.title,
+                "В архиве": o.archived ? "Да" : "Нет",
+                "Прогресс": pct,
+                "Этап": s.text,
+                "Срок": s.date || "Не указан",
+                "Статус": s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе"),
+                "Задержка / Блокер": s.blocker || "—",
+                "Изменено": s.updatedAt || "—"
+              });
+            });
+          }
+        });
+      });
+
+      if (rows.length === 0) {
+        showToast("Нет данных для выгрузки");
+        return;
+      }
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+        { wch: 22 }, // Направление
+        { wch: 28 }, // Объект
+        { wch: 10 }, // В архиве
+        { wch: 10 }, // Прогресс
+        { wch: 32 }, // Этап
+        { wch: 16 }, // Срок
+        { wch: 14 }, // Статус
+        { wch: 32 }, // Блокер
+        { wch: 18 }  // Изменено
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
+      XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
+      showToast("Excel файл скачан!");
+    }
+
+    /* ==============================================================
+       AI-ОТЧЕТ (gemini-3.6-flash)
        ============================================================== */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
@@ -1864,6 +2013,19 @@
       haptic();
     }
 
+    function clearGeminiApiKey() {
+      localStorage.removeItem(GEMINI_KEY_STORAGE);
+      document.getElementById('geminiApiKeyInput').value = '';
+      showToast("Ключ удален");
+      haptic();
+    }
+
+    function clearAiReport() {
+      document.getElementById('aiOutput-analytics').textContent = "Результат отчета появится здесь...";
+      showToast("Текст очищен");
+      haptic();
+    }
+
     async function runAiAnalytics() {
       const out = document.getElementById('aiOutput-analytics');
       out.textContent = "⏳ Анализирую проекты и формирую отчет...";
@@ -1879,12 +2041,12 @@
       const key = rawKey.trim();
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
       
-      const promptText = `Ты — профессиональный эксперт по управлению проектами (PMO). Составь очень чистый, красивый, лаконичный и понятный управленческий отчет для руководства.
-НИКАКИХ СЫРЫХ ТАБЛИЦ ИЛИ МАРКДАУН-РАМКК (вроде |---|). Используй аккуратные маркированные списки с эмодзи:
+      const promptText = `Ты — ведущий эксперт по управлению проектами (PMO). Составь чистый, красивый, лаконичный и понятный управленческий отчет для руководства.
+НИКАКИХ СЫРЫХ ТАБЛИЦ И МАРКДАУН-РАМОК (вроде |---|). Используй аккуратные списки с эмодзи:
 1. 📊 Краткий итог (общая динамика).
-2. 🚨 Требует внимания / Блокеры (если есть).
+2. 🚨 Требует внимания / Блокеры (если есть, с указанием участков).
 3. 📌 Статус ключевых объектов (кратко по пунктам).
-Пиши строго по делу, без лишней «воды», красиво и читаемо.`;
+Пиши строго по делу, без лишних вступлений и шаблонных завершений.`;
 
       const bodyPayload = {
         contents: [
@@ -1959,7 +2121,10 @@
               <span class="proc-folder-badge">📁 ${escapeHtml(proc.title)}</span>
               <span class="proc-tag-count">${activeObjects.length} в работе</span>
             </div>
-            <button class="proc-del-link" onclick="event.stopPropagation(); deleteProcess(${proc.id})">Удалить</button>
+            <div class="proc-actions" onclick="event.stopPropagation()">
+              <button class="proc-btn-tool" onclick="editProcessTitle(${proc.id})" title="Переименовать направление">✏️</button>
+              <button class="proc-btn-tool del" onclick="deleteProcess(${proc.id})">Удалить</button>
+            </div>
           </div>
 
           <div class="process-body ${isCollapsed ? 'hidden' : ''}">
@@ -1989,7 +2154,7 @@
                         ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
                         <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
                         <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
-                        <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
+                        <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕ Удалить</button>
                       </div>
                     </div>
                   </div>
