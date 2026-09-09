@@ -1116,7 +1116,7 @@
     <!-- СПИСОК ПРОЦЕССОВ И ОБЪЕКТОВ -->
     <div id="processesRoot"></div>
 
-    <!-- РЕЗЕРВНОЕ КОПИРОВАНИЕ -->
+    <!-- РЕЗЕРВНАЯ КОПИРОВАНИЕ -->
     <div class="backup-footer">
       <button class="backup-btn" onclick="exportBackup()">📥 Экспорт бэкапа (копия)</button>
       <button class="backup-btn" onclick="importBackup()">📤 Восстановить из файла</button>
@@ -1922,7 +1922,7 @@
     }
 
     /* ==============================================================
-       МОДУЛЬ GOOGLE GEMINI AI (ЭНДПОИНТ v1beta С МОДЕЛЬЮ gemini-1.5-flash)
+       МОДУЛЬ GOOGLE GEMINI AI (УНИВЕРСАЛЬНЫЙ gemini-pro)
        ============================================================== */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
@@ -1972,8 +1972,8 @@
 
       const key = rawKey.trim();
 
-      // Стандартный рабочий эндпоинт v1beta для gemini-1.5-flash
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+      // Универсальная модель gemini-pro для v1beta
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
       
       const bodyPayload = {
         contents: [
