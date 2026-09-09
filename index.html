@@ -106,7 +106,7 @@
       background: var(--ai-purple);
       color: #ffffff;
       border: none;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 700;
@@ -998,40 +998,6 @@
       cursor: pointer;
     }
 
-    /* СТИЛИ ДЛЯ AI-ЦЕНТРА */
-    .ai-tabs {
-      display: flex;
-      gap: 4px;
-      background: #f1f5f9;
-      padding: 4px;
-      border-radius: 10px;
-    }
-    .ai-tab-btn {
-      flex: 1;
-      padding: 8px 4px;
-      border: none;
-      background: none;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-    }
-    .ai-tab-btn.active {
-      background: #ffffff;
-      color: var(--ai-purple);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    .ai-tab-panel {
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .ai-tab-panel.active {
-      display: flex;
-    }
     .ai-output-box {
       background: #f8fafc;
       border: 1px solid var(--border);
@@ -1041,9 +1007,9 @@
       line-height: 1.45;
       color: #1e293b;
       white-space: pre-wrap;
-      max-height: 260px;
+      max-height: 300px;
       overflow-y: auto;
-      min-height: 90px;
+      min-height: 120px;
     }
 
     .toast {
@@ -1073,7 +1039,7 @@
           <span>📊</span> Мониторинг проектов
         </div>
         <div class="dash-top-actions">
-          <button class="btn-ai-trigger" onclick="openAiModal()">✨ AI-Центр</button>
+          <button class="btn-ai-trigger" onclick="openAiModal()">✨ AI-Отчет</button>
           <div class="sync-badge" id="syncTag">● Сохранено</div>
         </div>
       </div>
@@ -1133,87 +1099,39 @@
     </button>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: AI-ЦЕНТР -->
+  <!-- МОДАЛЬНОЕ ОКНО: AI-ОТЧЕТ И НАСТРОЙКИ КЛЮЧА -->
   <div class="modal-overlay" id="aiModalOverlay" onclick="closeAiModal(event)">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title" style="color:var(--ai-purple); display:flex; align-items:center; gap:6px;">
-          <span>✨</span> Интеллектуальный AI-Центр
+          <span>✨</span> AI-Генератор отчета
         </div>
         <button class="modal-close" onclick="closeAiModal()">✕</button>
       </div>
 
-      <!-- Вкладки функций ИИ -->
-      <div class="ai-tabs">
-        <button class="ai-tab-btn active" onclick="switchAiTab('analytics')">📊 Аналитика</button>
-        <button class="ai-tab-btn" onclick="switchAiTab('smartinput')">⚡ Ввод</button>
-        <button class="ai-tab-btn" onclick="switchAiTab('letter')">📝 Письмо</button>
-        <button class="ai-tab-btn" onclick="switchAiTab('translate')">🇰🇿 Қазақша</button>
-        <button class="ai-tab-btn" onclick="switchAiTab('settings')">⚙️ Ключ</button>
-      </div>
-
-      <!-- 1. Вкладка Аналитика -->
-      <div class="ai-tab-panel active" id="aiTab-analytics">
-        <p style="font-size:12px; color:var(--text-muted);">
-          Сформировать лаконичную управленческую записку для руководства по текущим статусам, срокам и рискам.
-        </p>
-        <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiAnalytics()">
-          ✨ Сгенерировать управленческую записку
-        </button>
-        <div class="ai-output-box" id="aiOutput-analytics">Результат появится здесь...</div>
-        <button class="btn-dark" style="background:#16a34a;" onclick="copyAiOutput('aiOutput-analytics')">📋 Скопировать текст</button>
-      </div>
-
-      <!-- 2. Вкладка Умный ввод -->
-      <div class="ai-tab-panel" id="aiTab-smartinput">
-        <p style="font-size:12px; color:var(--text-muted);">
-          Вставьте текст в свободной форме (напр. <i>«По Макату согласование МИО перенесли на 25 сентября из-за замечаний»</i>).
-        </p>
-        <textarea id="aiSmartInputText" class="modal-input" style="height:70px; resize:none;" placeholder="Напишите своими словами..."></textarea>
-        <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiSmartInput()">
-          ⚡ Распознать и обновить в трекере
-        </button>
-        <div class="ai-output-box" id="aiOutput-smartinput" style="min-height:50px;">Ожидание текста...</div>
-      </div>
-
-      <!-- 3. Вкладка Официальное письмо -->
-      <div class="ai-tab-panel" id="aiTab-letter">
-        <p style="font-size:12px; color:var(--text-muted);">
-          Подготовка проекта официального запроса / письма по активным задержкам.
-        </p>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Выберите проблемный объект:</label>
-          <select id="aiLetterObjectSelect" class="modal-input"></select>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label style="font-size:12px; font-weight:700; color:var(--text-muted);">API-ключ Gemini (Google AI Studio):</label>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <input type="password" id="geminiApiKeyInput" class="modal-input" placeholder="AIzaSy...">
+            <button class="btn-dark" style="padding: 10px 14px; font-size:13px;" onclick="saveGeminiApiKey()">Сохранить</button>
+          </div>
         </div>
-        <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiDraftLetter()">
-          📝 Составить официальное письмо
-        </button>
-        <div class="ai-output-box" id="aiOutput-letter">Черновик письма появится здесь...</div>
-        <button class="btn-dark" style="background:#16a34a;" onclick="copyAiOutput('aiOutput-letter')">📋 Скопировать письмо</button>
-      </div>
 
-      <!-- 4. Вкладка Казахский язык -->
-      <div class="ai-tab-panel" id="aiTab-translate">
-        <p style="font-size:12px; color:var(--text-muted);">
-          Күнделікті жобалар есебін мемлекеттік тілге аударып, ресми стильде ұсыну.
-        </p>
-        <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiTranslate()">
-          🇰🇿 Қазақ тілінде есеп дайындау
-        </button>
-        <div class="ai-output-box" id="aiOutput-translate">Мәтін осы жерде дайын болады...</div>
-        <button class="btn-dark" style="background:#16a34a;" onclick="copyAiOutput('aiOutput-translate')">📋 Көшіріп алу</button>
-      </div>
+        <hr style="border:none; border-top:1px solid var(--border);">
 
-      <!-- 5. Вкладка Настройки ключа -->
-      <div class="ai-tab-panel" id="aiTab-settings">
-        <p style="font-size:12px; color:var(--text-muted);">
-          Бесплатный ключ из <b>Google AI Studio</b> сохраняется только в памяти вашего браузера.
-        </p>
-        <input type="password" id="geminiApiKeyInput" class="modal-input" placeholder="AIzaSy...">
-        <div class="modal-actions">
-          <button class="modal-btn-primary" onclick="saveGeminiApiKey()">Сохранить ключ</button>
-          <button class="modal-btn-danger" onclick="clearGeminiApiKey()">Удалить</button>
+        <div>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+            Создать профессиональный управленческий отчет с аналитикой и таблицей по всем текущим объектам.
+          </p>
+          <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiAnalytics()">
+            ✨ Сгенерировать AI-отчет с таблицей
+          </button>
         </div>
+
+        <div class="ai-output-box" id="aiOutput-analytics">Результат отчета появится здесь...</div>
+
+        <button class="btn-dark" style="background:#16a34a;" onclick="copyAiOutput('aiOutput-analytics')">📋 Скопировать текст отчета</button>
       </div>
     </div>
   </div>
@@ -1922,11 +1840,10 @@
     }
 
     /* ==============================================================
-       МОДУЛЬ GOOGLE GEMINI AI (МОДЕЛЬ gemini-3.6-flash)
+       AI-ОТЧЕТ (gemini-3.6-flash)
        ============================================================== */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
-      populateAiLetterSelect();
       document.getElementById('aiModalOverlay').style.display = 'flex';
       haptic();
     }
@@ -1936,15 +1853,6 @@
       document.getElementById('aiModalOverlay').style.display = 'none';
     }
 
-    function switchAiTab(tabName) {
-      document.querySelectorAll('.ai-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.ai-tab-panel').forEach(p => p.classList.remove('active'));
-
-      event.target.classList.add('active');
-      document.getElementById(`aiTab-${tabName}`).classList.add('active');
-      haptic();
-    }
-
     function saveGeminiApiKey() {
       const val = document.getElementById('geminiApiKeyInput').value.trim();
       if (!val) {
@@ -1952,34 +1860,30 @@
         return;
       }
       localStorage.setItem(GEMINI_KEY_STORAGE, val);
-      showToast("API-ключ Gemini сохранен!");
+      showToast("API-ключ сохранен!");
       haptic();
     }
 
-    function clearGeminiApiKey() {
-      localStorage.removeItem(GEMINI_KEY_STORAGE);
-      document.getElementById('geminiApiKeyInput').value = '';
-      showToast("API-ключ удален");
+    async function runAiAnalytics() {
+      const out = document.getElementById('aiOutput-analytics');
+      out.textContent = "⏳ Анализирую проекты и формирую отчет...";
       haptic();
-    }
 
-    async function callGeminiApi(systemPrompt, userPrompt) {
+      const rawReport = generateTelegramReport();
       const rawKey = localStorage.getItem(GEMINI_KEY_STORAGE);
       if (!rawKey || !rawKey.trim()) {
-        alert("Пожалуйста, укажите API-ключ Gemini во вкладке «⚙️ Ключ». Ключ можно бесплатно получить в Google AI Studio.");
-        return null;
+        out.textContent = "⚠️ Пожалуйста, укажите и сохраните ваш API-ключ Gemini выше.";
+        return;
       }
 
       const key = rawKey.trim();
-
-      // Актуальный адрес с моделью gemini-3.6-flash
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
       
       const bodyPayload = {
         contents: [
           {
             parts: [
-              { text: `${systemPrompt}\n\nДанные пользователя:\n${userPrompt}` }
+              { text: `Ты — профессиональный эксперт по управлению проектами (PMO). Проанализируй текущий отчет по объектам и составь лаконичную управленческую записку с табличной выжимкой для руководства. Выдели ключевые риски и общую динамику.\n\nДанные проекта:\n${rawReport}` }
             ]
           }
         ]
@@ -1994,181 +1898,23 @@
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.error?.message || `HTTP ${response.status}`;
-          throw new Error(errMsg);
+          throw new Error(errData.error?.message || `HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ модели.";
+        const result = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ.";
+        out.textContent = result;
       } catch (err) {
-        console.error("Gemini API Error:", err);
-        return `⚠️ Ошибка Google AI: ${err.message}`;
-      }
-    }
-
-    async function runAiAnalytics() {
-      const out = document.getElementById('aiOutput-analytics');
-      out.textContent = "⏳ Анализирую текущие проекты и дедлайны...";
-      haptic();
-
-      const rawReport = generateTelegramReport();
-      const prompt = `Ты — профессиональный эксперт по управлению проектами (PMO). 
-Проанализируй текущий статус земельно-кадастровых работ и линейных объектов. 
-Составь четкое, лаконичное аналитическое резюме для руководства (до 150 слов). 
-Формат:
-1. Краткий вывод (общая динамика).
-2. Критические блокеры и риски (на что срочно требуется решение руководства).
-3. Точки внимания на ближайшие дни.`;
-
-      const result = await callGeminiApi(prompt, rawReport);
-      if (result) out.textContent = result;
-    }
-
-    function populateAiLetterSelect() {
-      const sel = document.getElementById('aiLetterObjectSelect');
-      sel.innerHTML = '';
-
-      let found = false;
-      state.forEach(p => {
-        (p.objects || []).filter(o => !o.archived).forEach(o => {
-          const blk = (o.steps || []).filter(s => !s.done && s.blocker);
-          if (blk.length > 0) {
-            found = true;
-            const opt = document.createElement('option');
-            opt.value = JSON.stringify({ obj: o.title, proc: p.title, steps: blk.map(b => `${b.text} (Причина: ${b.blocker})`) });
-            opt.textContent = `🚨 ${o.title} — ${blk[0].blocker}`;
-            sel.appendChild(opt);
-          }
-        });
-      });
-
-      if (!found) {
-        const opt = document.createElement('option');
-        opt.value = "";
-        opt.textContent = "Нет объектов с активными задержками";
-        sel.appendChild(opt);
-      }
-    }
-
-    async function runAiDraftLetter() {
-      const sel = document.getElementById('aiLetterObjectSelect');
-      const out = document.getElementById('aiOutput-letter');
-
-      if (!sel.value) {
-        out.textContent = "Нет зафиксированных блокеров для подготовки письма.";
-        return;
-      }
-
-      out.textContent = "⏳ Составляю официальный проект письма...";
-      haptic();
-
-      const item = JSON.parse(sel.value);
-      const prompt = `Ты — ведущий юрист и специалист по земельным отношениям. 
-Составь официальное обращение (проект письма / запроса) в уполномоченный орган или подрядчику для скорейшего решения проблемы.
-Объект: ${item.obj} (${item.proc})
-Задержки: ${item.steps.join('; ')}
-Тон: официальный, аргументированный, со ссылкой на необходимость соблюдения контрактных и нормативных сроков строительства.`;
-
-      const result = await callGeminiApi(prompt, "Подготовь чистовой проект письма.");
-      if (result) out.textContent = result;
-    }
-
-    async function runAiTranslate() {
-      const out = document.getElementById('aiOutput-translate');
-      out.textContent = "⏳ Есепті қазақ тіліне аударудамын...";
-      haptic();
-
-      const rawReport = generateTelegramReport();
-      const prompt = `Сен — мемлекеттік органдар мен ұлттық компаниялардың іс-қағаздарын жүргізуші ресми сарапшысың.
-Төмендегі жобалар бойынша күнделікті есепті қазақ тіліне сапалы әрі ұқыпты аудар. 
-Терминдерді дұрыс қолдан (жер комиссиясы, қаулы, жер учаскесі, шекара, экспликация, сәйкестендіру актісі т.б.). 
-Мәтінді WhatsApp / Telegram-да басшылыққа оқуға ыңғайлы етіп құрылымда.`;
-
-      const result = await callGeminiApi(prompt, rawReport);
-      if (result) out.textContent = result;
-    }
-
-    async function runAiSmartInput() {
-      const input = document.getElementById('aiSmartInputText').value.trim();
-      const out = document.getElementById('aiOutput-smartinput');
-      if (!input) {
-        out.textContent = "Введите текст для разбора.";
-        return;
-      }
-
-      out.textContent = "⏳ Нейросеть распознает объекты и даты...";
-      haptic();
-
-      const currentTree = state.map(p => ({
-        procId: p.id,
-        procTitle: p.title,
-        objects: (p.objects || []).map(o => ({ objId: o.id, objTitle: o.title, steps: (o.steps || []).map(s => ({ stepId: s.id, text: s.text })) }))
-      }));
-
-      const prompt = `Ты — автоматический парсер задач. Тебе дан текст пользователя и текущая структура объектов трекера.
-Определи, какой объект нужно обновить или создать.
-Возврати строго JSON следующего формата:
-{
-  "action": "update_step" | "add_step" | "add_object",
-  "matchedObjTitle": "название объекта из базы",
-  "stepText": "название шага",
-  "date": "до ДД.ММ.ГГГГ или пустая строка",
-  "blocker": "причина задержки или null",
-  "done": true | false
-}
-Если подходящего объекта нет, укажи action: "unknown".`;
-
-      const userContext = `Структура проектов: ${JSON.stringify(currentTree)}\n\nТекст пользователя: "${input}"`;
-      const result = await callGeminiApi(prompt, userContext);
-
-      try {
-        const cleanJson = result.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(cleanJson);
-
-        if (parsed.action === 'unknown') {
-          out.textContent = "⚠️ Не удалось сопоставить с существующими объектами в базе.";
-          return;
-        }
-
-        let updated = false;
-        state.forEach(p => {
-          (p.objects || []).forEach(o => {
-            if (o.title.toLowerCase().includes((parsed.matchedObjTitle || '').toLowerCase())) {
-              let step = (o.steps || []).find(s => s.text.toLowerCase().includes((parsed.stepText || '').toLowerCase()));
-              if (!step && parsed.action === 'add_step') {
-                step = { id: Date.now(), text: parsed.stepText, date: '', done: false, blocker: null };
-                o.steps.push(step);
-              }
-              if (step) {
-                if (parsed.date) step.date = parsed.date;
-                if (parsed.blocker !== undefined) step.blocker = parsed.blocker;
-                if (parsed.done !== undefined) step.done = parsed.done;
-                step.updatedAt = getTimestampStr();
-                updated = true;
-              }
-            }
-          });
-        });
-
-        if (updated) {
-          saveData();
-          out.textContent = `✅ Успешно обновлено:\nОбъект: ${parsed.matchedObjTitle}\nЭтап: ${parsed.stepText}\nСрок: ${parsed.date || 'без изменений'}\nРиск: ${parsed.blocker || 'нет'}`;
-          document.getElementById('aiSmartInputText').value = '';
-          showToast("База обновлена нейросетью!");
-        } else {
-          out.textContent = `Распознано: ${cleanJson}\n(Объект не найден для авто-записи)`;
-        }
-      } catch (e) {
-        out.textContent = `Распознанный ответ:\n${result}`;
+        out.textContent = `⚠️ Ошибка Google AI: ${err.message}`;
       }
     }
 
     function copyAiOutput(elementId) {
       const text = document.getElementById(elementId).innerText;
-      if (!text || text.includes("появится здесь") || text.includes("Ожидание")) return;
+      if (!text || text.includes("появится здесь") || text.includes("⏳")) return;
 
       haptic();
-      navigator.clipboard.writeText(text).then(() => showToast("Скопировано в буфер!"));
+      navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован!"));
     }
 
     function render() {
