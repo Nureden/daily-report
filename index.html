@@ -525,6 +525,17 @@
       font-weight: 700;
     }
 
+    /* Метка времени изменения */
+    .step-updated-badge {
+      font-size: 10px;
+      color: var(--text-subtle);
+      font-weight: 500;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      user-select: none;
+      padding-left: 2px;
+    }
+
     .mini-del {
       background: none;
       border: none;
@@ -1117,6 +1128,16 @@
       return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
     }
 
+    /* Функция получения времени изменения задачи */
+    function getTimestampStr() {
+      const d = new Date();
+      const day = String(d.getDate()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${m} ${h}:${min}`;
+    }
+
     function isoToDisplay(isoStr) {
       if (!isoStr) return '';
       const p = isoStr.split('-');
@@ -1175,7 +1196,6 @@
       }
 
       if (localState && localState.length > 0) {
-        // Принудительно сворачиваем все папки и объекты при старте
         state = localState.map(p => ({
           ...p,
           collapsed: true,
@@ -1378,6 +1398,7 @@
 
       const iso = document.getElementById('modalDatePickerInput').value;
       step.date = iso ? isoToDisplay(iso) : '';
+      step.updatedAt = getTimestampStr();
       closeDateModal();
       showToast("Срок сохранен!");
       haptic();
@@ -1392,6 +1413,7 @@
       if (!step) return;
 
       step.date = '';
+      step.updatedAt = getTimestampStr();
       closeDateModal();
       showToast("Срок очищен");
       haptic();
@@ -1431,6 +1453,7 @@
 
       const val = document.getElementById('customRiskInput').value.trim();
       step.blocker = val !== '' ? val : null;
+      step.updatedAt = getTimestampStr();
       closeRiskModal();
       showToast(step.blocker ? "Задержка зафиксирована!" : "Задержка снята");
       haptic();
@@ -1444,6 +1467,7 @@
       if (!step) return;
 
       step.blocker = null;
+      step.updatedAt = getTimestampStr();
       showToast("Задержка снята");
       haptic();
       saveData();
@@ -1481,6 +1505,7 @@
 
       const p = state.find(x => x.id === procId);
       if (p) {
+        const nowTs = getTimestampStr();
         p.objects.push({
           id: Date.now(),
           title: name.trim(),
@@ -1492,7 +1517,8 @@
             text: text,
             date: "",
             done: false,
-            blocker: null
+            blocker: null,
+            updatedAt: nowTs
           }))
         });
         showToast("Создан объект с 5 этапами!");
@@ -1510,6 +1536,7 @@
       const newTitle = prompt("Имя для копии:", src.title + " (Копия)");
       if (!newTitle || !newTitle.trim()) return;
 
+      const nowTs = getTimestampStr();
       p.objects.push({
         id: Date.now(),
         title: newTitle.trim(),
@@ -1521,7 +1548,8 @@
           text: s.text,
           date: s.date,
           done: false,
-          blocker: null
+          blocker: null,
+          updatedAt: nowTs
         }))
       });
       showToast("Структура скопирована!");
@@ -1535,13 +1563,15 @@
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
 
+      const nowTs = getTimestampStr();
       STANDARD_WORKFLOW.forEach((stepText, idx) => {
         obj.steps.push({
           id: Date.now() + idx,
           text: stepText,
           date: "",
           done: false,
-          blocker: null
+          blocker: null,
+          updatedAt: nowTs
         });
       });
 
@@ -1561,7 +1591,8 @@
         text: stepText,
         date: "",
         done: false,
-        blocker: null
+        blocker: null,
+        updatedAt: getTimestampStr()
       });
 
       haptic();
@@ -1619,7 +1650,8 @@
         text: txt,
         date: dispDate,
         done: false,
-        blocker: null
+        blocker: null,
+        updatedAt: getTimestampStr()
       });
 
       tInput.value = '';
@@ -1635,6 +1667,7 @@
       if (step) {
         step.done = !step.done;
         if (step.done) step.blocker = null;
+        step.updatedAt = getTimestampStr();
         haptic();
         saveData();
       }
@@ -1649,6 +1682,7 @@
       const newTxt = prompt("Описание этапа / задачи:", step.text);
       if (newTxt && newTxt.trim()) {
         step.text = newTxt.trim();
+        step.updatedAt = getTimestampStr();
         haptic();
         saveData();
       }
@@ -1792,6 +1826,7 @@
                                 <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                   ${hasBlock ? '🚨 Задержка' : '+ риск'}
                                 </button>
+                                ${s.updatedAt ? `<span class="step-updated-badge">изм. ${s.updatedAt}</span>` : ''}
                               </div>
                               <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
                             </div>
