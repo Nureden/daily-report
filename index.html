@@ -251,6 +251,7 @@
       color: #475569;
       padding: 2px 8px;
       border-radius: 10px;
+      white-space: nowrap;
     }
 
     .proc-del-link {
@@ -262,6 +263,7 @@
       cursor: pointer;
       padding: 4px 8px;
       border-radius: 6px;
+      white-space: nowrap;
     }
     .proc-del-link:hover {
       color: var(--danger);
@@ -309,11 +311,13 @@
       align-items: center;
       gap: 8px;
       flex: 1;
+      min-width: 0;
     }
     .obj-collapse-arrow {
       font-size: 10px;
       color: var(--text-muted);
       transition: transform 0.2s ease;
+      flex-shrink: 0;
     }
     .obj-collapse-arrow.collapsed {
       transform: rotate(-90deg);
@@ -325,12 +329,23 @@
       word-break: normal;
       overflow-wrap: break-word;
     }
+
     .obj-tools {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       flex-shrink: 0;
     }
+    .obj-tools-left {
+      display: flex;
+      align-items: center;
+    }
+    .obj-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .badge-percent {
       font-size: 11px;
       font-weight: 700;
@@ -350,11 +365,14 @@
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 3px 5px;
-      font-size: 11px;
+      padding: 3px 6px;
+      font-size: 12px;
       cursor: pointer;
       color: #475569;
       line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn-icon-tool:hover {
       background: #e2e8f0;
@@ -364,6 +382,37 @@
       color: var(--danger);
       background: var(--danger-bg);
       border-color: var(--danger-border);
+    }
+
+    /* МОБИЛЬДІ РЕТТЕУ: АТАУЫ МЕН КНОПКАЛАРДЫ БІР ҚАТАРҒА ЖИНАУ */
+    @media (max-width: 600px) {
+      .obj-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+      }
+      .obj-title-wrap {
+        width: 100%;
+      }
+      .obj-name {
+        font-size: 14px;
+        line-height: 1.35;
+      }
+      .obj-tools {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 5px;
+        border-top: 1px dashed var(--border-subtle);
+      }
+      .btn-icon-tool {
+        padding: 4px 7px;
+        font-size: 12px;
+      }
+      .proc-title-group {
+        font-size: 15px;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
     }
 
     .progress-bar-bg {
@@ -525,7 +574,6 @@
       font-weight: 700;
     }
 
-    /* Метка времени изменения */
     .step-updated-badge {
       font-size: 10px;
       color: var(--text-subtle);
@@ -1128,14 +1176,15 @@
       return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
     }
 
-    /* Функция получения времени изменения задачи */
+    /* Функция получения времени изменения задачи с годом */
     function getTimestampStr() {
       const d = new Date();
       const day = String(d.getDate()).padStart(2, '0');
       const m = String(d.getMonth() + 1).padStart(2, '0');
+      const y = d.getFullYear();
       const h = String(d.getHours()).padStart(2, '0');
       const min = String(d.getMinutes()).padStart(2, '0');
-      return `${day}.${m} ${h}:${min}`;
+      return `${day}.${m}.${y} ${h}:${min}`;
     }
 
     function isoToDisplay(isoStr) {
@@ -1778,15 +1827,21 @@
                       <span class="obj-collapse-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
                       <span class="obj-name">📌 ${escapeHtml(obj.title)}</span>
                     </div>
+                    
+                    <!-- БІР ҚАТАРҒА ЖИНАЛҒАН БАТЫРМАЛАР МЕН ПАЙЫЗ БЕЛГІСІ -->
                     <div class="obj-tools" onclick="event.stopPropagation()">
-                      ${tCount > 0 ? `
-                        <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
-                      ` : ''}
-                      ${objIdx > 0 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, -1)" title="Выше">⬆️</button>` : ''}
-                      ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
-                      <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
-                      <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
-                      <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
+                      <div class="obj-tools-left">
+                        ${tCount > 0 ? `
+                          <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
+                        ` : ''}
+                      </div>
+                      <div class="obj-btn-group">
+                        ${objIdx > 0 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, -1)" title="Выше">⬆️</button>` : ''}
+                        ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
+                        <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
+                        <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
+                        <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
+                      </div>
                     </div>
                   </div>
 
