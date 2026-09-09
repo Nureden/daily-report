@@ -47,7 +47,7 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 10px 12px 105px 12px;
+      padding: 10px 12px 115px 12px;
       font-size: 15px;
       line-height: 1.45;
     }
@@ -57,7 +57,7 @@
       margin: 0 auto;
     }
 
-    /* 1. ПАНЕЛЬ РУКОВОДИТЕЛЯ */
+    /* ПАНЕЛЬ РУКОВОДИТЕЛЯ */
     .dashboard-card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -88,12 +88,9 @@
       font-weight: 700;
       padding: 3px 10px;
       border-radius: 20px;
-      background: #f1f5f9;
-      color: #475569;
-    }
-    .sync-badge.active {
       background: #e0f2fe;
       color: #0369a1;
+      cursor: pointer;
     }
 
     .metrics-grid {
@@ -172,7 +169,7 @@
       border-color: var(--neutral-dark);
     }
 
-    /* 2. БЫСТРЫЙ ВВОД НАПРАВЛЕНИЯ */
+    /* БЫСТРЫЙ ВВОД */
     .quick-add-bar {
       display: flex;
       gap: 8px;
@@ -202,9 +199,7 @@
       white-space: nowrap;
     }
 
-    /* ==============================================================
-       УРОВЕНЬ 1: ПАПКА ПРОЦЕССА
-       ============================================================== */
+    /* ПАПКА ПРОЦЕССА */
     .process-section {
       background: #ffffff;
       border-radius: var(--radius);
@@ -287,9 +282,7 @@
       display: none !important;
     }
 
-    /* ==============================================================
-       УРОВЕНЬ 2: ОБЪЕКТ / УЧАСТОК
-       ============================================================== */
+    /* ОБЪЕКТ / УЧАСТОК */
     .object-card {
       background: #ffffff;
       border-radius: 10px;
@@ -405,9 +398,7 @@
       display: none !important;
     }
 
-    /* ==============================================================
-       УРОВЕНЬ 3: ШАГИ / ПОДЗАДАЧИ
-       ============================================================== */
+    /* ШАГИ */
     .steps-list {
       display: flex;
       flex-direction: column;
@@ -493,9 +484,7 @@
       white-space: nowrap;
       transition: all 0.15s;
     }
-    .step-date-btn:active {
-      transform: scale(0.96);
-    }
+    .step-date-btn:active { transform: scale(0.96); }
     .step-date-btn.overdue {
       background: #fee2e2;
       border-color: #fca5a5;
@@ -569,10 +558,7 @@
       font-weight: 600;
       margin-left: 29px;
     }
-    .blocker-banner span.reason-text {
-      flex: 1;
-      cursor: pointer;
-    }
+    .blocker-banner span.reason-text { flex: 1; cursor: pointer; }
     .blocker-clear-btn {
       background: none;
       border: none;
@@ -769,7 +755,26 @@
       cursor: pointer;
     }
 
-    /* 6. ПЛАВАЮЩАЯ ПАНЕЛЬ */
+    /* РЕЗЕРВНАЯ КОПИЯ В ПОДВАЛЕ */
+    .backup-footer {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+      margin-bottom: 20px;
+    }
+    .backup-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ПЛАВАЮЩАЯ ПАНЕЛЬ */
     .floating-action-bar {
       position: fixed;
       bottom: 0;
@@ -803,7 +808,7 @@
     .fab-btn.copy { background: #16a34a; }
     .fab-btn.send { background: #0284c7; }
 
-    /* 7. МОДАЛЬНОЕ ОКНО */
+    /* МОДАЛЬНЫЕ ОКНА */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -897,9 +902,7 @@
       font-size: 14px;
       outline: none;
     }
-    .modal-input:focus {
-      border-color: var(--brand);
-    }
+    .modal-input:focus { border-color: var(--brand); }
 
     .modal-actions {
       display: flex;
@@ -954,7 +957,7 @@
         <div class="dash-title">
           <span>📊</span> Мониторинг проектов
         </div>
-        <div class="sync-badge active" id="syncTag">● Синхронизировано</div>
+        <div class="sync-badge" id="syncTag">● Сохранено</div>
       </div>
 
       <div class="metrics-grid">
@@ -981,7 +984,7 @@
           ⚡ Сводка за сегодня
         </button>
         <button class="report-mode-btn" id="modeFull" onclick="setReportMode('full')">
-          📋 Полный отчет
+          📋 Полный отчет (Таблица)
         </button>
       </div>
     </div>
@@ -994,6 +997,12 @@
 
     <!-- СПИСОК ПРОЦЕССОВ И ОБЪЕКТОВ -->
     <div id="processesRoot"></div>
+
+    <!-- РЕЗЕРВНОЕ КОПИРОВАНИЕ -->
+    <div class="backup-footer">
+      <button class="backup-btn" onclick="exportBackup()">📥 Экспорт бэкапа (копия)</button>
+      <button class="backup-btn" onclick="importBackup()">📤 Восстановить из файла</button>
+    </div>
   </div>
 
   <!-- ПЛАВАЮЩАЯ ПАНЕЛЬ -->
@@ -1006,7 +1015,7 @@
     </button>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР ДАТЫ -->
+  <!-- МОДАЛЬНОЕ ОКНО ДАТЫ -->
   <div class="modal-overlay" id="dateModalOverlay" onclick="closeDateModal(event)">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -1039,7 +1048,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР РИСКА -->
+  <!-- МОДАЛЬНОЕ ОКНО РИСКОВ -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -1085,23 +1094,7 @@
 
   <script>
     const tg = window.Telegram?.WebApp;
-    const MAIN_STORAGE_KEY = 'manager_projects_permanent_data';
-
-    const LEGACY_STORAGE_KEYS = [
-      'manager_daily_tracker_v16_subtask_collapse',
-      'manager_daily_tracker_v15_collapsed_default',
-      'manager_daily_tracker_v14_always_open',
-      'manager_daily_tracker_v13_modal_calendar',
-      'manager_daily_tracker_v12_calendar',
-      'manager_daily_tracker_v11_reglament',
-      'manager_daily_tracker_v10_refined',
-      'manager_daily_tracker_v9_mobile',
-      'manager_daily_tracker_v8_archive',
-      'manager_daily_tracker_v7_blockers',
-      'manager_daily_tracker_v6_auto',
-      'manager_daily_tracker_v5',
-      'tma_unified_object_tree_v4'
-    ];
+    const STORAGE_KEY = 'daily_report_vault_v18';
 
     if (tg) {
       tg.ready();
@@ -1121,238 +1114,114 @@
 
     function getTodayISO() {
       const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
     function getTodayStr() {
       const d = new Date();
-      const day = String(d.getDate()).padStart(2, '0');
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const y = d.getFullYear();
-      return `${day}.${m}.${y}`;
+      return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
     }
 
     function isoToDisplay(isoStr) {
       if (!isoStr) return '';
       const p = isoStr.split('-');
-      if (p.length === 3) return `до ${p[2]}.${p[1]}.${p[0]}`;
-      return isoStr;
+      return p.length === 3 ? `до ${p[2]}.${p[1]}.${p[0]}` : isoStr;
     }
 
     function displayToISO(dispStr) {
       if (!dispStr) return '';
-      const match = dispStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-      if (!match) return '';
-      const day = match[1].padStart(2, '0');
-      const month = match[2].padStart(2, '0');
-      const year = match[3] || new Date().getFullYear();
-      return `${year}-${month}-${day}`;
+      const m = dispStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!m) return '';
+      return `${m[3] || new Date().getFullYear()}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
     }
 
     function analyzeDeadline(dateStr, isDone) {
       if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
       if (!dateStr) return { cls: 'empty', text: '📅 Выбрать дату' };
 
-      const match = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-      if (!match) return { cls: '', text: dateStr };
+      const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!m) return { cls: '', text: dateStr };
 
-      const day = parseInt(match[1], 10);
-      const month = parseInt(match[2], 10) - 1;
-      const year = match[3] ? parseInt(match[3], 10) : new Date().getFullYear();
-
-      const target = new Date(year, month, day);
+      const target = new Date(m[3] ? parseInt(m[3]) : new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
       const today = new Date();
       today.setHours(0,0,0,0);
       target.setHours(0,0,0,0);
 
-      const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
-
-      if (diffDays < 0) {
-        return { cls: 'overdue', text: `🔴 Просрочено (${dateStr})` };
-      } else if (diffDays === 0) {
-        return { cls: 'urgent', text: `🟠 Сегодня (${dateStr})` };
-      } else if (diffDays <= 2) {
-        return { cls: 'urgent', text: `🟡 ${diffDays} дн. (${dateStr})` };
-      }
+      const diff = Math.round((target - today) / 86400000);
+      if (diff < 0) return { cls: 'overdue', text: `🔴 Просрочено (${dateStr})` };
+      if (diff === 0) return { cls: 'urgent', text: `🟠 Сегодня (${dateStr})` };
+      if (diff <= 2) return { cls: 'urgent', text: `🟡 ${diff} дн. (${dateStr})` };
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
-    let state = [
-      {
-        id: 1,
-        title: "Дополнительные зем участки",
-        collapsed: true,
-        showArchive: false,
-        objects: [
-          {
-            id: 101,
-            title: "Жылыой - ЛЭС",
-            archived: false,
-            collapsed: true,
-            showAddForm: false,
-            steps: [
-              { id: 1001, text: "Акт сверки НАО", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1002, text: "Экспликация Гипрозем", date: "до 10.09.2026", done: true, blocker: null },
-              { id: 1003, text: "Утверждение ЗУП МИО", date: "до 20.09.2026", done: false, blocker: null },
-              { id: 1004, text: "Постановление акима", date: "до 30.09.2026", done: false, blocker: null },
-              { id: 1005, text: "Акт на землю, регистрация", date: "до 11.10.2026", done: false, blocker: null }
-            ]
-          },
-          {
-            id: 102,
-            title: "Жылыой - ВП",
-            archived: false,
-            collapsed: true,
-            showAddForm: false,
-            steps: [
-              { id: 2001, text: "Акт сверки НАО", date: "до 10.09.2026", done: false, blocker: null },
-              { id: 2002, text: "Экспликация Гипрозем", date: "до 15.09", done: true, blocker: null },
-              { id: 2003, text: "Утверждение ЗУП МИО", date: "до 23.09.2026", done: false, blocker: null }
-            ]
+    let state = [];
+
+    /* НАДЕЖНАЯ ЗАГРУЗКА БЕЗ СТИРАНИЙ */
+    function loadData() {
+      let localTimestamp = 0;
+      let localState = null;
+
+      // 1. Проверяем локальное хранилище
+      const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
+      if (rawLocal) {
+        try {
+          const parsed = JSON.parse(rawLocal);
+          if (parsed.updatedAt && Array.isArray(parsed.data)) {
+            localTimestamp = parsed.updatedAt;
+            localState = parsed.data;
+          } else if (Array.isArray(parsed)) {
+            localState = parsed;
           }
-        ]
+        } catch(e) {}
       }
-    ];
 
-    function mergeStatesList(list) {
-      const merged = {};
-
-      list.forEach(st => {
-        if (!Array.isArray(st)) return;
-        st.forEach(p => {
-          const pTitle = (p.title || '').trim();
-          if (!pTitle) return;
-          const pKey = pTitle.toLowerCase();
-
-          if (!merged[pKey]) {
-            merged[pKey] = {
-              id: p.id || Date.now() + Math.random(),
-              title: pTitle,
-              collapsed: true,
-              showArchive: false,
-              objectsMap: {}
-            };
-          }
-
-          (p.objects || []).forEach(o => {
-            const oTitle = (o.title || '').trim();
-            if (!oTitle) return;
-            const oKey = oTitle.toLowerCase();
-            const oMap = merged[pKey].objectsMap;
-
-            if (!oMap[oKey]) {
-              oMap[oKey] = {
-                id: o.id || Date.now() + Math.random(),
-                title: oTitle,
-                archived: !!o.archived,
-                collapsed: true,
-                showAddForm: false,
-                stepsMap: {}
-              };
-            }
-
-            (o.steps || []).forEach(s => {
-              const sText = (s.text || '').trim();
-              if (!sText) return;
-              const sKey = sText.toLowerCase();
-              const sMap = oMap[oKey].stepsMap;
-
-              if (!sMap[sKey]) {
-                sMap[sKey] = {
-                  id: s.id || Date.now() + Math.random(),
-                  text: sText,
-                  date: s.date || '',
-                  done: !!s.done,
-                  blocker: s.blocker || null
-                };
-              } else {
-                if (s.done) sMap[sKey].done = true;
-                if (s.date && !sMap[sKey].date) sMap[sKey].date = s.date;
-                if (s.blocker) sMap[sKey].blocker = s.blocker;
-              }
-            });
-          });
-        });
-      });
-
-      const res = [];
-      Object.values(merged).forEach(p => {
-        const objs = [];
-        Object.values(p.objectsMap).forEach(o => {
-          o.steps = Object.values(o.stepsMap);
-          delete o.stepsMap;
-          objs.push(o);
-        });
-        p.objects = objs;
-        delete p.objectsMap;
-        res.push(p);
-      });
-
-      return res;
-    }
-
-    function parseRaw(raw) {
-      try {
-        const p = JSON.parse(raw);
-        if (Array.isArray(p) && p.length > 0) return p;
-      } catch(e) {}
-      return null;
-    }
-
-    async function loadData() {
-      const candidates = [];
-      const allKeys = [MAIN_STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
-
-      allKeys.forEach(k => {
-        const raw = localStorage.getItem(k);
-        if (raw) {
-          const parsed = parseRaw(raw);
-          if (parsed) candidates.push(parsed);
-        }
-      });
-
-      if (tg?.CloudStorage) {
-        tg.CloudStorage.getItems(allKeys, (err, values) => {
-          if (!err && values) {
-            allKeys.forEach(k => {
-              if (values[k]) {
-                const parsed = parseRaw(values[k]);
-                if (parsed) candidates.push(parsed);
-              }
-            });
-          }
-
-          if (candidates.length > 0) {
-            state = mergeStatesList(candidates);
-          }
-          saveData();
-          render();
-        });
-      } else {
-        if (candidates.length > 0) {
-          state = mergeStatesList(candidates);
-        }
-        saveData();
+      if (localState && localState.length > 0) {
+        state = localState;
         render();
       }
-    }
 
-    function saveData() {
-      const json = JSON.stringify(state);
-      localStorage.setItem(MAIN_STORAGE_KEY, json);
-
+      // 2. Проверяем CloudStorage Telegram с контролем времени
       if (tg?.CloudStorage) {
-        tg.CloudStorage.setItem(MAIN_STORAGE_KEY, json, (err, ok) => {
-          const tag = document.getElementById('syncTag');
-          if (ok && tag) {
-            tag.textContent = "● Синхронизировано";
-            tag.classList.add('active');
+        tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
+          if (!err && val) {
+            try {
+              const cloudParsed = JSON.parse(val);
+              const cloudTimestamp = cloudParsed.updatedAt || 0;
+              const cloudData = cloudParsed.data || (Array.isArray(cloudParsed) ? cloudParsed : null);
+
+              // Берем облако ТОЛЬКО если оно гарантированно новее локального
+              if (cloudData && cloudTimestamp > localTimestamp) {
+                state = cloudData;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: cloudTimestamp, data: state }));
+                render();
+              }
+            } catch(e) {}
           }
         });
       }
+    }
+
+    /* МОМЕНТАЛЬНОЕ СОХРАНЕНИЕ */
+    function saveData() {
+      const now = Date.now();
+      const payload = { updatedAt: now, data: state };
+      const json = JSON.stringify(payload);
+
+      // Сразу пишем в постоянную память браузера
+      localStorage.setItem(STORAGE_KEY, json);
+      localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
+
+      // Отправляем в облако Telegram
+      if (tg?.CloudStorage) {
+        tg.CloudStorage.setItem(STORAGE_KEY, json);
+      }
+
+      const d = new Date();
+      const tag = document.getElementById('syncTag');
+      if (tag) {
+        tag.textContent = `● Сохранено ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+      }
+
       render();
     }
 
@@ -1364,7 +1233,7 @@
       reportMode = m;
       document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
       document.getElementById('modeFull').classList.toggle('active', m === 'full');
-      showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный отчет");
+      showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный отчет (Таблица)");
     }
 
     function addProcess() {
@@ -1406,7 +1275,6 @@
       render();
     }
 
-    /* ФУНКЦИЯ ПЕРЕМЕЩЕНИЯ ОБЪЕКТА ВВЕРХ ИЛИ ВНИЗ */
     function moveObject(procId, objId, direction) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
@@ -1446,7 +1314,7 @@
       if (!obj) return;
 
       obj.archived = true;
-      showToast(`«${obj.title}» перенесен в архив!`);
+      showToast(`«${obj.title}» в архиве!`);
       haptic();
       saveData();
     }
@@ -1479,9 +1347,7 @@
       if (!step) return;
 
       document.getElementById('dateModalStepTitle').textContent = `${obj.title} → ${step.text}`;
-      const iso = displayToISO(step.date) || getTodayISO();
-      document.getElementById('modalDatePickerInput').value = iso;
-
+      document.getElementById('modalDatePickerInput').value = displayToISO(step.date) || getTodayISO();
       document.getElementById('dateModalOverlay').style.display = 'flex';
       haptic();
     }
@@ -1494,10 +1360,7 @@
     function setModalDateOffset(days) {
       const d = new Date();
       d.setDate(d.getDate() + days);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      document.getElementById('modalDatePickerInput').value = `${y}-${m}-${day}`;
+      document.getElementById('modalDatePickerInput').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       haptic();
     }
 
@@ -1540,7 +1403,6 @@
       document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
       document.getElementById('customRiskInput').value = step.blocker || '';
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
-
       document.getElementById('riskModalOverlay').style.display = 'flex';
       haptic();
     }
@@ -1640,10 +1502,10 @@
       const src = p.objects.find(o => o.id === objId);
       if (!src) return;
 
-      const newTitle = prompt("Новое имя для скопированного объекта:", src.title + " (Копия)");
+      const newTitle = prompt("Имя для копии:", src.title + " (Копия)");
       if (!newTitle || !newTitle.trim()) return;
 
-      const cloned = {
+      p.objects.push({
         id: Date.now(),
         title: newTitle.trim(),
         archived: false,
@@ -1656,9 +1518,7 @@
           done: false,
           blocker: null
         }))
-      };
-
-      p.objects.push(cloned);
+      });
       showToast("Структура скопирована!");
       haptic();
       saveData();
@@ -1744,8 +1604,7 @@
       }
 
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
+      const obj = p?.objects.find(o => o.id === objId);
       if (!obj) return;
 
       if (!obj.steps) obj.steps = [];
@@ -1766,10 +1625,8 @@
 
     function toggleStep(procId, objId, stepId) {
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-      const step = obj.steps.find(s => s.id === stepId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
       if (step) {
         step.done = !step.done;
         if (step.done) step.blocker = null;
@@ -1780,10 +1637,8 @@
 
     function editStepText(procId, objId, stepId) {
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-      const step = obj.steps.find(s => s.id === stepId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
       if (!step) return;
 
       const newTxt = prompt("Описание этапа / задачи:", step.text);
@@ -1796,13 +1651,40 @@
 
     function deleteStep(procId, objId, stepId) {
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
+      const obj = p?.objects.find(o => o.id === objId);
       if (!obj) return;
 
       obj.steps = obj.steps.filter(s => s.id !== stepId);
       haptic();
       saveData();
+    }
+
+    /* РЕЗЕРВНАЯ КОПИЯ В 1 КЛИК */
+    function exportBackup() {
+      const str = JSON.stringify(state, null, 2);
+      navigator.clipboard.writeText(str).then(() => {
+        showToast("Резервная копия скопирована в буфер!");
+      }).catch(() => {
+        prompt("Скопируйте текст бэкапа:", str);
+      });
+    }
+
+    function importBackup() {
+      const str = prompt("Вставьте текст ранее сохраненной резервной копии:");
+      if (!str) return;
+      try {
+        const parsed = JSON.parse(str);
+        const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
+        if (Array.isArray(data) && data.length > 0) {
+          state = data;
+          saveData();
+          showToast("Данные успешно восстановлены!");
+        } else {
+          alert("Неверный формат данных!");
+        }
+      } catch(e) {
+        alert("Ошибка при чтении данных!");
+      }
     }
 
     function render() {
@@ -1862,10 +1744,8 @@
                       ${tCount > 0 ? `
                         <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
                       ` : ''}
-                      <!-- КНОПКИ ПЕРЕМЕЩЕНИЯ ОБЪЕКТА ВВЕРХ/ВНИЗ -->
                       ${objIdx > 0 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, -1)" title="Выше">⬆️</button>` : ''}
                       ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
-                      
                       <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
                       <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
                       <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить">✕</button>
@@ -1991,11 +1871,7 @@
 
       const bCard = document.getElementById('mBlockersCard');
       if (bCard) {
-        if (totalBlockers > 0) {
-          bCard.className = 'metric-card has-danger';
-        } else {
-          bCard.className = 'metric-card';
-        }
+        bCard.className = totalBlockers > 0 ? 'metric-card has-danger' : 'metric-card';
       }
 
       document.getElementById('mBlockers').textContent = totalBlockers;
@@ -2004,7 +1880,7 @@
       document.getElementById('mTotal').textContent = totalActiveObjs;
     }
 
-    /* ФОРМИРОВАНИЕ ОТЧЕТА ДЛЯ TELEGRAM */
+    /* ФОРМИРОВАНИЕ ОТЧЕТА С ТАБЛИЧНОЙ ВЫРАВНИВАЮЩЕЙСЯ СВОДКОЙ */
     function generateTelegramReport() {
       const today = getTodayStr();
 
@@ -2025,18 +1901,11 @@
         });
       });
 
-      const archivedList = [];
-      state.forEach(p => {
-        (p.objects || []).filter(o => o.archived).forEach(o => {
-          archivedList.push({ proc: p.title, obj: o.title });
-        });
-      });
-
       if (reportMode === 'executive') {
-        let txt = `📊 ОТЧЕТ ПО ПРОЕКТАМ | ${today}\n\n`;
+        let txt = `📊 СВОДКА ЗА СЕГОДНЯ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ / БЛОКЕРЫ:\n`;
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ (БЛОКЕРЫ):\n`;
           blockers.forEach(b => {
             txt += `• ${b.obj} (${b.proc}):\n`;
             txt += `  ⚠️ ${b.step} [${b.date}]\n`;
@@ -2046,7 +1915,7 @@
         }
 
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА СЕГОДНЯ:\n`;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА ДЕНЬ:\n`;
         state.forEach(p => {
           (p.objects || []).filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = (o.steps || []).filter(s => s.done);
@@ -2062,16 +1931,8 @@
         if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
         txt += doneTxt + `\n`;
 
-        if (archivedList.length > 0) {
-          txt += `🏆 ПОЛНОСТЬЮ ЗАВЕРШЕННЫЕ ОБЪЕКТЫ (100%):\n`;
-          archivedList.forEach(a => {
-            txt += `• 📌 ${a.obj} (${a.proc}) — оформление полностью закрыто\n`;
-          });
-          txt += `\n`;
-        }
-
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ / ПЛАНЫ:\n`;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ:\n`;
         state.forEach(p => {
           (p.objects || []).filter(o => !o.archived).forEach(o => {
             const regularSteps = (o.steps || []).filter(s => !s.done && !s.blocker);
@@ -2079,8 +1940,7 @@
               hasPlan = true;
               planTxt += `• ${o.title} (${p.title}):\n`;
               regularSteps.forEach(s => {
-                const dateStr = s.date ? ` [${s.date}]` : '';
-                planTxt += `  - ${s.text}${dateStr}\n`;
+                planTxt += `  - ${s.text}${s.date ? ` [${s.date}]` : ''}\n`;
               });
             }
           });
@@ -2091,12 +1951,13 @@
         return txt.trim();
 
       } else {
-        let txt = `📋 ПОЛНАЯ СВОДКА ПО ОБЪЕКТАМ | ${today}\n\n`;
+        // ТАБЛИЧНЫЙ ПОЛНЫЙ ОТЧЕТ
+        let txt = `📋 СВОДНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
 
         if (blockers.length > 0) {
-          txt += `🚨 КРИТИЧЕСКИЕ ЗАДЕРЖКИ (${blockers.length}):\n`;
+          txt += `🚨 БЛОКЕРЫ / ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date || 'без даты'}]\n`;
+            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]\n`;
           });
           txt += `\n`;
         }
@@ -2105,30 +1966,39 @@
           const active = (p.objects || []).filter(o => !o.archived);
           txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
           if (active.length === 0) {
-            txt += `  (все объекты завершены и в архиве)\n\n`;
+            txt += `  (все объекты в архиве)\n\n`;
             return;
           }
+
+          txt += `┌───────────────────────┬───────┬────────────┐\n`;
+          txt += `│ Объект                │ Готов │ Статус     │\n`;
+          txt += `├───────────────────────┼───────┼────────────┤\n`;
 
           active.forEach(o => {
             const d = (o.steps || []).filter(s => s.done).length;
             const t = (o.steps || []).length;
-            txt += `📌 ${o.title} [готовность: ${d}/${t}]\n`;
+            const hasBlk = (o.steps || []).some(s => !s.done && s.blocker);
+
+            const title = (o.title.length > 21 ? o.title.slice(0, 20) + '…' : o.title).padEnd(21, ' ');
+            const prog = `${d}/${t}`.padStart(5, ' ');
+            const status = (hasBlk ? '⚠️ Блокер' : (d === t && t > 0 ? '✔ Готово' : 'В работе')).padEnd(10, ' ');
+
+            txt += `│ ${title} │ ${prog} │ ${status} │\n`;
+          });
+          txt += `└───────────────────────┴───────┴────────────┘\n\n`;
+
+          // Вывод детальных шагов
+          active.forEach(o => {
+            txt += `📌 ${o.title}:\n`;
             (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
               const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
               txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
+            txt += `\n`;
           });
-          txt += `\n`;
         });
-
-        if (archivedList.length > 0) {
-          txt += `🗄 В АРХИВЕ (ЗАВЕРШЕНО 100%):\n`;
-          archivedList.forEach(a => {
-            txt += `• ${a.obj} (${a.proc})\n`;
-          });
-        }
 
         return txt.trim();
       }
