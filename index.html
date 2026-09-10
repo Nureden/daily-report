@@ -1926,12 +1926,14 @@
     }
 
     /* ==============================================================
-       ВЫГРУЗКА В EXCEL (.xlsx)
+       ВЫГРУЗКА В EXCEL (.xlsx) + БУФЕР ДЛЯ CTRL+V
        ============================================================== */
     function exportToExcel() {
       haptic();
 
       const rows = [];
+      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tБлокер\n";
+
       state.forEach(p => {
         (p.objects || []).forEach(o => {
           const total = (o.steps || []).length;
@@ -1950,19 +1952,25 @@
               "Задержка / Блокер": "—",
               "Изменено": "—"
             });
+            tsvText += `${p.title}\t${o.title}\t${pct}\t—\t—\tНет этапов\t—\n`;
           } else {
             o.steps.forEach(s => {
+              const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
+              const dateStr = s.date || "Не указан";
+              const blkStr = s.blocker || "—";
+
               rows.push({
                 "Направление": p.title,
                 "Объект": o.title,
                 "В архиве": o.archived ? "Да" : "Нет",
                 "Прогресс": pct,
                 "Этап": s.text,
-                "Срок": s.date || "Не указан",
-                "Статус": s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе"),
-                "Задержка / Блокер": s.blocker || "—",
+                "Срок": dateStr,
+                "Статус": statusStr,
+                "Задержка / Блокер": blkStr,
                 "Изменено": s.updatedAt || "—"
               });
+              tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${blkStr}\n`;
             });
           }
         });
@@ -1973,23 +1981,37 @@
         return;
       }
 
-      const ws = XLSX.utils.json_to_sheet(rows);
-      ws['!cols'] = [
-        { wch: 22 }, // Направление
-        { wch: 28 }, // Объект
-        { wch: 10 }, // В архиве
-        { wch: 10 }, // Прогресс
-        { wch: 32 }, // Этап
-        { wch: 16 }, // Срок
-        { wch: 14 }, // Статус
-        { wch: 32 }, // Блокер
-        { wch: 18 }  // Изменено
-      ];
+      // 1. Копируем в память (для мгновенной вставки Ctrl+V в Excel)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(tsvText);
+      }
 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
-      XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
-      showToast("Excel файл скачан!");
+      // 2. Пытаемся сохранить файл
+      try {
+        if (typeof XLSX !== 'undefined') {
+          const ws = XLSX.utils.json_to_sheet(rows);
+          ws['!cols'] = [
+            { wch: 22 },
+            { wch: 28 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 32 },
+            { wch: 16 },
+            { wch: 14 },
+            { wch: 32 },
+            { wch: 18 }
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
+          XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
+          showToast("Таблица скопирована + скачивание!");
+        } else {
+          showToast("Таблица скопирована! Вставьте в Excel (Ctrl+V)");
+        }
+      } catch (err) {
+        showToast("Таблица скопирована! Вставьте в Excel (Ctrl+V)");
+      }
     }
 
     /* ==============================================================
