@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Управленческий трекер проектов</title>
-  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Библиотека для экспорта в Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -17,1031 +15,169 @@
       --text-subtle: #94a3b8;
       --border: #e2e8f0;
       --border-subtle: #f1f5f9;
-
       --brand: #2563eb;
       --brand-light: #f8fafc;
       --brand-border: #cbd5e1;
-
       --done: #16a34a;
       --done-bg: #f0fdf4;
       --done-border: #bbf7d0;
-
       --amber: #d97706;
       --amber-bg: #fffbeb;
       --amber-border: #fde68a;
-
       --danger: #dc2626;
       --danger-bg: #fef2f2;
       --danger-border: #fca5a5;
-
       --ai-purple: #7c3aed;
       --ai-purple-bg: #f5f3ff;
       --ai-purple-border: #ddd6fe;
-
       --neutral-dark: #334155;
       --radius: 14px;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      padding: 10px 12px 115px 12px;
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .app-container {
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-    /* ПАНЕЛЬ РУКОВОДИТЕЛЯ */
-    .dashboard-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 14px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-
-    .dash-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .dash-title {
-      font-size: 17px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #0f172a;
-    }
-
-    .dash-top-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: #e0f2fe;
-      color: #0369a1;
-    }
-
-    .btn-ai-trigger {
-      background: var(--ai-purple);
-      color: #ffffff;
-      border: none;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: opacity 0.15s;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 10px 12px 115px 12px; font-size: 15px; line-height: 1.45; }
+    .app-container { max-width: 860px; margin: 0 auto; }
+    .dashboard-card { background: var(--card-bg); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); }
+    .dash-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .dash-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 6px; color: #0f172a; }
+    .dash-top-actions { display: flex; align-items: center; gap: 6px; }
+    .btn-sync-icon { background: #f1f5f9; border: 1px solid var(--border); border-radius: 20px; padding: 4px 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-sync-icon:active { transform: rotate(180deg); }
+    .sync-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: #e0f2fe; color: #0369a1; }
+    .btn-ai-trigger { background: var(--ai-purple); color: #ffffff; border: none; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: opacity 0.15s; }
     .btn-ai-trigger:active { opacity: 0.8; }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    @media (max-width: 480px) {
-      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .metric-card {
-      padding: 10px 12px;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--neutral-dark);
-    }
-    .metric-card.has-danger {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border-color: var(--danger-border);
-    }
-    .metric-card.is-green {
-      background: var(--done-bg);
-      color: var(--done);
-      border-color: var(--done-border);
-    }
-    .metric-card.is-amber {
-      background: var(--amber-bg);
-      color: var(--amber);
-      border-color: var(--amber-border);
-    }
-    .metric-card.is-blue {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-color: #bfdbfe;
-    }
-
-    .metric-lbl {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      opacity: 0.8;
-    }
-    .metric-num {
-      font-size: 20px;
-      font-weight: 800;
-      margin-top: 2px;
-    }
-
-    .report-modes {
-      display: flex;
-      gap: 6px;
-    }
-    .report-mode-btn {
-      flex: 1;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--text-muted);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-    }
-    .report-mode-btn.active {
-      background: var(--neutral-dark);
-      color: #ffffff;
-      border-color: var(--neutral-dark);
-    }
-
-    /* БЫСТРЫЙ ВВОД */
-    .quick-add-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .quick-add-bar input {
-      flex: 1;
-      padding: 11px 14px;
-      font-size: 15px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #ffffff;
-      outline: none;
-    }
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 480px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+    .metric-card { padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; border: 1px solid var(--border); background: #f8fafc; color: var(--neutral-dark); }
+    .metric-card.has-danger { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
+    .metric-card.is-green { background: var(--done-bg); color: var(--done); border-color: var(--done-border); }
+    .metric-card.is-amber { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+    .metric-card.is-blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .metric-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.8; }
+    .metric-num { font-size: 20px; font-weight: 800; margin-top: 2px; }
+    .report-modes { display: flex; gap: 6px; }
+    .report-mode-btn { flex: 1; padding: 8px 10px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text-muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+    .report-mode-btn.active { background: var(--neutral-dark); color: #ffffff; border-color: var(--neutral-dark); }
+    .quick-add-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .quick-add-bar input { flex: 1; padding: 11px 14px; font-size: 15px; border: 1px solid var(--border); border-radius: 10px; background: #ffffff; outline: none; }
     .quick-add-bar input:focus { border-color: var(--brand); }
-    .btn-dark {
-      background: var(--neutral-dark);
-      color: #ffffff;
-      padding: 11px 18px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    /* ПАПКА ПРОЦЕССА */
-    .process-section {
-      background: #ffffff;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      margin-bottom: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    }
-
-    .process-sticker-header {
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #ffffff;
-      cursor: pointer;
-      user-select: none;
-      border-bottom: 1px solid transparent;
-      border-left: 5px solid var(--brand);
-    }
-    .process-section.is-open .process-sticker-header {
-      border-bottom-color: var(--border-subtle);
-    }
-
-    .proc-title-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .proc-folder-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .proc-arrow {
-      display: inline-block;
-      font-size: 11px;
-      color: var(--text-muted);
-      transition: transform 0.2s ease;
-    }
-    .proc-arrow.collapsed {
-      transform: rotate(-90deg);
-    }
-
-    .proc-tag-count {
-      font-size: 11px;
-      font-weight: 700;
-      background: #f1f5f9;
-      color: #475569;
-      padding: 2px 8px;
-      border-radius: 10px;
-      white-space: nowrap;
-    }
-
-    .proc-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .proc-btn-tool {
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 700;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 6px;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .btn-dark { background: var(--neutral-dark); color: #ffffff; padding: 11px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .process-section { background: #ffffff; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); }
+    .process-sticker-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; background: #ffffff; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; border-left: 5px solid var(--brand); }
+    .process-section.is-open .process-sticker-header { border-bottom-color: var(--border-subtle); }
+    .proc-title-group { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; color: #0f172a; }
+    .proc-folder-badge { display: inline-flex; align-items: center; gap: 6px; }
+    .proc-arrow { display: inline-block; font-size: 11px; color: var(--text-muted); transition: transform 0.2s ease; }
+    .proc-arrow.collapsed { transform: rotate(-90deg); }
+    .proc-tag-count { font-size: 11px; font-weight: 700; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .proc-actions { display: flex; align-items: center; gap: 4px; }
+    .proc-btn-tool { color: var(--text-muted); font-size: 13px; font-weight: 700; background: #f8fafc; border: 1px solid var(--border); cursor: pointer; padding: 4px 8px; border-radius: 6px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
     .proc-btn-tool:hover { background: #f1f5f9; color: var(--text-main); }
     .proc-btn-tool.del { color: var(--danger); }
     .proc-btn-tool.del:hover { background: var(--danger-bg); border-color: var(--danger-border); }
-
-    .process-body {
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #f8fafc;
-    }
-    .process-body.hidden {
-      display: none !important;
-    }
-
-    /* ОБЪЕКТ / УЧАСТОК */
-    .object-card {
-      background: #ffffff;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--brand);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
-    .object-card.completed-obj {
-      border-left-color: var(--done);
-      background: #fcfdfc;
-    }
-
-    .obj-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .obj-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-    }
-    .obj-collapse-arrow {
-      font-size: 10px;
-      color: var(--text-muted);
-      transition: transform 0.2s ease;
-      flex-shrink: 0;
-    }
-    .obj-collapse-arrow.collapsed {
-      transform: rotate(-90deg);
-    }
-    .obj-name {
-      font-size: 15px;
-      font-weight: 800;
-      color: #0f172a;
-      word-break: normal;
-      overflow-wrap: break-word;
-    }
-
-    .obj-tools {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .obj-tools-left {
-      display: flex;
-      align-items: center;
-    }
-    .obj-btn-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .badge-percent {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 12px;
-      background: #f1f5f9;
-      color: #475569;
-      white-space: nowrap;
-    }
-    .badge-percent.green {
-      background: var(--done-bg);
-      color: var(--done);
-      border: 1px solid var(--done-border);
-    }
-
-    .btn-icon-tool {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 7px;
-      font-size: 12px;
-      cursor: pointer;
-      color: #475569;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-icon-tool:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-    }
-    .btn-icon-tool.del {
-      color: var(--danger);
-      font-weight: 800;
-    }
-    .btn-icon-tool.del:hover {
-      background: var(--danger-bg);
-      border-color: var(--danger-border);
-    }
-
+    .process-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
+    .process-body.hidden { display: none !important; }
+    .object-card { background: #ffffff; border-radius: 10px; border: 1px solid var(--border); border-left: 4px solid var(--brand); padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02); }
+    .object-card.completed-obj { border-left-color: var(--done); background: #fcfdfc; }
+    .obj-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+    .obj-title-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .obj-collapse-arrow { font-size: 10px; color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+    .obj-collapse-arrow.collapsed { transform: rotate(-90deg); }
+    .obj-name { font-size: 15px; font-weight: 800; color: #0f172a; word-break: normal; overflow-wrap: break-word; }
+    .obj-tools { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .obj-tools-left { display: flex; align-items: center; }
+    .obj-btn-group { display: flex; align-items: center; gap: 4px; }
+    .badge-percent { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 12px; background: #f1f5f9; color: #475569; white-space: nowrap; }
+    .badge-percent.green { background: var(--done-bg); color: var(--done); border: 1px solid var(--done-border); }
+    .btn-icon-tool { background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; font-size: 12px; cursor: pointer; color: #475569; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-icon-tool:hover { background: #e2e8f0; color: #0f172a; }
+    .btn-icon-tool.del { color: var(--danger); font-weight: 800; }
+    .btn-icon-tool.del:hover { background: var(--danger-bg); border-color: var(--danger-border); }
     @media (max-width: 600px) {
-      .obj-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-      }
+      .obj-header { flex-direction: column; align-items: stretch; gap: 6px; }
       .obj-title-wrap { width: 100%; }
       .obj-name { font-size: 14px; line-height: 1.35; }
-      .obj-tools {
-        width: 100%;
-        justify-content: space-between;
-        padding-top: 5px;
-        border-top: 1px dashed var(--border-subtle);
-      }
+      .obj-tools { width: 100%; justify-content: space-between; padding-top: 5px; border-top: 1px dashed var(--border-subtle); }
       .btn-icon-tool { padding: 4px 7px; font-size: 12px; }
       .proc-title-group { font-size: 15px; gap: 6px; flex-wrap: wrap; }
     }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 4px;
-      background: #f1f5f9;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--brand);
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
+    .progress-bar-bg { width: 100%; height: 4px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--brand); border-radius: 4px; transition: width 0.3s ease; }
     .progress-bar-fill.done { background: var(--done); }
-
-    .obj-body {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 4px;
-      padding-top: 6px;
-      border-top: 1px dashed var(--border);
-    }
-    .obj-body.hidden {
-      display: none !important;
-    }
-
-    /* ШАГИ */
-    .steps-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .step-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 9px 11px;
-      border-radius: 8px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-    }
-    .step-item.is-done {
-      background: var(--done-bg);
-      border-color: var(--done-border);
-    }
-    .step-item.has-blocker {
-      background: var(--danger-bg);
-      border-color: var(--danger-border);
-    }
-
-    .step-header-line {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      width: 100%;
-    }
-    .step-chk {
-      width: 19px;
-      height: 19px;
-      cursor: pointer;
-      accent-color: var(--done);
-      margin-top: 1px;
-      flex-shrink: 0;
-    }
-    .step-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-main);
-      cursor: pointer;
-      line-height: 1.35;
-      flex: 1;
-      word-break: normal;
-      overflow-wrap: break-word;
-      hyphens: none;
-    }
-    .step-item.is-done .step-title {
-      text-decoration: line-through;
-      color: var(--done);
-      opacity: 0.75;
-    }
-
-    .step-footer-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-left: 29px;
-    }
-
-    .step-actions-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .step-date-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      color: #334155;
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
+    .obj-body { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--border); }
+    .obj-body.hidden { display: none !important; }
+    .steps-list { display: flex; flex-direction: column; gap: 6px; }
+    .step-item { display: flex; flex-direction: column; gap: 6px; padding: 9px 11px; border-radius: 8px; background: #f8fafc; border: 1px solid var(--border); }
+    .step-item.is-done { background: var(--done-bg); border-color: var(--done-border); }
+    .step-item.has-blocker { background: var(--danger-bg); border-color: var(--danger-border); }
+    .step-header-line { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+    .step-chk { width: 19px; height: 19px; cursor: pointer; accent-color: var(--done); margin-top: 1px; flex-shrink: 0; }
+    .step-title { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; line-height: 1.35; flex: 1; word-break: normal; overflow-wrap: break-word; hyphens: none; }
+    .step-item.is-done .step-title { text-decoration: line-through; color: var(--done); opacity: 0.75; }
+    .step-footer-line { display: flex; justify-content: space-between; align-items: center; padding-left: 29px; }
+    .step-actions-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .step-date-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #ffffff; border: 1px solid var(--border); color: #334155; cursor: pointer; user-select: none; white-space: nowrap; transition: all 0.15s; }
     .step-date-btn:active { transform: scale(0.96); }
-    .step-date-btn.overdue {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #991b1b;
-    }
-    .step-date-btn.urgent {
-      background: #fef3c7;
-      border-color: #fde68a;
-      color: #92400e;
-    }
-    .step-date-btn.done {
-      background: #ffffff;
-      border-color: var(--done-border);
-      color: var(--done);
-    }
-    .step-date-btn.empty {
-      color: var(--brand);
-      border-style: dashed;
-      border-color: var(--brand-border);
-      background: #eff6ff;
-    }
-
-    .btn-blocker-trigger {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #64748b;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .btn-blocker-trigger:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
-    .btn-blocker-trigger.active {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #991b1b;
-      font-weight: 700;
-    }
-
-    .step-updated-badge {
-      font-size: 10px;
-      color: var(--text-subtle);
-      font-weight: 500;
-      letter-spacing: -0.2px;
-      white-space: nowrap;
-      user-select: none;
-      padding-left: 2px;
-    }
-
-    .mini-del {
-      background: none;
-      border: none;
-      color: var(--danger);
-      font-size: 13px;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 800;
-      line-height: 1;
-    }
-    .mini-del:hover {
-      background: var(--danger-bg);
-    }
-
-    .blocker-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      background: #ffffff;
-      border: 1px solid #fca5a5;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 12px;
-      color: #991b1b;
-      font-weight: 600;
-      margin-left: 29px;
-    }
+    .step-date-btn.overdue { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .step-date-btn.urgent { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+    .step-date-btn.done { background: #ffffff; border-color: var(--done-border); color: var(--done); }
+    .step-date-btn.empty { color: var(--brand); border-style: dashed; border-color: var(--brand-border); background: #eff6ff; }
+    .btn-blocker-trigger { background: #ffffff; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; cursor: pointer; color: #64748b; white-space: nowrap; transition: all 0.15s; }
+    .btn-blocker-trigger:hover { background: #f1f5f9; color: #0f172a; }
+    .btn-blocker-trigger.active { background: #fee2e2; border-color: #fca5a5; color: #991b1b; font-weight: 700; }
+    .step-updated-badge { font-size: 10px; color: var(--text-subtle); font-weight: 500; letter-spacing: -0.2px; white-space: nowrap; user-select: none; padding-left: 2px; }
+    .mini-del { background: none; border: none; color: var(--danger); font-size: 13px; cursor: pointer; padding: 2px 6px; border-radius: 4px; font-weight: 800; line-height: 1; }
+    .mini-del:hover { background: var(--danger-bg); }
+    .blocker-banner { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #ffffff; border: 1px solid #fca5a5; border-radius: 6px; padding: 6px 10px; font-size: 12px; color: #991b1b; font-weight: 600; margin-left: 29px; }
     .blocker-banner span.reason-text { flex: 1; cursor: pointer; }
-    .blocker-clear-btn {
-      background: none;
-      border: none;
-      color: #991b1b;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 2px 4px;
-    }
-
-    .all-done-banner {
-      background: var(--done-bg);
-      border: 1px dashed var(--done-border);
-      border-radius: 8px;
-      padding: 9px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .all-done-banner span {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--done);
-    }
-    .btn-finish-work {
-      background: var(--done);
-      color: #ffffff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .step-add-toggle-btn {
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      color: var(--text-muted);
-      border-radius: 6px;
-      padding: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      margin-top: 2px;
-    }
-    .step-add-toggle-btn:hover {
-      background: #ffffff;
-      color: var(--text-main);
-    }
-
-    .step-fast-add {
-      background: #f8fafc;
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
-    .template-chips-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-bottom: 2px;
-    }
-    .tpl-chip {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 3px 6px;
-      border-radius: 5px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .tpl-chip:hover {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-    .tpl-chip.preset-all {
-      background: var(--done-bg);
-      border-color: var(--done-border);
-      color: var(--done);
-      font-weight: 700;
-    }
-
-    .sfa-row-1 {
-      display: flex;
-      gap: 6px;
-    }
-    .sfa-row-1 input[type="text"] {
-      flex: 1;
-      padding: 7px 9px;
-      font-size: 13px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      outline: none;
-    }
-    .sfa-row-1 input[type="date"] {
-      width: 130px;
-      padding: 6px 8px;
-      font-size: 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      outline: none;
-      background: #fff;
-    }
-
-    .sfa-row-2 {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-add-step {
-      background: var(--neutral-dark);
-      color: #ffffff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .proc-add-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .btn-new-obj {
-      flex: 1;
-      background: #ffffff;
-      color: var(--neutral-dark);
-      border: 1px dashed #94a3b8;
-      padding: 9px 6px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-    }
-    .btn-new-obj.template {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-
-    .archive-section {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-    }
-    .archive-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .archive-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .archive-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 8px;
-      background: #f8fafc;
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      font-size: 13px;
-    }
-    .btn-restore {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    /* РЕЗЕРВНАЯ КОПИЯ В ПОДВАЛЕ */
-    .backup-footer {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 24px;
-      margin-bottom: 20px;
-    }
-    .backup-btn {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* ПЛАВАЮЩАЯ ПАНЕЛЬ */
-    .floating-action-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #ffffff;
-      border-top: 1px solid var(--border);
-      padding: 10px 14px;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
-      display: flex;
-      gap: 8px;
-      z-index: 100;
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-    .fab-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 11px;
-      font-size: 13px;
-      font-weight: 700;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      color: #ffffff;
-    }
+    .blocker-clear-btn { background: none; border: none; color: #991b1b; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+    .all-done-banner { background: var(--done-bg); border: 1px dashed var(--done-border); border-radius: 8px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .all-done-banner span { font-size: 12px; font-weight: 700; color: var(--done); }
+    .btn-finish-work { background: var(--done); color: #ffffff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .step-add-toggle-btn { background: #f8fafc; border: 1px dashed #cbd5e1; color: var(--text-muted); border-radius: 6px; padding: 6px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; margin-top: 2px; }
+    .step-add-toggle-btn:hover { background: #ffffff; color: var(--text-main); }
+    .step-fast-add { background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+    .template-chips-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
+    .tpl-chip { background: #ffffff; border: 1px solid var(--border); color: var(--text-main); padding: 3px 6px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .tpl-chip:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .tpl-chip.preset-all { background: var(--done-bg); border-color: var(--done-border); color: var(--done); font-weight: 700; }
+    .sfa-row-1 { display: flex; gap: 6px; }
+    .sfa-row-1 input[type="text"] { flex: 1; padding: 7px 9px; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; outline: none; }
+    .sfa-row-1 input[type="date"] { width: 130px; padding: 6px 8px; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; outline: none; background: #fff; }
+    .sfa-row-2 { display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
+    .btn-add-step { background: var(--neutral-dark); color: #ffffff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .proc-add-actions { display: flex; gap: 6px; margin-top: 4px; }
+    .btn-new-obj { flex: 1; background: #ffffff; color: var(--neutral-dark); border: 1px dashed #94a3b8; padding: 9px 6px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; }
+    .btn-new-obj.template { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .archive-section { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+    .archive-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    .archive-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .archive-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 13px; }
+    .btn-restore { background: #ffffff; border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+    .backup-footer { display: flex; justify-content: center; gap: 12px; margin-top: 24px; margin-bottom: 20px; }
+    .backup-btn { background: #ffffff; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .floating-action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1px solid var(--border); padding: 10px 14px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); display: flex; gap: 8px; z-index: 100; max-width: 860px; margin: 0 auto; }
+    .fab-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px; font-size: 13px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; color: #ffffff; }
     .fab-btn.copy { background: #16a34a; }
     .fab-btn.excel { background: #059669; }
     .fab-btn.send { background: #0284c7; }
-
-    /* МОДАЛЬНЫЕ ОКНА */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      display: none;
-      justify-content: center;
-      align-items: flex-end;
-      z-index: 1000;
-      backdrop-filter: blur(2px);
-    }
-    @media (min-width: 600px) {
-      .modal-overlay { align-items: center; }
-    }
-
-    .modal-sheet {
-      background: #ffffff;
-      width: 100%;
-      max-width: 520px;
-      border-radius: 16px 16px 0 0;
-      padding: 18px;
-      box-shadow: 0 -8px 24px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 88vh;
-      overflow-y: auto;
-    }
-    @media (min-width: 600px) {
-      .modal-sheet { border-radius: 16px; }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 18px;
-      color: #94a3b8;
-      cursor: pointer;
-      padding: 2px 6px;
-    }
-
-    .modal-step-name {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: -6px;
-    }
-
-    .modal-preset-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .preset-btn {
-      text-align: left;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #1e293b;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.1s;
-    }
-    .preset-btn:hover {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-
-    .modal-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: flex-end; z-index: 1000; backdrop-filter: blur(2px); }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; } }
+    .modal-sheet { background: #ffffff; width: 100%; max-width: 520px; border-radius: 16px 16px 0 0; padding: 18px; box-shadow: 0 -8px 24px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 12px; max-height: 88vh; overflow-y: auto; }
+    @media (min-width: 600px) { .modal-sheet { border-radius: 16px; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 16px; font-weight: 800; color: #0f172a; }
+    .modal-close { background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; padding: 2px 6px; }
+    .modal-step-name { font-size: 13px; color: var(--text-muted); margin-top: -6px; }
+    .modal-preset-grid { display: flex; flex-direction: column; gap: 6px; }
+    .preset-btn { text-align: left; background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.1s; }
+    .preset-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .modal-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
     .modal-input:focus { border-color: var(--brand); }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .modal-btn-primary {
-      flex: 1;
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      padding: 11px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .modal-btn-danger {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-      padding: 11px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .ai-output-box {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #1e293b;
-      white-space: pre-wrap;
-      max-height: 300px;
-      overflow-y: auto;
-      min-height: 120px;
-    }
-
-    .toast {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #0f172a;
-      color: #ffffff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      display: none;
-      z-index: 2000;
-      white-space: nowrap;
-    }
+    .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .modal-btn-primary { flex: 1; background: var(--brand); color: #fff; border: none; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .modal-btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 11px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .ai-output-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.5; color: #1e293b; white-space: pre-wrap; max-height: 300px; overflow-y: auto; min-height: 120px; }
+    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; display: none; z-index: 2000; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -1054,8 +190,9 @@
           <span>📊</span> Мониторинг проектов
         </div>
         <div class="dash-top-actions">
+          <button class="btn-sync-icon" onclick="manualSync()" title="Синхронизировать данные">🔄</button>
           <button class="btn-ai-trigger" onclick="openAiModal()">✨ AI-Отчет</button>
-          <div class="sync-badge" id="syncTag">● Сохранено</div>
+          <div class="sync-badge" id="syncTag">● Загрузка...</div>
         </div>
       </div>
 
@@ -1253,9 +390,10 @@
   <script>
     const tg = window.Telegram?.WebApp;
     const STORAGE_KEY = 'daily_report_vault_v18';
+    const SAFETY_BACKUP_KEY = 'daily_safety_backup';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
     const CLOUD_CHUNK_PREFIX = 'daily_chunk_';
-    const CHUNK_SIZE = 3500; // Безопасный размер до 4096 байт для Telegram
+    const CHUNK_SIZE = 3500;
 
     if (tg) {
       tg.ready();
@@ -1265,6 +403,8 @@
     let reportMode = 'executive';
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let deleteCallbackAction = null;
+    let currentRevision = 0;
+    let isSaving = false;
 
     const STANDARD_WORKFLOW = [
       "Акт сверки НАО",
@@ -1331,45 +471,91 @@
     function parseRaw(raw) {
       try {
         const p = JSON.parse(raw);
-        if (p && p.updatedAt && Array.isArray(p.data)) return { ts: p.updatedAt, data: p.data };
-        if (Array.isArray(p)) return { ts: 0, data: p };
+        if (p && Array.isArray(p.data)) {
+          return { rev: p.rev || 0, ts: p.updatedAt || 0, data: p.data };
+        }
+        if (Array.isArray(p)) return { rev: 0, ts: 0, data: p };
       } catch(e) {}
       return null;
     }
 
-    /* БЕСШОВНОЕ ЧТЕНИЕ ИЗ ОБЛАКА TELEGRAM (СКЛЕЙКА КУСОЧКОВ) */
-    function loadFromCloud(callback) {
-      if (!tg?.CloudStorage) return callback(null);
+    /* УМНОЕ СЛИЯНИЕ БАЗ (SMART MERGE) */
+    function mergeStates(localArr, remoteArr) {
+      if (!localArr || localArr.length === 0) return remoteArr || [];
+      if (!remoteArr || remoteArr.length === 0) return localArr || [];
 
-      tg.CloudStorage.getItem('sync_chunks_count', (err, countVal) => {
-        if (err || !countVal) {
-          // Запасной путь со старым форматом
-          tg.CloudStorage.getItem(STORAGE_KEY, (e2, val2) => {
-            if (!e2 && val2) callback(val2);
-            else callback(null);
+      const merged = [...localArr];
+
+      remoteArr.forEach(remProc => {
+        const localProc = merged.find(lp => lp.id === remProc.id || lp.title.trim().toLowerCase() === remProc.title.trim().toLowerCase());
+        if (!localProc) {
+          merged.push(remProc);
+        } else {
+          // Слияние объектов внутри процесса
+          if (!localProc.objects) localProc.objects = [];
+          (remProc.objects || []).forEach(remObj => {
+            const localObj = localProc.objects.find(lo => lo.id === remObj.id || lo.title.trim().toLowerCase() === remObj.title.trim().toLowerCase());
+            if (!localObj) {
+              localProc.objects.push(remObj);
+            } else {
+              // Объединяем шаги
+              if (!localObj.steps || localObj.steps.length === 0) {
+                localObj.steps = remObj.steps || [];
+              }
+            }
           });
-          return;
         }
+      });
 
-        const count = parseInt(countVal, 10);
-        if (isNaN(count) || count <= 0) return callback(null);
+      return merged;
+    }
 
-        const keys = [];
-        for (let i = 0; i < count; i++) keys.push(`${CLOUD_CHUNK_PREFIX}${i}`);
-
-        tg.CloudStorage.getItems(keys, (err2, res) => {
-          if (err2 || !res) return callback(null);
-          let fullStr = '';
-          for (let i = 0; i < count; i++) {
-            fullStr += (res[`${CLOUD_CHUNK_PREFIX}${i}`] || '');
-          }
-          callback(fullStr);
-        });
+    function tgSetItemAsync(key, value) {
+      return new Promise((resolve) => {
+        if (!tg?.CloudStorage) return resolve(false);
+        tg.CloudStorage.setItem(key, value, (err) => resolve(!err));
       });
     }
 
-    /* БЕСШОВНОЕ СОХРАНЕНИЕ В ОБЛАКО TELEGRAM (НАРЕЗКА НА КУСОЧКИ) */
-    function saveToCloud(jsonStr) {
+    function tgGetItemAsync(key) {
+      return new Promise((resolve) => {
+        if (!tg?.CloudStorage) return resolve(null);
+        tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : val));
+      });
+    }
+
+    function tgGetItemsAsync(keys) {
+      return new Promise((resolve) => {
+        if (!tg?.CloudStorage) return resolve(null);
+        tg.CloudStorage.getItems(keys, (err, res) => resolve(err ? null : res));
+      });
+    }
+
+    async function loadFromCloudAsync() {
+      if (!tg?.CloudStorage) return null;
+
+      const countVal = await tgGetItemAsync('sync_chunks_count');
+      if (!countVal) {
+        return await tgGetItemAsync(STORAGE_KEY);
+      }
+
+      const count = parseInt(countVal, 10);
+      if (isNaN(count) || count <= 0) return null;
+
+      const keys = [];
+      for (let i = 0; i < count; i++) keys.push(`${CLOUD_CHUNK_PREFIX}${i}`);
+
+      const res = await tgGetItemsAsync(keys);
+      if (!res) return null;
+
+      let fullStr = '';
+      for (let i = 0; i < count; i++) {
+        fullStr += (res[`${CLOUD_CHUNK_PREFIX}${i}`] || '');
+      }
+      return fullStr;
+    }
+
+    async function saveToCloudSequential(jsonStr) {
       if (!tg?.CloudStorage) return;
 
       const chunks = [];
@@ -1377,22 +563,20 @@
         chunks.push(jsonStr.slice(i, i + CHUNK_SIZE));
       }
 
-      tg.CloudStorage.setItem('sync_chunks_count', String(chunks.length), () => {
-        chunks.forEach((chunk, idx) => {
-          tg.CloudStorage.setItem(`${CLOUD_CHUNK_PREFIX}${idx}`, chunk);
-        });
-      });
+      await tgSetItemAsync('sync_chunks_count', String(chunks.length));
+      for (let i = 0; i < chunks.length; i++) {
+        await tgSetItemAsync(`${CLOUD_CHUNK_PREFIX}${i}`, chunks[i]);
+      }
     }
 
-    function loadData() {
-      let localTimestamp = 0;
+    async function loadData() {
       let localState = null;
 
       const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
       if (rawLocal) {
         const res = parseRaw(rawLocal);
         if (res && res.data) {
-          localTimestamp = res.ts;
+          currentRevision = res.rev || 0;
           localState = res.data;
         }
       }
@@ -1401,51 +585,78 @@
         state = localState.map(p => ({
           ...p,
           collapsed: true,
-          objects: (p.objects || []).map(o => ({
-            ...o,
-            collapsed: true
-          }))
+          objects: (p.objects || []).map(o => ({ ...o, collapsed: true }))
         }));
         render();
+        updateSyncTag(`● v${currentRevision}`);
       }
 
-      loadFromCloud((cloudRaw) => {
-        if (!cloudRaw) return;
-        const res = parseRaw(cloudRaw);
-        if (res && res.data && res.ts > localTimestamp) {
-          state = res.data.map(p => ({
-            ...p,
-            collapsed: true,
-            objects: (p.objects || []).map(o => ({
-              ...o,
-              collapsed: true
-            }))
-          }));
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: res.ts, data: state }));
-          render();
-          showToast("Синхронизировано из облака!");
-        }
-      });
+      await syncWithCloud();
     }
 
-    function saveData() {
+    async function syncWithCloud(forceToast = false) {
+      const cloudRaw = await loadFromCloudAsync();
+      if (!cloudRaw) {
+        updateSyncTag(`● Готово (v${currentRevision})`);
+        return;
+      }
+
+      const res = parseRaw(cloudRaw);
+      if (res && res.data) {
+        // Создаем аварийный бэкап перед любым слиянием
+        if (state.length > 0) {
+          localStorage.setItem(SAFETY_BACKUP_KEY, JSON.stringify(state));
+        }
+
+        // Выполняем умное слияние (никогда не удаляем локальные процессы)
+        state = mergeStates(state, res.data);
+        currentRevision = Math.max(currentRevision, res.rev || 0) + 1;
+
+        const payload = { rev: currentRevision, updatedAt: Date.now(), data: state };
+        const json = JSON.stringify(payload);
+        localStorage.setItem(STORAGE_KEY, json);
+        localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
+        
+        render();
+        if (forceToast) showToast(`Синхронизировано (v${currentRevision})!`);
+      }
+      updateSyncTag(`● v${currentRevision}`);
+    }
+
+    async function manualSync() {
+      haptic();
+      updateSyncTag(`⏳ Синхронизация...`);
+      await syncWithCloud(true);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') syncWithCloud();
+    });
+    window.addEventListener('focus', () => syncWithCloud());
+
+    async function saveData() {
+      if (isSaving) return;
+      isSaving = true;
+
+      currentRevision++;
       const now = Date.now();
-      const payload = { updatedAt: now, data: state };
+      const payload = { rev: currentRevision, updatedAt: now, data: state };
       const json = JSON.stringify(payload);
 
       localStorage.setItem(STORAGE_KEY, json);
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
-      // Нарезка и сохранение без ограничений по размеру
-      saveToCloud(json);
-
-      const d = new Date();
-      const tag = document.getElementById('syncTag');
-      if (tag) {
-        tag.textContent = `● Сохранено ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-      }
-
+      updateSyncTag(`⏳ Сохранение v${currentRevision}...`);
+      await saveToCloudSequential(json);
+      updateSyncTag(`● Сохранено (v${currentRevision})`);
+      
+      isSaving = false;
       render();
+    }
+
+    function updateSyncTag(text) {
+      const tag = document.getElementById('syncTag');
+      if (tag) tag.textContent = text;
     }
 
     function haptic() {
@@ -1971,9 +1182,7 @@
       }
     }
 
-    /* ==============================================================
-       ВЫГРУЗКА В EXCEL (.xlsx) + БУФЕР ДЛЯ CTRL+V
-       ============================================================== */
+    /* ВЫГРУЗКА В EXCEL (.xlsx) */
     function exportToExcel() {
       haptic();
 
@@ -2035,17 +1244,9 @@
         if (typeof XLSX !== 'undefined') {
           const ws = XLSX.utils.json_to_sheet(rows);
           ws['!cols'] = [
-            { wch: 22 },
-            { wch: 28 },
-            { wch: 10 },
-            { wch: 10 },
-            { wch: 32 },
-            { wch: 16 },
-            { wch: 14 },
-            { wch: 32 },
-            { wch: 18 }
+            { wch: 22 }, { wch: 28 }, { wch: 10 }, { wch: 10 },
+            { wch: 32 }, { wch: 16 }, { wch: 14 }, { wch: 32 }, { wch: 18 }
           ];
-
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
           XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
@@ -2058,9 +1259,7 @@
       }
     }
 
-    /* ==============================================================
-       AI-ОТЧЕТ (gemini-3.6-flash)
-       ============================================================== */
+    /* AI-ОТЧЕТ (gemini-3.6-flash) */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
       document.getElementById('aiModalOverlay').style.display = 'flex';
@@ -2118,15 +1317,7 @@
 3. 📌 Статус ключевых объектов (кратко по пунктам).
 Пиши строго по делу, без лишних вступлений и шаблонных завершений.`;
 
-      const bodyPayload = {
-        contents: [
-          {
-            parts: [
-              { text: `${promptText}\n\nДанные проекта:\n${rawReport}` }
-            ]
-          }
-        ]
-      };
+      const bodyPayload = { contents: [{ parts: [{ text: `${promptText}\n\nДанные проекта:\n${rawReport}` }] }] };
 
       try {
         const response = await fetch(url, {
@@ -2141,8 +1332,7 @@
         }
 
         const data = await response.json();
-        const result = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ.";
-        out.textContent = result;
+        out.textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ.";
       } catch (err) {
         out.textContent = `⚠️ Ошибка Google AI: ${err.message}`;
       }
@@ -2151,7 +1341,6 @@
     function copyAiOutput(elementId) {
       const text = document.getElementById(elementId).innerText;
       if (!text || text.includes("появится здесь") || text.includes("⏳")) return;
-
       haptic();
       navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован!"));
     }
@@ -2360,7 +1549,6 @@
 
     function generateTelegramReport() {
       const today = getTodayStr();
-
       const blockers = [];
       state.forEach(p => {
         (p.objects || []).filter(o => !o.archived).forEach(o => {
@@ -2482,7 +1670,6 @@
     function copyReport() {
       const text = generateTelegramReport();
       haptic();
-
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован в буфер!"));
       } else {
@@ -2499,7 +1686,6 @@
     function shareToTelegram() {
       const text = generateTelegramReport();
       haptic();
-
       const url = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
       if (tg?.openTelegramLink) {
         tg.openTelegramLink(url);
