@@ -386,8 +386,7 @@
     const tg = window.Telegram?.WebApp;
     const STORAGE_KEY = 'daily_report_vault_v18';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
-    const CLOUD_CHUNK_PREFIX = 'daily_chunk_';
-    const CHUNK_SIZE = 1500; // 1500 знаков = ~3000 байт в UTF-8 (гарантированно меньше 4096 байт)
+    const CHUNK_SIZE = 1200; // 1200 символов = ~2400 байт (с запасом меньше лимита 4096 байт)
 
     if (tg) {
       tg.ready();
@@ -487,27 +486,27 @@
       });
     }
 
-    async function loadFromCloudAsync() {
+    async function loadFromCloud() {
       if (!tg?.CloudStorage) return null;
 
-      const countVal = await tgGetItemAsync('sync_chunks_count');
-      if (!countVal) {
+      const countStr = await tgGetItemAsync('c_count');
+      if (!countStr) {
         return await tgGetItemAsync(STORAGE_KEY);
       }
 
-      const count = parseInt(countVal, 10);
+      const count = parseInt(countStr, 10);
       if (isNaN(count) || count <= 0) return null;
 
-      let fullStr = '';
+      let full = '';
       for (let i = 0; i < count; i++) {
-        const chunk = await tgGetItemAsync(`${CLOUD_CHUNK_PREFIX}${i}`);
-        if (chunk === null) return null;
-        fullStr += chunk;
+        const part = await tgGetItemAsync(`c_${i}`);
+        if (part === null) return null;
+        full += part;
       }
-      return fullStr;
+      return full;
     }
 
-    async function saveToCloudSequential(jsonStr) {
+    async function saveToCloud(jsonStr) {
       if (!tg?.CloudStorage) return false;
 
       const chunks = [];
@@ -516,13 +515,11 @@
       }
 
       for (let i = 0; i < chunks.length; i++) {
-        const ok = await tgSetItemAsync(`${CLOUD_CHUNK_PREFIX}${i}`, chunks[i]);
-        if (!ok) {
-          console.error(`Ошибка сохранения кусочка ${i}`);
-          return false;
-        }
+        const ok = await tgSetItemAsync(`c_${i}`, chunks[i]);
+        if (!ok) return false;
       }
-      return await tgSetItemAsync('sync_chunks_count', String(chunks.length));
+      const countOk = await tgSetItemAsync('c_count', String(chunks.length));
+      return countOk;
     }
 
     async function loadData() {
@@ -551,7 +548,7 @@
     }
 
     async function syncWithCloud(forceToast = false) {
-      const cloudRaw = await loadFromCloudAsync();
+      const cloudRaw = await loadFromCloud();
       if (!cloudRaw) {
         updateSyncTag(`● Готово (v${currentRevision})`);
         return;
@@ -559,10 +556,9 @@
 
       const res = parseRaw(cloudRaw);
       if (res && res.data) {
-        const isDifferent = JSON.stringify(res.data) !== JSON.stringify(state);
-        // Если ревизия новее ИЛИ данные визуально отличаются при нажатии пользователем кнопки "Обновить"
-        if (res.rev > currentRevision || (forceToast && isDifferent) || state.length === 0) {
-          currentRevision = Math.max(currentRevision, res.rev || 0);
+        // Принудительное обновление если нажата кнопка 🔄 или версия в облаке больше
+        if (res.rev > currentRevision || (forceToast && res.rev !== currentRevision) || state.length === 0) {
+          currentRevision = res.rev;
           state = res.data.map(p => ({
             ...p,
             collapsed: true,
@@ -603,7 +599,7 @@
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
       updateSyncTag(`⏳ Сохранение v${currentRevision}...`);
-      const ok = await saveToCloudSequential(json);
+      const ok = await saveToCloud(json);
       if (ok) {
         updateSyncTag(`● Сохранено (v${currentRevision})`);
       } else {
