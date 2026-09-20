@@ -183,7 +183,6 @@
 <body>
 
   <div class="app-container">
-    <!-- ПАНЕЛЬ РУКОВОДИТЕЛЯ -->
     <div class="dashboard-card">
       <div class="dash-top">
         <div class="dash-title">
@@ -225,23 +224,19 @@
       </div>
     </div>
 
-    <!-- БЫСТРЫЙ ВВОД НАПРАВЛЕНИЯ -->
     <div class="quick-add-bar">
       <input type="text" id="newProcInput" placeholder="Новое направление (напр. Сервитуты)..." onkeydown="if(event.key==='Enter') addProcess()">
       <button class="btn-dark" onclick="addProcess()">+ Процесс</button>
     </div>
 
-    <!-- СПИСОК ПРОЦЕССОВ И ОБЪЕКТОВ -->
     <div id="processesRoot"></div>
 
-    <!-- РЕЗЕРВНОЕ КОПИРОВАНИЕ -->
     <div class="backup-footer">
       <button class="backup-btn" onclick="exportBackup()">📥 Экспорт бэкапа (копия)</button>
       <button class="backup-btn" onclick="importBackup()">📤 Восстановить из файла</button>
     </div>
   </div>
 
-  <!-- ПЛАВАЮЩАЯ ПАНЕЛЬ -->
   <div class="floating-action-bar">
     <button class="fab-btn copy" onclick="copyReport()">
       📋 Текст
@@ -390,7 +385,6 @@
   <script>
     const tg = window.Telegram?.WebApp;
     const STORAGE_KEY = 'daily_report_vault_v18';
-    const SAFETY_BACKUP_KEY = 'daily_safety_backup';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
     const CLOUD_CHUNK_PREFIX = 'daily_chunk_';
     const CHUNK_SIZE = 3500;
@@ -477,37 +471,6 @@
         if (Array.isArray(p)) return { rev: 0, ts: 0, data: p };
       } catch(e) {}
       return null;
-    }
-
-    /* УМНОЕ СЛИЯНИЕ БАЗ (SMART MERGE) */
-    function mergeStates(localArr, remoteArr) {
-      if (!localArr || localArr.length === 0) return remoteArr || [];
-      if (!remoteArr || remoteArr.length === 0) return localArr || [];
-
-      const merged = [...localArr];
-
-      remoteArr.forEach(remProc => {
-        const localProc = merged.find(lp => lp.id === remProc.id || lp.title.trim().toLowerCase() === remProc.title.trim().toLowerCase());
-        if (!localProc) {
-          merged.push(remProc);
-        } else {
-          // Слияние объектов внутри процесса
-          if (!localProc.objects) localProc.objects = [];
-          (remProc.objects || []).forEach(remObj => {
-            const localObj = localProc.objects.find(lo => lo.id === remObj.id || lo.title.trim().toLowerCase() === remObj.title.trim().toLowerCase());
-            if (!localObj) {
-              localProc.objects.push(remObj);
-            } else {
-              // Объединяем шаги
-              if (!localObj.steps || localObj.steps.length === 0) {
-                localObj.steps = remObj.steps || [];
-              }
-            }
-          });
-        }
-      });
-
-      return merged;
     }
 
     function tgSetItemAsync(key, value) {
@@ -603,22 +566,21 @@
 
       const res = parseRaw(cloudRaw);
       if (res && res.data) {
-        // Создаем аварийный бэкап перед любым слиянием
-        if (state.length > 0) {
-          localStorage.setItem(SAFETY_BACKUP_KEY, JSON.stringify(state));
+        // Строгая ревизия: если в облаке версия выше, принимаем точно как есть (включая удаленные элементы)
+        if (res.rev > currentRevision || state.length === 0) {
+          currentRevision = res.rev;
+          state = res.data.map(p => ({
+            ...p,
+            collapsed: true,
+            objects: (p.objects || []).map(o => ({ ...o, collapsed: true }))
+          }));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ rev: currentRevision, updatedAt: res.ts, data: state }));
+          localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
+          render();
+          showToast(`Синхронизировано (v${currentRevision})!`);
+        } else if (forceToast) {
+          showToast("У вас уже актуальная версия!");
         }
-
-        // Выполняем умное слияние (никогда не удаляем локальные процессы)
-        state = mergeStates(state, res.data);
-        currentRevision = Math.max(currentRevision, res.rev || 0) + 1;
-
-        const payload = { rev: currentRevision, updatedAt: Date.now(), data: state };
-        const json = JSON.stringify(payload);
-        localStorage.setItem(STORAGE_KEY, json);
-        localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
-        
-        render();
-        if (forceToast) showToast(`Синхронизировано (v${currentRevision})!`);
       }
       updateSyncTag(`● v${currentRevision}`);
     }
