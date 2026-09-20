@@ -1254,6 +1254,8 @@
     const tg = window.Telegram?.WebApp;
     const STORAGE_KEY = 'daily_report_vault_v18';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
+    const CLOUD_CHUNK_PREFIX = 'daily_chunk_';
+    const CHUNK_SIZE = 3500; // Безопасный размер до 4096 байт для Telegram
 
     if (tg) {
       tg.ready();
@@ -1335,6 +1337,53 @@
       return null;
     }
 
+    /* БЕСШОВНОЕ ЧТЕНИЕ ИЗ ОБЛАКА TELEGRAM (СКЛЕЙКА КУСОЧКОВ) */
+    function loadFromCloud(callback) {
+      if (!tg?.CloudStorage) return callback(null);
+
+      tg.CloudStorage.getItem('sync_chunks_count', (err, countVal) => {
+        if (err || !countVal) {
+          // Запасной путь со старым форматом
+          tg.CloudStorage.getItem(STORAGE_KEY, (e2, val2) => {
+            if (!e2 && val2) callback(val2);
+            else callback(null);
+          });
+          return;
+        }
+
+        const count = parseInt(countVal, 10);
+        if (isNaN(count) || count <= 0) return callback(null);
+
+        const keys = [];
+        for (let i = 0; i < count; i++) keys.push(`${CLOUD_CHUNK_PREFIX}${i}`);
+
+        tg.CloudStorage.getItems(keys, (err2, res) => {
+          if (err2 || !res) return callback(null);
+          let fullStr = '';
+          for (let i = 0; i < count; i++) {
+            fullStr += (res[`${CLOUD_CHUNK_PREFIX}${i}`] || '');
+          }
+          callback(fullStr);
+        });
+      });
+    }
+
+    /* БЕСШОВНОЕ СОХРАНЕНИЕ В ОБЛАКО TELEGRAM (НАРЕЗКА НА КУСОЧКИ) */
+    function saveToCloud(jsonStr) {
+      if (!tg?.CloudStorage) return;
+
+      const chunks = [];
+      for (let i = 0; i < jsonStr.length; i += CHUNK_SIZE) {
+        chunks.push(jsonStr.slice(i, i + CHUNK_SIZE));
+      }
+
+      tg.CloudStorage.setItem('sync_chunks_count', String(chunks.length), () => {
+        chunks.forEach((chunk, idx) => {
+          tg.CloudStorage.setItem(`${CLOUD_CHUNK_PREFIX}${idx}`, chunk);
+        });
+      });
+    }
+
     function loadData() {
       let localTimestamp = 0;
       let localState = null;
@@ -1360,25 +1409,23 @@
         render();
       }
 
-      if (tg?.CloudStorage) {
-        tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
-          if (!err && val) {
-            const res = parseRaw(val);
-            if (res && res.data && res.ts > localTimestamp) {
-              state = res.data.map(p => ({
-                ...p,
-                collapsed: true,
-                objects: (p.objects || []).map(o => ({
-                  ...o,
-                  collapsed: true
-                }))
-              }));
-              localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: res.ts, data: state }));
-              render();
-            }
-          }
-        });
-      }
+      loadFromCloud((cloudRaw) => {
+        if (!cloudRaw) return;
+        const res = parseRaw(cloudRaw);
+        if (res && res.data && res.ts > localTimestamp) {
+          state = res.data.map(p => ({
+            ...p,
+            collapsed: true,
+            objects: (p.objects || []).map(o => ({
+              ...o,
+              collapsed: true
+            }))
+          }));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ updatedAt: res.ts, data: state }));
+          render();
+          showToast("Синхронизировано из облака!");
+        }
+      });
     }
 
     function saveData() {
@@ -1389,9 +1436,8 @@
       localStorage.setItem(STORAGE_KEY, json);
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
-      if (tg?.CloudStorage) {
-        tg.CloudStorage.setItem(STORAGE_KEY, json);
-      }
+      // Нарезка и сохранение без ограничений по размеру
+      saveToCloud(json);
 
       const d = new Date();
       const tag = document.getElementById('syncTag');
@@ -1981,12 +2027,10 @@
         return;
       }
 
-      // 1. Копируем в память (для мгновенной вставки Ctrl+V в Excel)
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(tsvText);
       }
 
-      // 2. Пытаемся сохранить файл
       try {
         if (typeof XLSX !== 'undefined') {
           const ws = XLSX.utils.json_to_sheet(rows);
@@ -2163,7 +2207,7 @@
 
               return `
                 <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
-                  <div class="obj-header" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})">
+                  <div class="obj-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
                     <div class="obj-title-wrap">
                       <span class="obj-collapse-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
                       <span class="obj-name">📌 ${escapeHtml(obj.title)}</span>
@@ -2178,9 +2222,9 @@
                       <div class="obj-btn-group">
                         ${objIdx > 0 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, -1)" title="Выше">⬆️</button>` : ''}
                         ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
-                        <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id}, ${obj.id})" title="Переименовать">✏️</button>
-                        <button class="btn-icon-tool" onclick="cloneObject(${proc.id}, ${obj.id})" title="Копировать">📋</button>
-                        <button class="btn-icon-tool del" onclick="deleteObject(${proc.id}, ${obj.id})" title="Удалить объект">✕</button>
+                        <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id},${obj.id})" title="Переименовать">✏️</button>
+                        <button class="btn-icon-tool" onclick="cloneObject(${proc.id},${obj.id})" title="Копировать">📋</button>
+                        <button class="btn-icon-tool del" onclick="deleteObject(${proc.id},${obj.id})" title="Удалить объект">✕</button>
                       </div>
                     </div>
                   </div>
@@ -2228,10 +2272,10 @@
 
                             ${hasBlock ? `
                               <div class="blocker-banner">
-                                <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
                                   🚨 ${escapeHtml(s.blocker)}
                                 </span>
-                                <button class="blocker-clear-btn" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id}, ${s.id})">Снять</button>
+                                <button class="blocker-clear-btn" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
                               </div>
                             ` : ''}
                           </div>
@@ -2290,7 +2334,7 @@
                     ${archivedObjects.map(ao => `
                       <div class="archive-item">
                         <span style="font-weight:700; color:#166534;">✔ 📌 ${escapeHtml(ao.title)} (100%)</span>
-                        <button class="btn-restore" onclick="restoreObject(${proc.id}, ${ao.id})">↩ Вернуть</button>
+                        <button class="btn-restore" onclick="restoreObject(${proc.id},${ao.id})">↩ Вернуть</button>
                       </div>
                     `).join('')}
                   </div>
