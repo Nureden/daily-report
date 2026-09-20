@@ -387,7 +387,7 @@
     const STORAGE_KEY = 'daily_report_vault_v18';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
     const CLOUD_CHUNK_PREFIX = 'daily_chunk_';
-    const CHUNK_SIZE = 3500;
+    const CHUNK_SIZE = 1500; // 1500 знаков = ~3000 байт в UTF-8 (гарантированно меньше 4096 байт)
 
     if (tg) {
       tg.ready();
@@ -483,14 +483,7 @@
     function tgGetItemAsync(key) {
       return new Promise((resolve) => {
         if (!tg?.CloudStorage) return resolve(null);
-        tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : val));
-      });
-    }
-
-    function tgGetItemsAsync(keys) {
-      return new Promise((resolve) => {
-        if (!tg?.CloudStorage) return resolve(null);
-        tg.CloudStorage.getItems(keys, (err, res) => resolve(err ? null : res));
+        tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : (val || '')));
       });
     }
 
@@ -505,31 +498,31 @@
       const count = parseInt(countVal, 10);
       if (isNaN(count) || count <= 0) return null;
 
-      const keys = [];
-      for (let i = 0; i < count; i++) keys.push(`${CLOUD_CHUNK_PREFIX}${i}`);
-
-      const res = await tgGetItemsAsync(keys);
-      if (!res) return null;
-
       let fullStr = '';
       for (let i = 0; i < count; i++) {
-        fullStr += (res[`${CLOUD_CHUNK_PREFIX}${i}`] || '');
+        const chunk = await tgGetItemAsync(`${CLOUD_CHUNK_PREFIX}${i}`);
+        if (chunk === null) return null;
+        fullStr += chunk;
       }
       return fullStr;
     }
 
     async function saveToCloudSequential(jsonStr) {
-      if (!tg?.CloudStorage) return;
+      if (!tg?.CloudStorage) return false;
 
       const chunks = [];
       for (let i = 0; i < jsonStr.length; i += CHUNK_SIZE) {
         chunks.push(jsonStr.slice(i, i + CHUNK_SIZE));
       }
 
-      await tgSetItemAsync('sync_chunks_count', String(chunks.length));
       for (let i = 0; i < chunks.length; i++) {
-        await tgSetItemAsync(`${CLOUD_CHUNK_PREFIX}${i}`, chunks[i]);
+        const ok = await tgSetItemAsync(`${CLOUD_CHUNK_PREFIX}${i}`, chunks[i]);
+        if (!ok) {
+          console.error(`Ошибка сохранения кусочка ${i}`);
+          return false;
+        }
       }
+      return await tgSetItemAsync('sync_chunks_count', String(chunks.length));
     }
 
     async function loadData() {
@@ -566,9 +559,10 @@
 
       const res = parseRaw(cloudRaw);
       if (res && res.data) {
-        // Строгая ревизия: если в облаке версия выше, принимаем точно как есть (включая удаленные элементы)
-        if (res.rev > currentRevision || state.length === 0) {
-          currentRevision = res.rev;
+        const isDifferent = JSON.stringify(res.data) !== JSON.stringify(state);
+        // Если ревизия новее ИЛИ данные визуально отличаются при нажатии пользователем кнопки "Обновить"
+        if (res.rev > currentRevision || (forceToast && isDifferent) || state.length === 0) {
+          currentRevision = Math.max(currentRevision, res.rev || 0);
           state = res.data.map(p => ({
             ...p,
             collapsed: true,
@@ -609,8 +603,12 @@
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
       updateSyncTag(`⏳ Сохранение v${currentRevision}...`);
-      await saveToCloudSequential(json);
-      updateSyncTag(`● Сохранено (v${currentRevision})`);
+      const ok = await saveToCloudSequential(json);
+      if (ok) {
+        updateSyncTag(`● Сохранено (v${currentRevision})`);
+      } else {
+        updateSyncTag(`⚠️ Ошибка облака (v${currentRevision})`);
+      }
       
       isSaving = false;
       render();
