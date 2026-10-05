@@ -127,9 +127,36 @@
     .step-updated-badge { font-size: 10px; color: var(--text-subtle); font-weight: 500; letter-spacing: -0.2px; white-space: nowrap; user-select: none; padding-left: 2px; }
     .mini-del { background: none; border: none; color: var(--danger); font-size: 13px; cursor: pointer; padding: 2px 6px; border-radius: 4px; font-weight: 800; line-height: 1; }
     .mini-del:hover { background: var(--danger-bg); }
-    .blocker-banner { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #ffffff; border: 1px solid #fca5a5; border-radius: 6px; padding: 6px 10px; font-size: 12px; color: #991b1b; font-weight: 600; margin-left: 29px; }
-    .blocker-banner span.reason-text { flex: 1; cursor: pointer; }
-    .blocker-clear-btn { background: none; border: none; color: #991b1b; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+
+    /* БЛОК ХРОНОЛОГИИ ЗАДЕРЖЕК */
+    .blocker-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-left: 29px;
+      margin-top: 2px;
+    }
+    .blocker-banner-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #991b1b;
+      font-weight: 600;
+    }
+    .blocker-banner-row.info-row {
+      border-color: #cbd5e1;
+      color: #475569;
+      background: #f8fafc;
+    }
+    .blocker-banner-row span.reason-text { flex: 1; cursor: pointer; }
+    .blocker-clear-btn { background: none; border: none; color: #991b1b; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; white-space: nowrap; }
+
     .all-done-banner { background: var(--done-bg); border: 1px dashed var(--done-border); border-radius: 8px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .all-done-banner span { font-size: 12px; font-weight: 700; color: var(--done); }
     .btn-finish-work { background: var(--done); color: #ffffff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
@@ -178,6 +205,33 @@
     .modal-btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 11px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .ai-output-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.5; color: #1e293b; white-space: pre-wrap; max-height: 300px; overflow-y: auto; min-height: 120px; }
     .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; display: none; z-index: 2000; white-space: nowrap; }
+
+    /* СПИСОК ИСТОРИИ ВНУТРИ МОДАЛКИ */
+    .history-log-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 150px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .history-log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #334155;
+      background: #ffffff;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+    .history-log-item .hist-text { flex: 1; }
+    .history-log-item .hist-del { color: var(--danger); background: none; border: none; cursor: pointer; font-weight: 800; font-size: 12px; padding: 2px 4px; }
   </style>
 </head>
 <body>
@@ -273,7 +327,7 @@
 
         <div>
           <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
-            Создать лаконичный и красивый отчет для руководства.
+            Создать лаконичный и красивый отчет для руководства с полной хронологией.
           </p>
           <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiAnalytics()">
             ✨ Сгенерировать чистый AI-отчет
@@ -338,14 +392,22 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО РИСКОВ -->
+  <!-- МОДАЛЬНОЕ ОКНО: ХРОНОЛОГИЯ ЗАДЕРЖЕК И ИЗМЕНЕНИЙ -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title">🚨 Причина задержки</div>
+        <div class="modal-title">🚨 Хронология задержек и изменений</div>
         <button class="modal-close" onclick="closeRiskModal()">✕</button>
       </div>
       <div class="modal-step-name" id="riskModalStepTitle">Этап...</div>
+
+      <!-- Лента сохраненной истории -->
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Сохраненная история:</label>
+        <div class="history-log-box" id="modalHistoryLogBox">
+          <!-- Записи добавляются скриптом -->
+        </div>
+      </div>
 
       <div class="modal-preset-grid">
         <button type="button" class="preset-btn" onclick="selectRiskPreset('Оплата не идет у подрядчика')">
@@ -360,22 +422,19 @@
         <button type="button" class="preset-btn" onclick="selectRiskPreset('Спор / согласование со смежниками')">
           🤝 Спор / согласование со смежниками
         </button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание земельной комиссии')">
-          ⚖️ Ожидание земельной комиссии
-        </button>
         <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание подписания постановления')">
           📜 Ожидание подписания постановления
         </button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Или введите свою причину:</label>
-        <input type="text" id="customRiskInput" class="modal-input" placeholder="Например: Задержка полевого выезда...">
+      <div style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Новая запись / изменение:</label>
+        <input type="text" id="customRiskInput" class="modal-input" placeholder="Например: Загрузили повторно 02.10.2026...">
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn-primary" onclick="saveRiskFromModal()">Зафиксировать</button>
-        <button class="modal-btn-danger" id="riskClearBtn" onclick="clearRiskFromModal()">Снять</button>
+        <button class="modal-btn-primary" onclick="appendRiskFromModal()">➕ Добавить запись</button>
+        <button class="modal-btn-danger" id="riskClearBtn" onclick="clearRiskFromModal()" title="Снять статус активного блокера">Снять блокер</button>
       </div>
     </div>
   </div>
@@ -386,7 +445,7 @@
     const tg = window.Telegram?.WebApp;
     const STORAGE_KEY = 'daily_report_vault_v18';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
-    const CHUNK_SIZE = 1200; // 1200 символов = ~2400 байт (с запасом меньше лимита 4096 байт)
+    const CHUNK_SIZE = 1200;
 
     if (tg) {
       tg.ready();
@@ -535,16 +594,32 @@
       }
 
       if (localState && localState.length > 0) {
-        state = localState.map(p => ({
-          ...p,
-          collapsed: true,
-          objects: (p.objects || []).map(o => ({ ...o, collapsed: true }))
-        }));
+        state = normalizeStateHistory(localState);
         render();
         updateSyncTag(`● v${currentRevision}`);
       }
 
       await syncWithCloud();
+    }
+
+    /* АВТОМАТИЧЕСКАЯ МИГРАЦИЯ ДАННЫХ В ХРОНОЛОГИЮ */
+    function normalizeStateHistory(arr) {
+      return (arr || []).map(p => ({
+        ...p,
+        collapsed: true,
+        objects: (p.objects || []).map(o => ({
+          ...o,
+          collapsed: true,
+          steps: (o.steps || []).map(s => {
+            if (!s.history) s.history = [];
+            // Если есть старый блокер, но нет в истории - добавляем
+            if (s.blocker && s.history.length === 0) {
+              s.history.push({ date: s.updatedAt || 'Ранее', text: s.blocker });
+            }
+            return s;
+          })
+        }))
+      }));
     }
 
     async function syncWithCloud(forceToast = false) {
@@ -556,14 +631,10 @@
 
       const res = parseRaw(cloudRaw);
       if (res && res.data) {
-        // Принудительное обновление если нажата кнопка 🔄 или версия в облаке больше
-        if (res.rev > currentRevision || (forceToast && res.rev !== currentRevision) || state.length === 0) {
-          currentRevision = res.rev;
-          state = res.data.map(p => ({
-            ...p,
-            collapsed: true,
-            objects: (p.objects || []).map(o => ({ ...o, collapsed: true }))
-          }));
+        const isDifferent = JSON.stringify(res.data) !== JSON.stringify(state);
+        if (res.rev > currentRevision || (forceToast && isDifferent) || state.length === 0) {
+          currentRevision = Math.max(currentRevision, res.rev || 0);
+          state = normalizeStateHistory(res.data);
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ rev: currentRevision, updatedAt: res.ts, data: state }));
           localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
           render();
@@ -843,6 +914,48 @@
       saveData();
     }
 
+    /* РАБОТА С ХРОНОЛОГИЕЙ ЗАДЕРЖЕК В МОДАЛЬНОМ ОКНЕ */
+    function renderModalHistoryList(step) {
+      const box = document.getElementById('modalHistoryLogBox');
+      box.innerHTML = '';
+      const list = step.history || [];
+
+      if (list.length === 0) {
+        box.innerHTML = `<div style="font-size:12px; color:#94a3b8; text-align:center; padding:6px;">Записей пока нет</div>`;
+        return;
+      }
+
+      list.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'history-log-item';
+        row.innerHTML = `
+          <span class="hist-text"><b>${escapeHtml(item.date)}:</b> ${escapeHtml(item.text)}</span>
+          <button class="hist-del" onclick="deleteHistoryItem(${idx})" title="Удалить эту запись">✕</button>
+        `;
+        box.appendChild(row);
+      });
+    }
+
+    function deleteHistoryItem(idx) {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step || !step.history) return;
+
+      step.history.splice(idx, 1);
+      // Если записей не осталось, снимаем активный блокер
+      if (step.history.length === 0) {
+        step.blocker = null;
+      } else {
+        step.blocker = step.history[step.history.length - 1].text;
+      }
+      step.updatedAt = getTimestampStr();
+      renderModalHistoryList(step);
+      document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
+      saveData();
+    }
+
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -850,8 +963,15 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (!step) return;
 
+      if (!step.history) step.history = [];
+      if (step.blocker && step.history.length === 0) {
+        step.history.push({ date: step.updatedAt || 'Ранее', text: step.blocker });
+      }
+
       document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
-      document.getElementById('customRiskInput').value = step.blocker || '';
+      document.getElementById('customRiskInput').value = '';
+      renderModalHistoryList(step);
+
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
       document.getElementById('riskModalOverlay').style.display = 'flex';
       haptic();
@@ -864,10 +984,11 @@
 
     function selectRiskPreset(text) {
       document.getElementById('customRiskInput').value = text;
-      saveRiskFromModal();
+      appendRiskFromModal();
     }
 
-    function saveRiskFromModal() {
+    /* ДОБАВЛЕНИЕ НОВОЙ ЗАПИСИ БЕЗ УДАЛЕНИЯ ПРЕДЫДУЩИХ */
+    function appendRiskFromModal() {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
       const obj = p?.objects.find(o => o.id === objId);
@@ -875,23 +996,39 @@
       if (!step) return;
 
       const val = document.getElementById('customRiskInput').value.trim();
-      step.blocker = val !== '' ? val : null;
-      step.updatedAt = getTimestampStr();
+      if (!val) {
+        showToast("Введите текст изменения");
+        return;
+      }
+
+      if (!step.history) step.history = [];
+      const timestamp = getTimestampStr();
+
+      step.history.push({
+        date: timestamp,
+        text: val
+      });
+
+      // Делаем последний статус текущим активным блокером
+      step.blocker = val;
+      step.updatedAt = timestamp;
+
       closeRiskModal();
-      showToast(step.blocker ? "Задержка зафиксирована!" : "Задержка снята");
+      showToast("Запись зафиксирована в истории!");
       haptic();
       saveData();
     }
 
+    /* СНЯТИЕ АКТИВНОГО БЛОКЕРА (ИСТОРИЯ СОХРАНЯЕТСЯ) */
     function clearBlocker(procId, objId, stepId) {
       const p = state.find(x => x.id == procId);
       const obj = p?.objects.find(o => o.id == objId);
       const step = obj?.steps.find(s => s.id == stepId);
       if (!step) return;
 
-      step.blocker = null;
+      step.blocker = null; // статус задержки снят
       step.updatedAt = getTimestampStr();
-      showToast("Задержка снята");
+      showToast("Задержка снята (история сохранена)");
       haptic();
       saveData();
     }
@@ -941,6 +1078,7 @@
             date: "",
             done: false,
             blocker: null,
+            history: [],
             updatedAt: nowTs
           }))
         });
@@ -972,6 +1110,7 @@
           date: s.date,
           done: false,
           blocker: null,
+          history: [],
           updatedAt: nowTs
         }))
       });
@@ -994,6 +1133,7 @@
           date: "",
           done: false,
           blocker: null,
+          history: [],
           updatedAt: nowTs
         });
       });
@@ -1015,6 +1155,7 @@
         date: "",
         done: false,
         blocker: null,
+        history: [],
         updatedAt: getTimestampStr()
       });
 
@@ -1063,6 +1204,7 @@
         date: dispDate,
         done: false,
         blocker: null,
+        history: [],
         updatedAt: getTimestampStr()
       });
 
@@ -1127,7 +1269,7 @@
         const parsed = JSON.parse(str);
         const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
         if (Array.isArray(data) && data.length > 0) {
-          state = data;
+          state = normalizeStateHistory(data);
           saveData();
           showToast("Данные восстановлены!");
         } else {
@@ -1138,12 +1280,12 @@
       }
     }
 
-    /* ВЫГРУЗКА В EXCEL (.xlsx) */
+    /* ВЫГРУЗКА В EXCEL С ПОЛНОЙ ХРОНОЛОГИЕЙ */
     function exportToExcel() {
       haptic();
 
       const rows = [];
-      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tБлокер\n";
+      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tИстория задержек и изменений\n";
 
       state.forEach(p => {
         (p.objects || []).forEach(o => {
@@ -1160,7 +1302,7 @@
               "Этап": "—",
               "Срок": "—",
               "Статус": "Нет этапов",
-              "Задержка / Блокер": "—",
+              "История изменений": "—",
               "Изменено": "—"
             });
             tsvText += `${p.title}\t${o.title}\t${pct}\t—\t—\tНет этапов\t—\n`;
@@ -1168,7 +1310,10 @@
             o.steps.forEach(s => {
               const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
               const dateStr = s.date || "Не указан";
-              const blkStr = s.blocker || "—";
+              
+              // Собираем всю хронологию в одну аккуратную строку
+              const histList = (s.history || []).map(h => `[${h.date}] ${h.text}`);
+              const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
 
               rows.push({
                 "Направление": p.title,
@@ -1178,10 +1323,10 @@
                 "Этап": s.text,
                 "Срок": dateStr,
                 "Статус": statusStr,
-                "Задержка / Блокер": blkStr,
+                "История изменений": fullHistStr,
                 "Изменено": s.updatedAt || "—"
               });
-              tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${blkStr}\n`;
+              tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
             });
           }
         });
@@ -1201,7 +1346,7 @@
           const ws = XLSX.utils.json_to_sheet(rows);
           ws['!cols'] = [
             { wch: 22 }, { wch: 28 }, { wch: 10 }, { wch: 10 },
-            { wch: 32 }, { wch: 16 }, { wch: 14 }, { wch: 32 }, { wch: 18 }
+            { wch: 32 }, { wch: 16 }, { wch: 14 }, { wch: 45 }, { wch: 18 }
           ];
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
@@ -1215,7 +1360,7 @@
       }
     }
 
-    /* AI-ОТЧЕТ (gemini-3.6-flash) */
+    /* AI-ОТЧЕТ */
     function openAiModal() {
       document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
       document.getElementById('aiModalOverlay').style.display = 'flex';
@@ -1266,10 +1411,10 @@
       const key = rawKey.trim();
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
       
-      const promptText = `Ты — ведущий эксперт по управлению проектами (PMO). Составь чистый, красивый, лаконичный и понятный управленческий отчет для руководства.
+      const promptText = `Ты — ведущий эксперт по управлению проектами (PMO). Составь чистый, красивый, лаконичный и понятный управленческий отчет для руководства с учетом хронологии решения вопросов.
 НИКАКИХ СЫРЫХ ТАБЛИЦ И МАРКДАУН-РАМОК (вроде |---|). Используй аккуратные списки с эмодзи:
 1. 📊 Краткий итог (общая динамика).
-2. 🚨 Требует внимания / Блокеры (если есть, с указанием участков).
+2. 🚨 Требует внимания / Блокеры (с цепочкой: причина ➔ что предпринято).
 3. 📌 Статус ключевых объектов (кратко по пунктам).
 Пиши строго по делу, без лишних вступлений и шаблонных завершений.`;
 
@@ -1394,6 +1539,7 @@
                       ${(obj.steps || []).map(s => {
                         const hasBlock = !s.done && !!s.blocker;
                         const dateMeta = analyzeDeadline(s.date, s.done);
+                        const hist = s.history || [];
 
                         return `
                           <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
@@ -1408,19 +1554,28 @@
                                   ${dateMeta.text}
                                 </button>
                                 <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                  ${hasBlock ? '🚨 Задержка' : '+ риск'}
+                                  ${hasBlock ? '🚨 Задержка' : (hist.length > 0 ? '📜 История (' + hist.length + ')' : '+ риск')}
                                 </button>
                                 ${s.updatedAt ? `<span class="step-updated-badge">изм. ${s.updatedAt}</span>` : ''}
                               </div>
                               <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
                             </div>
 
-                            ${hasBlock ? `
-                              <div class="blocker-banner">
-                                <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
-                                  🚨 ${escapeHtml(s.blocker)}
-                                </span>
-                                <button class="blocker-clear-btn" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
+                            ${hist.length > 0 ? `
+                              <div class="blocker-container">
+                                ${hist.map((hItem, hIdx) => {
+                                  const isLast = hIdx === hist.length - 1;
+                                  return `
+                                    <div class="blocker-banner-row ${!hasBlock && isLast ? 'info-row' : ''}">
+                                      <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                        ${hasBlock && isLast ? '🚨' : '📝'} [${escapeHtml(hItem.date)}] ${escapeHtml(hItem.text)}
+                                      </span>
+                                      ${isLast && hasBlock ? `
+                                        <button class="blocker-clear-btn" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
+                                      ` : ''}
+                                    </div>
+                                  `;
+                                }).join('')}
                               </div>
                             ` : ''}
                           </div>
@@ -1510,12 +1665,13 @@
         (p.objects || []).filter(o => !o.archived).forEach(o => {
           (o.steps || []).forEach(s => {
             if (!s.done && s.blocker) {
+              const hist = (s.history || []).map(h => `[${h.date}] ${h.text}`);
               blockers.push({
                 proc: p.title,
                 obj: o.title,
                 step: s.text,
                 date: s.date || 'срок не указан',
-                reason: s.blocker
+                history: hist.length > 0 ? hist : [s.blocker]
               });
             }
           });
@@ -1530,7 +1686,9 @@
           blockers.forEach(b => {
             txt += `• ${b.obj} (${b.proc}):\n`;
             txt += `  ⚠️ ${b.step} [${b.date}]\n`;
-            txt += `     └ Причина: ${b.reason}\n`;
+            b.history.forEach(hStr => {
+              txt += `     └ ${hStr}\n`;
+            });
           });
           txt += `\n`;
         }
@@ -1577,7 +1735,7 @@
         if (blockers.length > 0) {
           txt += `🚨 БЛОКЕРЫ / ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} — ${b.reason} [${b.date}]\n`;
+            txt += `• ${b.obj}: ${b.step} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
           });
           txt += `\n`;
         }
