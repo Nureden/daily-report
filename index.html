@@ -216,7 +216,6 @@
       background: var(--surface);
       border-radius: var(--radius-card);
       border: 1px solid var(--border);
-      overflow: hidden;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
     }
 
@@ -410,8 +409,8 @@
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
-      z-index: 50;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+      z-index: 100;
       display: none;
       flex-direction: column;
       min-width: 150px;
@@ -478,6 +477,7 @@
       cursor: pointer;
       flex: 1;
       overflow-wrap: break-word;
+      user-select: none;
     }
     .step-unit.done .step-text {
       text-decoration: line-through;
@@ -528,19 +528,14 @@
       background: transparent;
       border: none;
       color: var(--text-subtle);
-      font-size: 12px;
+      font-size: 15px;
+      padding: 2px 6px;
       cursor: pointer;
-      padding: 2px 5px;
-      border-radius: 4px;
       line-height: 1;
-      opacity: 0.35;
-      transition: opacity 0.15s, color 0.15s;
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
     }
-    .step-del-btn:hover {
-      opacity: 1;
-      color: var(--danger);
-      background: var(--danger-bg);
-    }
+    .step-del-btn:hover { background: var(--surface-subtle); color: var(--text-main); }
 
     /* ЛЕНТА ЗАМЕЧАНИЙ */
     .step-remarks-thread {
@@ -584,7 +579,24 @@
       white-space: nowrap;
     }
 
-    /* БЛОК ШАБЛОНОВ ДОБАВЛЕНИЯ В ПАПКЕ */
+    /* ПОДВЕТКА СТОРОН */
+    .tag-party {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-right: 4px;
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .tag-party.cpp { background: #fee2e2; color: #991b1b; }
+    .tag-party.kmgi { background: #fef3c7; color: #92400e; }
+    .tag-party.kmgp { background: #eff6ff; color: #1d4ed8; }
+    .tag-party.mio { background: #f3e8ff; color: #6b21a8; }
+    .tag-party.nao { background: #ecfdf5; color: #047857; }
+
+    /* ШАБЛОНЫ */
     .folder-footer-actions {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -698,19 +710,38 @@
     .btn-m-primary { flex: 1; background: var(--brand); color: #fff; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-m-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 
+    /* ШАБЛОНЫ ПРИЧИН */
     .preset-list { display: flex; flex-direction: column; gap: 4px; }
-    .preset-btn {
-      text-align: left;
+    .preset-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
-      padding: 8px 10px;
       border-radius: 6px;
+      padding-right: 6px;
+    }
+    .preset-btn {
+      flex: 1;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 8px 10px;
       font-size: 12.5px;
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer;
     }
-    .preset-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .preset-btn:hover { color: var(--brand); }
+    .preset-del-btn {
+      background: none;
+      border: none;
+      color: var(--text-subtle);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .preset-del-btn:hover { color: var(--danger); }
 
     /* ЧИПЫ ОТВЕТСТВЕННОЙ СТОРОНЫ */
     .party-chips-ribbon {
@@ -818,7 +849,7 @@
     <!-- ЕДИНЫЙ РЕЕСТР ПРОЦЕССОВ -->
     <div class="registry-card" id="processesRoot"></div>
 
-    <!-- СЛУЖЕБНЫЙ ПОДВАЛ С РЕАЛЬНЫМ СКАЧИВАНИЕМ ФАЙЛА -->
+    <!-- СЛУЖЕБНЫЙ ПОДВАЛ -->
     <div class="footer-subtle-wrap">
       <div style="display:flex; gap:8px;">
         <button class="btn-date-chip" onclick="downloadBackupFile()">📥 Скачать файл бэкапа</button>
@@ -829,11 +860,26 @@
     </div>
   </div>
 
-  <!-- НИЖНЯЯ ПАНЕЛЬ ДЕЙСТВИЙ (МОНОХРОМНАЯ) -->
+  <!-- НИЖНЯЯ ПАНЕЛЬ ДЕЙСТВИЙ -->
   <div class="floating-bar">
     <button class="fab-btn" onclick="copyReport()">📋 Скопировать</button>
     <button class="fab-btn" onclick="exportToExcel()">📊 Скачать Excel</button>
     <button class="fab-btn" onclick="shareToTelegram()">✈️ В Telegram</button>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ВВОДА / РЕДАКТИРОВАНИЯ ТЕКСТА -->
+  <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" id="textModalTitle">Редактирование</div>
+        <button class="modal-x" onclick="closeTextModal()">✕</button>
+      </div>
+      <input type="text" id="textModalInput" class="modal-input-field" placeholder="Введите название..." onkeydown="if(event.key==='Enter') submitTextModal()">
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
+        <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
+      </div>
+    </div>
   </div>
 
   <!-- МОДАЛЬНОЕ ОКНО AI -->
@@ -893,7 +939,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ С ВЫБОРОМ ОТВЕТСТВЕННОГО -->
+  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ С УЧАСТНИКАМИ И РЕДАКТИРУЕМЫМИ ШАБЛОНАМИ -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -902,27 +948,35 @@
       </div>
       <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
 
+      <!-- ЛЕНТА С КНОПКАМИ ПРАВКИ -->
       <div style="display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
 
+      <!-- ОТВЕТСТВЕННЫЕ СТОРОНЫ -->
       <div>
         <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
         <div class="party-chips-ribbon">
-          <button type="button" class="party-chip selected" onclick="selectPartyChip(this, 'Подрядчик')">Подрядчик</button>
+          <button type="button" class="party-chip selected" onclick="selectPartyChip(this, 'Подрядчик CPP')">Подрядчик CPP</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Субподряд КМГИ')">Субподряд КМГИ</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Заказчик KMG Petrochem')">Заказчик KMG Petrochem</button>
           <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Акимат / МИО')">Акимат / МИО</button>
           <button type="button" class="party-chip" onclick="selectPartyChip(this, 'НАО / Кадастр')">НАО / Кадастр</button>
-          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Заказчик')">Заказчик</button>
         </div>
       </div>
 
-      <div class="preset-list">
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Оплата не идет у подрядчика')">💳 Оплата не идет у подрядчика</button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('На согласовании в акимате / МИО')">🏛 На согласовании в акимате / МИО</button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Замечания НАО / Гипрозем')">📐 Замечания НАО / Гипрозем</button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Спор со смежниками')">🤝 Спор со смежниками</button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание подписания постановления')">📜 Ожидание постановления</button>
+      <!-- РЕДАКТИРУЕМЫЕ ШАБЛОНЫ ПРИЧИН -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Быстрые шаблоны причин:</label>
+          <button type="button" style="background:none; border:none; color:var(--brand); font-size:11px; font-weight:700; cursor:pointer;" onclick="promptAddRiskPreset()">+ Свой шаблон</button>
+        </div>
+        <div class="preset-list" id="modalPresetsList"></div>
       </div>
 
-      <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Суть замечания / статус...">
+      <!-- СУТЬ ЗАМЕЧАНИЯ -->
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Текст замечания / статус:</label>
+        <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Нажмите на шаблон или введите причину..." onkeydown="if(event.key==='Enter') appendRiskFromModal()">
+      </div>
 
       <div class="modal-actions-row">
         <button class="btn-m-primary" onclick="appendRiskFromModal()">➕ Зафиксировать</button>
@@ -948,9 +1002,31 @@
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
-    let selectedPartyTag = 'Подрядчик';
+    let selectedPartyTag = 'Подрядчик CPP';
+    let textModalCallback = null;
 
-    // 4. ТИПОВЫЕ ОТРАСЛЕВЫЕ ЦЕПОЧКИ
+    // БАЗОВЫЕ ШАБЛОНЫ ПРИЧИН (МОЖНО РЕДАКТИРОВАТЬ И СОХРАНЯТЬ)
+    const DEFAULT_RISK_PRESETS = [
+      "Оплата не идет у подрядчика",
+      "На согласовании в акимате / МИО",
+      "Замечания НАО / Гипрозем (накладка)",
+      "Спор со смежниками по границам",
+      "Ожидание подписания постановления",
+      "Задержка полевого выезда / съемки"
+    ];
+
+    function getRiskPresets() {
+      try {
+        const raw = localStorage.getItem('daily_risk_presets_v2');
+        if (raw) return JSON.parse(raw);
+      } catch(e) {}
+      return [...DEFAULT_RISK_PRESETS];
+    }
+
+    function saveRiskPresets(arr) {
+      localStorage.setItem('daily_risk_presets_v2', JSON.stringify(arr));
+    }
+
     const WORKFLOW_TEMPLATES = {
       land: [
         "Акт сверки НАО",
@@ -1006,7 +1082,6 @@
       return `${m[3] || new Date().getFullYear()}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
     }
 
-    // 2. СЧЕТЧИК ДНЕЙ ЗАДЕРЖКИ
     function analyzeDeadline(dateStr, isDone) {
       if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
       if (!dateStr) return { cls: 'empty', text: '📅 Срок' };
@@ -1191,6 +1266,29 @@
       showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
     }
 
+    function showTextModal(title, initialValue, onSave) {
+      document.getElementById('textModalTitle').textContent = title;
+      const inp = document.getElementById('textModalInput');
+      inp.value = initialValue || '';
+      textModalCallback = onSave;
+      document.getElementById('textPromptModalOverlay').style.display = 'flex';
+      setTimeout(() => inp.focus(), 60);
+    }
+
+    function closeTextModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('textPromptModalOverlay').style.display = 'none';
+      textModalCallback = null;
+    }
+
+    function submitTextModal() {
+      const val = document.getElementById('textModalInput').value.trim();
+      if (textModalCallback && val) {
+        textModalCallback(val);
+      }
+      closeTextModal();
+    }
+
     function addProcess() {
       const input = document.getElementById('newProcInput');
       const val = input.value.trim();
@@ -1212,11 +1310,11 @@
     function editProcessTitle(procId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
-      const newTitle = prompt("Название направления:", p.title);
-      if (newTitle && newTitle.trim()) {
-        p.title = newTitle.trim();
+      showTextModal("✏️ Название направления", p.title, (newTitle) => {
+        p.title = newTitle;
         saveData();
-      }
+        showToast("Обновлено");
+      });
     }
 
     function deleteProcess(procId) {
@@ -1281,44 +1379,55 @@
 
     function editObjectTitle(procId, objId) {
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
+      const obj = p?.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      const newTitle = prompt("Название объекта:", obj.title);
-      if (newTitle && newTitle.trim()) {
-        obj.title = newTitle.trim();
+      showTextModal("✏️ Название объекта / участка", obj.title, (newTitle) => {
+        obj.title = newTitle;
         saveData();
-      }
+        showToast("Обновлено");
+      });
     }
 
     function cloneObject(procId, objId) {
       const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const src = p.objects.find(o => o.id === objId);
-      if (!src) return;
+      const src = p?.objects.find(o => o.id === objId);
+      if (!p || !src) return;
 
-      const newTitle = prompt("Имя для копии:", src.title + " (Копия)");
-      if (!newTitle || !newTitle.trim()) return;
-
-      const nowTs = getTimestampStr();
-      p.objects.push({
-        id: Date.now(),
-        title: newTitle.trim(),
-        archived: false,
-        collapsed: false,
-        steps: (src.steps || []).map((s, i) => ({
-          id: Date.now() + i + 1,
-          text: s.text,
-          date: s.date,
-          done: false,
-          blocker: null,
-          history: [],
-          updatedAt: nowTs
-        }))
+      showTextModal("📋 Копирование объекта", src.title + " (Копия)", (newTitle) => {
+        const nowTs = getTimestampStr();
+        p.objects.push({
+          id: Date.now(),
+          title: newTitle,
+          archived: false,
+          collapsed: false,
+          steps: (src.steps || []).map((s, i) => ({
+            id: Date.now() + i + 1,
+            text: s.text,
+            date: s.date,
+            done: false,
+            blocker: null,
+            history: [],
+            updatedAt: nowTs
+          }))
+        });
+        saveData();
+        showToast("Скопировано");
       });
-      saveData();
-      showToast("Скопировано");
+    }
+
+    function openEditStepModal(procId, objId, stepId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      showTextModal("✏️ Описание этапа", step.text, (newText) => {
+        step.text = newText;
+        step.updatedAt = getTimestampStr();
+        saveData();
+        showToast("Этап обновлен");
+      });
     }
 
     function openDateModal(procId, objId, stepId) {
@@ -1371,6 +1480,7 @@
       saveData();
     }
 
+    /* РЕНДЕРИНГ ЛЕНТЫ ЗАМЕЧАНИЙ С ВОЗМОЖНОСТЬЮ ПРАВКИ */
     function renderModalHistoryList(step) {
       const box = document.getElementById('modalHistoryLogBox');
       box.innerHTML = '';
@@ -1383,12 +1493,42 @@
 
       list.forEach((item, idx) => {
         const row = document.createElement('div');
-        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:4px 8px; border-radius:4px; font-size:11.5px; border:1px solid #e2e8f0;";
+        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-radius:4px; font-size:12px; border:1px solid #e2e8f0; gap:6px;";
         row.innerHTML = `
-          <span><b>[${escapeHtml(item.date)}]:</b> ${escapeHtml(item.text)}</span>
-          <button style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:700; padding:2px;" onclick="deleteHistoryItem(${idx})">✕</button>
+          <span style="flex:1;"><b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text)}</span>
+          <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px; padding:2px;" onclick="editHistoryItem(${idx})" title="Редактировать">✏️</button>
+          <button style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:700; padding:2px;" onclick="deleteHistoryItem(${idx})" title="Удалить">✕</button>
         `;
         box.appendChild(row);
+      });
+    }
+
+    function formatPartyTag(text) {
+      if (!text) return '';
+      return escapeHtml(text)
+        .replace(/[Подрядчик CPP]/g, '<span class="tag-party cpp">CPP</span>')
+        .replace(/[Субподряд КМГИ]/g, '<span class="tag-party kmgi">КМГИ</span>')
+        .replace(/[Заказчик KMG Petrochem]/g, '<span class="tag-party kmgp">Petrochem</span>')
+        .replace(/\[Акимат \/ МИО\]/g, '<span class="tag-party mio">МИО</span>')
+        .replace(/\[НАО \/ Кадастр\]/g, '<span class="tag-party nao">НАО</span>');
+    }
+
+    function editHistoryItem(idx) {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step || !step.history || !step.history[idx]) return;
+
+      showTextModal("✏️ Изменить замечание", step.history[idx].text, (newText) => {
+        step.history[idx].text = newText;
+        if (idx === step.history.length - 1 && step.blocker) {
+          step.blocker = newText;
+        }
+        step.updatedAt = getTimestampStr();
+        renderModalHistoryList(step);
+        saveData();
+        showToast("Запись обновлена");
       });
     }
 
@@ -1413,6 +1553,46 @@
       btn.classList.add('selected');
     }
 
+    /* РЕНДЕРИНГ РЕДАКТИРУЕМЫХ ШАБЛОНОВ */
+    function renderPresetsList() {
+      const container = document.getElementById('modalPresetsList');
+      container.innerHTML = '';
+      const list = getRiskPresets();
+
+      list.forEach((presetText, idx) => {
+        const row = document.createElement('div');
+        row.className = 'preset-row';
+        row.innerHTML = `
+          <button type="button" class="preset-btn" onclick="applyPresetToInput('${escapeHtml(presetText)}')">${escapeHtml(presetText)}</button>
+          <button type="button" class="preset-del-btn" onclick="deleteRiskPreset(${idx})" title="Удалить шаблон">✕</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function applyPresetToInput(text) {
+      const inp = document.getElementById('customRiskInput');
+      inp.value = text;
+      inp.focus();
+    }
+
+    function promptAddRiskPreset() {
+      showTextModal("➕ Новый шаблон причины", "", (val) => {
+        const list = getRiskPresets();
+        list.push(val);
+        saveRiskPresets(list);
+        renderPresetsList();
+        showToast("Шаблон сохранен");
+      });
+    }
+
+    function deleteRiskPreset(idx) {
+      const list = getRiskPresets();
+      list.splice(idx, 1);
+      saveRiskPresets(list);
+      renderPresetsList();
+    }
+
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1428,6 +1608,7 @@
       document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
       document.getElementById('customRiskInput').value = '';
       renderModalHistoryList(step);
+      renderPresetsList();
 
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
       document.getElementById('riskModalOverlay').style.display = 'flex';
@@ -1438,12 +1619,6 @@
       document.getElementById('riskModalOverlay').style.display = 'none';
     }
 
-    function selectRiskPreset(text) {
-      document.getElementById('customRiskInput').value = text;
-      appendRiskFromModal();
-    }
-
-    // 3. ОТМЕТКА СТОРОНЫ В ЛОГЕ
     function appendRiskFromModal() {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -1499,20 +1674,6 @@
       }
     }
 
-    function editStepText(procId, objId, stepId) {
-      const p = state.find(x => x.id === procId);
-      const obj = p?.objects.find(o => o.id === objId);
-      const step = obj?.steps.find(s => s.id === stepId);
-      if (!step) return;
-
-      const newTxt = prompt("Описание этапа:", step.text);
-      if (newTxt && newTxt.trim()) {
-        step.text = newTxt.trim();
-        step.updatedAt = getTimestampStr();
-        saveData();
-      }
-    }
-
     function deleteStep(procId, objId, stepId) {
       const p = state.find(x => x.id === procId);
       const obj = p?.objects.find(o => o.id === objId);
@@ -1520,58 +1681,61 @@
 
       obj.steps = obj.steps.filter(s => s.id !== stepId);
       saveData();
+      showToast("Этап удален");
     }
 
-    // 4. СОЗДАНИЕ С ШАБЛОНАМИ
     function createObjectWithTemplate(procId, tplKey) {
-      const name = prompt("Название объекта / участка:");
-      if (!name || !name.trim()) return;
-
       const p = state.find(x => x.id === procId);
       if (!p) return;
 
-      const nowTs = getTimestampStr();
-      const templateSteps = WORKFLOW_TEMPLATES[tplKey] || [];
+      const titlePlaceholder = tplKey === 'empty' ? "Новый объект" : 
+                               tplKey === 'losses' ? "Участок (сельхозпотери)" :
+                               tplKey === 'szz' ? "Объект (СЗЗ)" : "Новый участок";
 
-      p.objects.push({
-        id: Date.now(),
-        title: name.trim(),
-        archived: false,
-        collapsed: false,
-        steps: templateSteps.map((text, idx) => ({
-          id: Date.now() + idx,
-          text: text,
-          date: "",
-          done: false,
-          blocker: null,
-          history: [],
-          updatedAt: nowTs
-        }))
+      showTextModal("➕ Название объекта / участка", titlePlaceholder, (name) => {
+        const nowTs = getTimestampStr();
+        const templateSteps = WORKFLOW_TEMPLATES[tplKey] || [];
+
+        p.objects.push({
+          id: Date.now(),
+          title: name,
+          archived: false,
+          collapsed: false,
+          steps: templateSteps.map((text, idx) => ({
+            id: Date.now() + idx,
+            text: text,
+            date: "",
+            done: false,
+            blocker: null,
+            history: [],
+            updatedAt: nowTs
+          }))
+        });
+
+        saveData();
+        showToast("Объект создан");
       });
-
-      saveData();
-      showToast("Объект создан");
     }
 
     function addCustomStep(procId, objId) {
-      const txt = prompt("Название этапа:");
-      if (!txt || !txt.trim()) return;
-
       const p = state.find(x => x.id === procId);
       const obj = p?.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      if (!obj.steps) obj.steps = [];
-      obj.steps.push({
-        id: Date.now(),
-        text: txt.trim(),
-        date: "",
-        done: false,
-        blocker: null,
-        history: [],
-        updatedAt: getTimestampStr()
+      showTextModal("➕ Добавить этап / задачу", "", (txt) => {
+        if (!obj.steps) obj.steps = [];
+        obj.steps.push({
+          id: Date.now(),
+          text: txt,
+          date: "",
+          done: false,
+          blocker: null,
+          history: [],
+          updatedAt: getTimestampStr()
+        });
+        saveData();
+        showToast("Этап добавлен");
       });
-      saveData();
     }
 
     function archiveObject(procId, objId) {
@@ -1584,7 +1748,6 @@
       }
     }
 
-    // 5. АВТОМАТИЧЕСКОЕ СКАЧИВАНИЕ ФАЙЛА БЭКАПА
     function downloadBackupFile() {
       const str = JSON.stringify(state, null, 2);
       const blob = new Blob([str], { type: 'application/json' });
@@ -1655,7 +1818,6 @@
           });
         });
 
-        // 1. Шлифовка: шеврон + нейтральное меню ···
         row.innerHTML = `
           <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="folder-left">
@@ -1728,8 +1890,8 @@
                         return `
                           <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
                             <div class="step-row-top">
-                              <input type="checkbox" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
-                              <span class="step-text" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})">${escapeHtml(s.text)}</span>
+                              <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                              <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
                             </div>
 
                             <div class="step-row-bottom">
@@ -1743,7 +1905,14 @@
                                   </button>
                                 ` : ''}
                               </div>
-                              <button class="step-del-btn" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
+
+                              <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
+                                <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
+                                <div class="obj-dropdown-menu" id="smenu-${s.id}">
+                                  <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
+                                  <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
+                                </div>
+                              </div>
                             </div>
 
                             ${hist.length > 0 ? `
@@ -1754,7 +1923,7 @@
                                     <div class="step-remark-item ${hasBlock && isLast ? 'is-active-block' : 'is-resolved'}">
                                       <span class="remark-icon">${hasBlock && isLast ? '🚨' : '✔'}</span>
                                       <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                        <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${escapeHtml(hItem.text)}
+                                        <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text)}
                                       </span>
                                       ${isLast && hasBlock ? `
                                         <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
@@ -1777,7 +1946,6 @@
               `;
             }).join('')}
 
-            <!-- 4. ОТРАСЛЕВЫЕ ЦЕПОЧКИ -->
             <div class="folder-footer-actions">
               <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
               <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
@@ -1982,7 +2150,7 @@
       if (!key) return out.textContent = "⚠️ Укажите API-ключ Gemini";
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
-      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и красивый управленческий отчет для руководства с хронологией ключевых рисков с указанием ответственных сторон ([Подрядчик], [Акимат], [НАО]) без сырых таблиц. Данные:\n${rawReport}`;
+      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и понятный управленческий отчет для руководства с хронологией рисков и распределением по ответственным ([Подрядчик CPP], [Субподряд КМГИ], [Заказчик KMG Petrochem], [Акимат / МИО], [НАО / Кадастр]). Без сырых таблиц, строго по пунктам:\n${rawReport}`;
 
       try {
         const response = await fetch(url, {
