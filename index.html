@@ -30,7 +30,7 @@
 
       --ai: #7c3aed;
       --neutral-dark: #0f172a;
-      
+
       --radius-card: 14px;
       --radius-sm: 8px;
     }
@@ -57,7 +57,7 @@
       margin: 0 auto;
     }
 
-    /* 1. ШАПКА И СБАЛАНСИРОВАННЫЙ KPI */
+    /* ДАШБОРД */
     .dashboard-panel {
       background: var(--surface);
       border-radius: var(--radius-card);
@@ -120,7 +120,6 @@
       box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
     }
 
-    /* ЕДИНЫЙ ГАРМОНИЧНЫЙ KPI */
     .metrics-ribbon {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -182,7 +181,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
-    /* 2. СПОКОЙНАЯ СТРОКА ВВОДА */
+    /* СТРОКА ВВОДА */
     .input-group {
       display: flex;
       gap: 8px;
@@ -210,11 +209,9 @@
       white-space: nowrap;
       transition: all 0.15s;
     }
-    .btn-action-quiet:hover {
-      background: var(--brand-light);
-    }
+    .btn-action-quiet:hover { background: var(--brand-light); }
 
-    /* 3. СПИСОК НАПРАВЛЕНИЙ (ЕДИНЫЙ РЕЕСТР ВМЕСТО ОСТРОВКОВ) */
+    /* РЕЕСТР НАПРАВЛЕНИЙ */
     .registry-card {
       background: var(--surface);
       border-radius: var(--radius-card);
@@ -226,9 +223,7 @@
     .folder-row {
       border-bottom: 1px solid var(--border);
     }
-    .folder-row:last-child {
-      border-bottom: none;
-    }
+    .folder-row:last-child { border-bottom: none; }
 
     .folder-header {
       padding: 12px 14px;
@@ -239,6 +234,7 @@
       user-select: none;
       background: #ffffff;
       transition: background 0.15s;
+      position: relative;
     }
     .folder-header:hover { background: var(--surface-subtle); }
 
@@ -284,13 +280,14 @@
       align-items: center;
       gap: 4px;
       flex-shrink: 0;
+      position: relative;
     }
     .btn-row-menu {
       color: var(--text-subtle);
       background: transparent;
       border: none;
-      font-size: 15px;
-      padding: 2px 6px;
+      font-size: 16px;
+      padding: 2px 7px;
       cursor: pointer;
       border-radius: 4px;
       line-height: 1;
@@ -307,7 +304,7 @@
     }
     .folder-content.hidden { display: none !important; }
 
-    /* 4. ОБЪЕКТЫ / УЧАСТКИ */
+    /* ОБЪЕКТЫ / УЧАСТКИ */
     .item-card {
       background: #ffffff;
       border-radius: var(--radius-sm);
@@ -390,22 +387,21 @@
       height: 100%;
       background: var(--brand);
     }
-    .progress-pill.green .progress-mini-fill {
-      background: var(--done);
-    }
+    .progress-pill.green .progress-mini-fill { background: var(--done); }
 
     .btn-item-more {
       background: transparent;
       border: none;
       color: var(--text-subtle);
-      font-size: 14px;
-      padding: 2px 5px;
+      font-size: 15px;
+      padding: 2px 6px;
       cursor: pointer;
       line-height: 1;
       border-radius: 4px;
     }
     .btn-item-more:hover { background: var(--surface-subtle); color: var(--text-main); }
 
+    /* ВЫПАДАЮЩИЕ МЕНЮ */
     .obj-dropdown-menu {
       position: absolute;
       top: 100%;
@@ -418,7 +414,7 @@
       z-index: 50;
       display: none;
       flex-direction: column;
-      min-width: 140px;
+      min-width: 150px;
       padding: 4px;
     }
     .obj-dropdown-menu.open { display: flex; }
@@ -449,7 +445,7 @@
     }
     .item-body.hidden { display: none !important; }
 
-    /* 5. ЭТАПЫ РАБОТ */
+    /* ЭТАПЫ РАБОТ */
     .step-unit {
       display: flex;
       flex-direction: column;
@@ -588,26 +584,31 @@
       white-space: nowrap;
     }
 
+    /* БЛОК ШАБЛОНОВ ДОБАВЛЕНИЯ В ПАПКЕ */
     .folder-footer-actions {
-      display: flex;
-      gap: 6px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
       margin-top: 2px;
     }
+    @media (max-width: 540px) {
+      .folder-footer-actions { grid-template-columns: repeat(2, 1fr); }
+    }
     .btn-add-obj-subtle {
-      flex: 1;
       background: #fff;
-      border: 1px dashed var(--border-dark);
-      padding: 7px;
+      border: 1px dashed var(--border);
+      padding: 7px 4px;
       border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11.5px;
+      font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
       text-align: center;
+      transition: all 0.15s;
     }
-    .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); }
+    .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
 
-    /* 6. ПРЕМИАЛЬНАЯ МОНОХРОМНАЯ НИЖНЯЯ ПАНЕЛЬ */
+    /* ПАНЕЛЬ ОТЧЕТОВ */
     .floating-bar {
       position: fixed;
       bottom: 12px;
@@ -645,7 +646,7 @@
       background: rgba(255, 255, 255, 0.18);
     }
 
-    /* 7. МОДАЛЬНЫЕ ОКНА */
+    /* МОДАЛЬНЫЕ ОКНА */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -710,6 +711,30 @@
       cursor: pointer;
     }
     .preset-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+
+    /* ЧИПЫ ОТВЕТСТВЕННОЙ СТОРОНЫ */
+    .party-chips-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 2px 0;
+    }
+    .party-chip {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .party-chip.selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
 
     .toast-msg {
       position: fixed;
@@ -793,12 +818,13 @@
     <!-- ЕДИНЫЙ РЕЕСТР ПРОЦЕССОВ -->
     <div class="registry-card" id="processesRoot"></div>
 
-    <!-- СЛУЖЕБНЫЙ ПОДВАЛ -->
+    <!-- СЛУЖЕБНЫЙ ПОДВАЛ С РЕАЛЬНЫМ СКАЧИВАНИЕМ ФАЙЛА -->
     <div class="footer-subtle-wrap">
       <div style="display:flex; gap:8px;">
-        <button class="btn-date-chip" onclick="exportBackup()">📥 Копия данных</button>
-        <button class="btn-date-chip" onclick="importBackup()">📤 Восстановить</button>
+        <button class="btn-date-chip" onclick="downloadBackupFile()">📥 Скачать файл бэкапа</button>
+        <button class="btn-date-chip" onclick="triggerImportFile()">📤 Загрузить файл</button>
       </div>
+      <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
       <div class="footer-rev-tag" id="syncTag">● Синхронизировано</div>
     </div>
   </div>
@@ -867,7 +893,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ -->
+  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ С ВЫБОРОМ ОТВЕТСТВЕННОГО -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -876,7 +902,17 @@
       </div>
       <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
 
-      <div style="display:flex; flex-direction:column; gap:4px; max-height:140px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
+      <div style="display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
+
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
+        <div class="party-chips-ribbon">
+          <button type="button" class="party-chip selected" onclick="selectPartyChip(this, 'Подрядчик')">Подрядчик</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Акимат / МИО')">Акимат / МИО</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'НАО / Кадастр')">НАО / Кадастр</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Заказчик')">Заказчик</button>
+        </div>
+      </div>
 
       <div class="preset-list">
         <button type="button" class="preset-btn" onclick="selectRiskPreset('Оплата не идет у подрядчика')">💳 Оплата не идет у подрядчика</button>
@@ -886,10 +922,10 @@
         <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание подписания постановления')">📜 Ожидание постановления</button>
       </div>
 
-      <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Новый статус / замечание...">
+      <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Суть замечания / статус...">
 
       <div class="modal-actions-row">
-        <button class="btn-m-primary" onclick="appendRiskFromModal()">➕ Добавить запись</button>
+        <button class="btn-m-primary" onclick="appendRiskFromModal()">➕ Зафиксировать</button>
         <button class="btn-m-danger" id="riskClearBtn" onclick="clearRiskFromModal()">Снять блокер</button>
       </div>
     </div>
@@ -912,14 +948,30 @@
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
+    let selectedPartyTag = 'Подрядчик';
 
-    const STANDARD_WORKFLOW = [
-      "Акт сверки НАО",
-      "Экспликация Гипрозем",
-      "Утверждение ЗУП МИО",
-      "Постановление акима",
-      "Акт на землю, регистрация"
-    ];
+    // 4. ТИПОВЫЕ ОТРАСЛЕВЫЕ ЦЕПОЧКИ
+    const WORKFLOW_TEMPLATES = {
+      land: [
+        "Акт сверки НАО",
+        "Экспликация Гипрозем",
+        "Утверждение ЗУП МИО",
+        "Постановление акима",
+        "Акт на землю, регистрация"
+      ],
+      losses: [
+        "Расчет потерь и убытков",
+        "Согласование с землепользователем",
+        "Протокол комиссии МИО",
+        "Перечисление / Оплата потерь"
+      ],
+      szz: [
+        "Проект СЗЗ / Экспертиза",
+        "Санитарно-эпидемиологическое заключение",
+        "Согласование в МИО / Архитектура",
+        "Внесение в дежурный кадастровый план"
+      ]
+    };
 
     function getTodayISO() {
       const d = new Date();
@@ -954,6 +1006,7 @@
       return `${m[3] || new Date().getFullYear()}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
     }
 
+    // 2. СЧЕТЧИК ДНЕЙ ЗАДЕРЖКИ
     function analyzeDeadline(dateStr, isDone) {
       if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
       if (!dateStr) return { cls: 'empty', text: '📅 Срок' };
@@ -967,9 +1020,10 @@
       target.setHours(0,0,0,0);
 
       const diff = Math.round((target - today) / 86400000);
-      if (diff < 0) return { cls: 'overdue', text: `🔴 ${dateStr}` };
-      if (diff === 0) return { cls: 'urgent', text: `🟠 Сегодня` };
-      if (diff <= 2) return { cls: 'urgent', text: `🟡 ${diff} дн.` };
+      if (diff < 0) return { cls: 'overdue', text: `🔴 Просрочено (${Math.abs(diff)} дн.)` };
+      if (diff === 0) return { cls: 'urgent', text: `🟠 Срок сегодня` };
+      if (diff === 1) return { cls: 'urgent', text: `🟡 Завтра` };
+      if (diff <= 3) return { cls: 'urgent', text: `🟡 Через ${diff} дн.` };
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
@@ -1117,7 +1171,7 @@
       localStorage.setItem(STORAGE_KEY, json);
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
-      updateSyncTag(`⏳ Сохранение v${currentRevision}...`);
+      updateSyncTag(`⏳ v${currentRevision}`);
       await saveToCloud(json);
       updateSyncTag(`● Версия ${currentRevision}`);
 
@@ -1192,9 +1246,9 @@
       render();
     }
 
-    function toggleObjMenu(e, objId) {
+    function toggleMenuGeneric(e, menuId) {
       e.stopPropagation();
-      const menu = document.getElementById(`menu-${objId}`);
+      const menu = document.getElementById(menuId);
       const allMenus = document.querySelectorAll('.obj-dropdown-menu');
       allMenus.forEach(m => { if (m !== menu) m.classList.remove('open'); });
       if (menu) menu.classList.toggle('open');
@@ -1353,6 +1407,12 @@
       saveData();
     }
 
+    function selectPartyChip(btn, partyName) {
+      selectedPartyTag = partyName;
+      document.querySelectorAll('.party-chip').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
       const p = state.find(x => x.id === procId);
@@ -1383,6 +1443,7 @@
       appendRiskFromModal();
     }
 
+    // 3. ОТМЕТКА СТОРОНЫ В ЛОГЕ
     function appendRiskFromModal() {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -1390,19 +1451,22 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      const val = document.getElementById('customRiskInput').value.trim();
-      if (!val) return;
+      const rawVal = document.getElementById('customRiskInput').value.trim();
+      if (!rawVal) return;
+
+      const partyPrefix = selectedPartyTag ? `[${selectedPartyTag}] ` : '';
+      const fullEntry = `${partyPrefix}${rawVal}`;
 
       if (!step.history) step.history = [];
       const timestamp = getTimestampStr();
 
-      step.history.push({ date: timestamp, text: val });
-      step.blocker = val;
+      step.history.push({ date: timestamp, text: fullEntry });
+      step.blocker = fullEntry;
       step.updatedAt = timestamp;
 
       closeRiskModal();
       saveData();
-      showToast("Запись сохранена");
+      showToast("Запись сохранена в журнал");
     }
 
     function clearBlocker(procId, objId, stepId) {
@@ -1458,31 +1522,35 @@
       saveData();
     }
 
-    function createObjectFast(procId, isStandard) {
+    // 4. СОЗДАНИЕ С ШАБЛОНАМИ
+    function createObjectWithTemplate(procId, tplKey) {
       const name = prompt("Название объекта / участка:");
       if (!name || !name.trim()) return;
 
       const p = state.find(x => x.id === procId);
-      if (p) {
-        const nowTs = getTimestampStr();
-        p.objects.push({
-          id: Date.now(),
-          title: name.trim(),
-          archived: false,
-          collapsed: false,
-          steps: isStandard ? STANDARD_WORKFLOW.map((text, idx) => ({
-            id: Date.now() + idx,
-            text: text,
-            date: "",
-            done: false,
-            blocker: null,
-            history: [],
-            updatedAt: nowTs
-          })) : []
-        });
-        saveData();
-        showToast("Объект создан");
-      }
+      if (!p) return;
+
+      const nowTs = getTimestampStr();
+      const templateSteps = WORKFLOW_TEMPLATES[tplKey] || [];
+
+      p.objects.push({
+        id: Date.now(),
+        title: name.trim(),
+        archived: false,
+        collapsed: false,
+        steps: templateSteps.map((text, idx) => ({
+          id: Date.now() + idx,
+          text: text,
+          date: "",
+          done: false,
+          blocker: null,
+          history: [],
+          updatedAt: nowTs
+        }))
+      });
+
+      saveData();
+      showToast("Объект создан");
     }
 
     function addCustomStep(procId, objId) {
@@ -1516,6 +1584,50 @@
       }
     }
 
+    // 5. АВТОМАТИЧЕСКОЕ СКАЧИВАНИЕ ФАЙЛА БЭКАПА
+    function downloadBackupFile() {
+      const str = JSON.stringify(state, null, 2);
+      const blob = new Blob([str], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_projects_${getTodayISO()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      navigator.clipboard?.writeText(str);
+      showToast("Файл скачан + копия в буфере!");
+    }
+
+    function triggerImportFile() {
+      document.getElementById('backupFileInput').click();
+    }
+
+    function handleFileImport(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
+          if (Array.isArray(data)) {
+            state = normalizeStateHistory(data);
+            saveData();
+            showToast("База восстановлена из файла!");
+          } else {
+            alert("Некорректная структура файла!");
+          }
+        } catch(err) {
+          alert("Ошибка при чтении JSON-файла!");
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
     function render() {
       const root = document.getElementById('processesRoot');
       root.innerHTML = '';
@@ -1543,6 +1655,7 @@
           });
         });
 
+        // 1. Шлифовка: шеврон + нейтральное меню ···
         row.innerHTML = `
           <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
             <div class="folder-left">
@@ -1551,8 +1664,11 @@
               <span class="counter-badge">${activeObjects.length}</span>
             </div>
             <div class="folder-right-tools" onclick="event.stopPropagation()">
-              <button class="btn-row-menu" onclick="editProcessTitle(${proc.id})" title="Изменить">✏️</button>
-              <button class="btn-row-menu" style="color:var(--danger);" onclick="deleteProcess(${proc.id})" title="Удалить">✕</button>
+              <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
+              <div class="obj-dropdown-menu" id="fmenu-${proc.id}">
+                <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editProcessTitle(${proc.id})">✏️ Переименовать</button>
+                <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteProcess(${proc.id})">✕ Удалить направление</button>
+              </div>
             </div>
           </div>
 
@@ -1569,7 +1685,7 @@
                   <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
                     <div class="item-title-wrap">
                       <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
-                      <span class="item-title">📌 ${escapeHtml(obj.title)}</span>
+                      <span class="item-title">${escapeHtml(obj.title)}</span>
                     </div>
 
                     <div class="item-meta-right" onclick="event.stopPropagation()">
@@ -1580,10 +1696,12 @@
                           </div>
                           <span>${dCount}/${tCount} (${percent}%)</span>
                         </div>
-                      ` : ''}
+                      ` : `
+                        <span class="progress-pill" style="opacity:0.6;">0 задач</span>
+                      `}
 
-                      <button class="btn-item-more" onclick="toggleObjMenu(event, ${obj.id})" title="Меню">···</button>
-                      <div class="obj-dropdown-menu" id="menu-${obj.id}">
+                      <button class="btn-item-more" onclick="toggleMenuGeneric(event, 'omenu-${obj.id}')" title="Меню">···</button>
+                      <div class="obj-dropdown-menu" id="omenu-${obj.id}">
                         <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editObjectTitle(${proc.id},${obj.id})">✏️ Переименовать</button>
                         <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); cloneObject(${proc.id},${obj.id})">📋 Копировать</button>
                         ${objIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, -1)">⬆️ Вверх</button>` : ''}
@@ -1659,13 +1777,12 @@
               `;
             }).join('')}
 
+            <!-- 4. ОТРАСЛЕВЫЕ ЦЕПОЧКИ -->
             <div class="folder-footer-actions">
-              <button class="btn-add-obj-subtle" onclick="createObjectFast(${proc.id}, true)">
-                ⚡ + Объект (5 этапов)
-              </button>
-              <button class="btn-add-obj-subtle" onclick="createObjectFast(${proc.id}, false)">
-                + Пустой объект
-              </button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
             </div>
           </div>
         `;
@@ -1865,7 +1982,7 @@
       if (!key) return out.textContent = "⚠️ Укажите API-ключ Gemini";
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
-      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и красивый управленческий отчет для руководства с хронологией ключевых рисков без сырых таблиц. Данные:\n${rawReport}`;
+      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и красивый управленческий отчет для руководства с хронологией ключевых рисков с указанием ответственных сторон ([Подрядчик], [Акимат], [НАО]) без сырых таблиц. Данные:\n${rawReport}`;
 
       try {
         const response = await fetch(url, {
@@ -1883,24 +2000,6 @@
     function copyAiOutput(elementId) {
       const text = document.getElementById(elementId).innerText;
       if (text) navigator.clipboard.writeText(text).then(() => showToast("Скопировано!"));
-    }
-
-    function exportBackup() {
-      navigator.clipboard.writeText(JSON.stringify(state, null, 2)).then(() => showToast("Бэкап в буфере"));
-    }
-
-    function importBackup() {
-      const str = prompt("Вставьте текст бэкапа:");
-      if (!str) return;
-      try {
-        const parsed = JSON.parse(str);
-        const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
-        if (Array.isArray(data)) {
-          state = normalizeStateHistory(data);
-          saveData();
-          showToast("Восстановлено");
-        }
-      } catch(e) { alert("Ошибка чтения данных"); }
     }
 
     function showToast(msg) {
