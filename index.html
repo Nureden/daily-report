@@ -50,6 +50,7 @@
       font-size: 14px;
       line-height: 1.45;
       letter-spacing: -0.01em;
+      min-height: 100vh;
     }
 
     .app-container {
@@ -211,18 +212,17 @@
     }
     .btn-action-quiet:hover { background: var(--brand-light); }
 
-    /* РЕЕСТР НАПРАВЛЕНИЙ */
+    /* РЕЕСТР */
     .registry-card {
       background: var(--surface);
       border-radius: var(--radius-card);
       border: 1px solid var(--border);
+      overflow: hidden;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-      height: auto !important;
     }
 
     .folder-row {
       border-bottom: 1px solid var(--border);
-      height: auto !important;
     }
     .folder-row:last-child { border-bottom: none; }
 
@@ -302,11 +302,10 @@
       gap: 7px;
       background: #f8fafc;
       border-top: 1px solid var(--border-subtle);
-      height: auto !important;
     }
     .folder-content.hidden { display: none !important; }
 
-    /* ОБЪЕКТЫ / УЧАСТКИ */
+    /* ОБЪЕКТЫ */
     .item-card {
       background: #ffffff;
       border-radius: var(--radius-sm);
@@ -315,8 +314,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      height: auto !important;
-      flex: none !important;
     }
     .item-card.is-complete {
       background: #fcfdfc;
@@ -446,12 +443,10 @@
       gap: 6px;
       padding-top: 6px;
       border-top: 1px dashed var(--border);
-      height: auto !important;
-      flex: none !important;
     }
     .item-body.hidden { display: none !important; }
 
-    /* ЭТАПЫ РАБОТ */
+    /* ЭТАПЫ */
     .step-unit {
       display: flex;
       flex-direction: column;
@@ -460,9 +455,6 @@
       border-radius: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
-      height: auto !important;
-      min-height: auto !important;
-      flex: none !important;
     }
     .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
     .step-unit.blocked { background: #fffbfb; border-color: #fecaca; }
@@ -589,5 +581,1633 @@
       white-space: nowrap;
     }
 
-    /* ПОДСВЕТКА СТОРОН */
-    .tag
+    /* ТЕГИ СТОРОН */
+    .tag-party {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-right: 4px;
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .tag-party.cpp { background: #fee2e2; color: #991b1b; }
+    .tag-party.kmgi { background: #fef3c7; color: #92400e; }
+    .tag-party.kmgp { background: #eff6ff; color: #1d4ed8; }
+    .tag-party.mio { background: #f3e8ff; color: #6b21a8; }
+    .tag-party.nao { background: #ecfdf5; color: #047857; }
+
+    /* ШАБЛОНЫ */
+    .folder-footer-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-top: 2px;
+    }
+    @media (max-width: 540px) {
+      .folder-footer-actions { grid-template-columns: repeat(2, 1fr); }
+    }
+    .btn-add-obj-subtle {
+      background: #fff;
+      border: 1px dashed var(--border);
+      padding: 7px 4px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+    /* ПАНЕЛЬ ОТЧЕТОВ */
+    .floating-bar {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      max-width: 796px;
+      margin: 0 auto;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+      z-index: 100;
+    }
+    .fab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 9px;
+      border: none;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .fab-btn:active {
+      transform: scale(0.97);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* МОДАЛЬНЫЕ ОКНА */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+    }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; } }
+    .modal-box {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    @media (min-width: 600px) { .modal-box { border-radius: 16px; } }
+
+    .modal-top { display: flex; justify-content: space-between; align-items: center; }
+    .modal-head-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
+    .modal-x {
+      background: var(--surface-subtle);
+      border: none;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .modal-input-field {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .modal-input-field:focus { border-color: var(--brand); }
+
+    .modal-actions-row { display: flex; gap: 6px; margin-top: 4px; }
+    .btn-m-primary { flex: 1; background: var(--brand); color: #fff; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-m-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+
+    /* ШАБЛОНЫ ПРИЧИН */
+    .preset-list { display: flex; flex-direction: column; gap: 4px; }
+    .preset-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding-right: 6px;
+    }
+    .preset-btn {
+      flex: 1;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 8px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .preset-btn:hover { color: var(--brand); }
+    .preset-del-btn {
+      background: none;
+      border: none;
+      color: var(--text-subtle);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .preset-del-btn:hover { color: var(--danger); }
+
+    /* ЧИПЫ СТОРОН */
+    .party-chips-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 2px 0;
+    }
+    .party-chip {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .party-chip.selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
+
+    .toast-msg {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: none;
+      z-index: 2000;
+    }
+
+    .footer-subtle-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 24px;
+    }
+    .footer-rev-tag {
+      font-size: 11px;
+      color: var(--text-subtle);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- ДАШБОРД -->
+    <div class="dashboard-panel">
+      <div class="dash-header">
+        <div class="dash-title">
+          <span>📊</span> Мониторинг проектов
+        </div>
+        <div class="dash-controls">
+          <button class="btn-icon-refresh" onclick="manualSync()" title="Синхронизировать">🔄</button>
+          <button class="btn-ai-compact" onclick="openAiModal()">✨ AI-Отчет</button>
+        </div>
+      </div>
+
+      <div class="metrics-ribbon">
+        <div class="kpi-cell danger" id="kpiBlockersBox">
+          <span class="kpi-title">Задержки</span>
+          <span class="kpi-val" id="mBlockers">0</span>
+        </div>
+        <div class="kpi-cell green">
+          <span class="kpi-title">Сделано</span>
+          <span class="kpi-val" id="mDone">0</span>
+        </div>
+        <div class="kpi-cell">
+          <span class="kpi-title">В работе</span>
+          <span class="kpi-val" id="mPlan">0</span>
+        </div>
+        <div class="kpi-cell">
+          <span class="kpi-title">Объектов</span>
+          <span class="kpi-val" id="mTotal">0</span>
+        </div>
+      </div>
+
+      <div class="format-switch">
+        <button class="format-btn active" id="modeExecutive" onclick="setReportMode('executive')">
+          ⚡ Сводка за сегодня
+        </button>
+        <button class="format-btn" id="modeFull" onclick="setReportMode('full')">
+          📋 Полный отчет
+        </button>
+      </div>
+    </div>
+
+    <!-- ВВОД НАПРАВЛЕНИЯ -->
+    <div class="input-group">
+      <input type="text" id="newProcInput" placeholder="Новое направление..." onkeydown="if(event.key==='Enter') addProcess()">
+      <button class="btn-action-quiet" onclick="addProcess()">+ Добавить</button>
+    </div>
+
+    <!-- ЕДИНЫЙ РЕЕСТР ПРОЦЕССОВ -->
+    <div class="registry-card" id="processesRoot"></div>
+
+    <!-- СЛУЖЕБНЫЙ ПОДВАЛ -->
+    <div class="footer-subtle-wrap">
+      <div style="display:flex; gap:8px;">
+        <button class="btn-date-chip" onclick="downloadBackupFile()">📥 Скачать файл бэкапа</button>
+        <button class="btn-date-chip" onclick="triggerImportFile()">📤 Загрузить файл</button>
+      </div>
+      <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
+      <div class="footer-rev-tag" id="syncTag">● Синхронизировано</div>
+    </div>
+  </div>
+
+  <!-- ПАНЕЛЬ ОТЧЕТОВ -->
+  <div class="floating-bar">
+    <button class="fab-btn" onclick="copyReport()">📋 Скопировать</button>
+    <button class="fab-btn" onclick="exportToExcel()">📊 Скачать Excel</button>
+    <button class="fab-btn" onclick="shareToTelegram()">✈️ В Telegram</button>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА -->
+  <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" id="textModalTitle">Редактирование</div>
+        <button class="modal-x" onclick="closeTextModal()">✕</button>
+      </div>
+      <input type="text" id="textModalInput" class="modal-input-field" placeholder="Введите название..." onkeydown="if(event.key==='Enter') submitTextModal()">
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
+        <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО AI -->
+  <div class="modal-overlay" id="aiModalOverlay" onclick="closeAiModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" style="color:var(--ai);">✨ AI-Генератор отчета</div>
+        <button class="modal-x" onclick="closeAiModal()">✕</button>
+      </div>
+
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ключ Gemini API:</label>
+        <div style="display:flex; gap:6px; margin-top:3px;">
+          <input type="password" id="geminiApiKeyInput" class="modal-input-field" placeholder="AIzaSy...">
+          <button class="btn-m-primary" style="padding:7px 14px;" onclick="saveGeminiApiKey()">ОК</button>
+        </div>
+      </div>
+
+      <button class="btn-m-primary" style="background:var(--ai);" onclick="runAiAnalytics()">
+        Сгенерировать сводку
+      </button>
+
+      <div style="background:var(--surface-subtle); border:1px solid var(--border); padding:10px; border-radius:6px; font-size:12.5px; line-height:1.45; max-height:220px; overflow-y:auto; white-space:pre-wrap;" id="aiOutput-analytics">
+        Результат появится здесь...
+      </div>
+
+      <button class="btn-m-primary" style="background:#059669;" onclick="copyAiOutput('aiOutput-analytics')">
+        Скопировать результат
+      </button>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ДАТЫ -->
+  <div class="modal-overlay" id="dateModalOverlay" onclick="closeDateModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title">📅 Выбор срока</div>
+        <button class="modal-x" onclick="closeDateModal()">✕</button>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);" id="dateModalStepTitle">Этап...</div>
+
+      <input type="date" id="modalDatePickerInput" class="modal-input-field">
+
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px;">
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(0)">Сегодня</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(1)">Завтра</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(3)">+3 дня</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(7)">+7 дней</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(15)">+15 дней</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(30)">+1 мес</button>
+      </div>
+
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="saveDateFromModal()">Сохранить</button>
+        <button class="btn-m-danger" onclick="clearDateFromModal()">Без даты</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ -->
+  <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" style="color:var(--danger);">🚨 Хронология замечаний</div>
+        <button class="modal-x" onclick="closeRiskModal()">✕</button>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
+
+      <div style="display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
+
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
+        <div class="party-chips-ribbon">
+          <button type="button" class="party-chip selected" onclick="selectPartyChip(this, 'Подрядчик CPP')">Подрядчик CPP</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Субподряд КМГИ')">Субподряд КМГИ</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Заказчик KMG Petrochem')">Заказчик KMG Petrochem</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'Акимат / МИО')">Акимат / МИО</button>
+          <button type="button" class="party-chip" onclick="selectPartyChip(this, 'НАО / Кадастр')">НАО / Кадастр</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Быстрые шаблоны причин:</label>
+          <button type="button" style="background:none; border:none; color:var(--brand); font-size:11px; font-weight:700; cursor:pointer;" onclick="promptAddRiskPreset()">+ Свой шаблон</button>
+        </div>
+        <div class="preset-list" id="modalPresetsList"></div>
+      </div>
+
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Текст замечания / статус:</label>
+        <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Нажмите на шаблон или введите причину..." onkeydown="if(event.key==='Enter') appendRiskFromModal()">
+      </div>
+
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="appendRiskFromModal()">➕ Зафиксировать</button>
+        <button class="btn-m-danger" id="riskClearBtn" onclick="clearRiskFromModal()">Снять блокер</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toastMsg">Готово!</div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    const STORAGE_KEY = 'daily_report_vault_v18';
+    const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
+    const CHUNK_SIZE = 1200;
+
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+      } catch(e) {}
+    }
+
+    let reportMode = 'executive';
+    let activeModalTarget = { procId: null, objId: null, stepId: null };
+    let currentRevision = 0;
+    let isSaving = false;
+    let selectedPartyTag = 'Подрядчик CPP';
+    let textModalCallback = null;
+
+    const DEFAULT_RISK_PRESETS = [
+      "Оплата не идет у подрядчика",
+      "На согласовании в акимате / МИО",
+      "Замечания НАО / Гипрозем (накладка)",
+      "Спор со смежниками по границам",
+      "Ожидание подписания постановления",
+      "Задержка полевого выезда / съемки"
+    ];
+
+    function getRiskPresets() {
+      try {
+        const raw = localStorage.getItem('daily_risk_presets_v2');
+        if (raw) return JSON.parse(raw);
+      } catch(e) {}
+      return [...DEFAULT_RISK_PRESETS];
+    }
+
+    function saveRiskPresets(arr) {
+      try {
+        localStorage.setItem('daily_risk_presets_v2', JSON.stringify(arr));
+      } catch(e) {}
+    }
+
+    const WORKFLOW_TEMPLATES = {
+      land: [
+        "Акт сверки НАО",
+        "Экспликация Гипрозем",
+        "Утверждение ЗУП МИО",
+        "Постановление акима",
+        "Акт на землю, регистрация"
+      ],
+      losses: [
+        "Расчет потерь и убытков",
+        "Согласование с землепользователем",
+        "Протокол комиссии МИО",
+        "Перечисление / Оплата потерь"
+      ],
+      szz: [
+        "Проект СЗЗ / Экспертиза",
+        "Санитарно-эпидемиологическое заключение",
+        "Согласование в МИО / Архитектура",
+        "Внесение в дежурный кадастровый план"
+      ]
+    };
+
+    function getTodayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getTodayStr() {
+      const d = new Date();
+      return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+    }
+
+    function getTimestampStr() {
+      const d = new Date();
+      const day = String(d.getDate()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const y = d.getFullYear();
+      const h = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${m}.${y} ${h}:${min}`;
+    }
+
+    function isoToDisplay(isoStr) {
+      if (!isoStr) return '';
+      const p = isoStr.split('-');
+      return p.length === 3 ? `до ${p[2]}.${p[1]}.${p[0]}` : isoStr;
+    }
+
+    function displayToISO(dispStr) {
+      if (!dispStr) return '';
+      const m = dispStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!m) return '';
+      return `${m[3] || new Date().getFullYear()}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    }
+
+    function analyzeDeadline(dateStr, isDone) {
+      if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
+      if (!dateStr) return { cls: 'empty', text: '📅 Срок' };
+
+      const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!m) return { cls: '', text: dateStr };
+
+      const target = new Date(m[3] ? parseInt(m[3]) : new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      target.setHours(0,0,0,0);
+
+      const diff = Math.round((target - today) / 86400000);
+      if (diff < 0) return { cls: 'overdue', text: `🔴 Просрочено (${Math.abs(diff)} дн.)` };
+      if (diff === 0) return { cls: 'urgent', text: `🟠 Срок сегодня` };
+      if (diff === 1) return { cls: 'urgent', text: `🟡 Завтра` };
+      if (diff <= 3) return { cls: 'urgent', text: `🟡 Через ${diff} дн.` };
+      return { cls: '', text: `📅 ${dateStr}` };
+    }
+
+    let state = [];
+
+    function parseRaw(raw) {
+      try {
+        const p = JSON.parse(raw);
+        if (p && Array.isArray(p.data)) {
+          return { rev: p.rev || 0, ts: p.updatedAt || 0, data: p.data };
+        }
+        if (Array.isArray(p)) return { rev: 0, ts: 0, data: p };
+      } catch(e) {}
+      return null;
+    }
+
+    function tgSetItemAsync(key, value) {
+      return new Promise((resolve) => {
+        if (!tg?.CloudStorage) return resolve(false);
+        try {
+          tg.CloudStorage.setItem(key, value, (err) => resolve(!err));
+        } catch(e) { resolve(false); }
+      });
+    }
+
+    function tgGetItemAsync(key) {
+      return new Promise((resolve) => {
+        if (!tg?.CloudStorage) return resolve(null);
+        try {
+          tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : (val || '')));
+        } catch(e) { resolve(null); }
+      });
+    }
+
+    async function loadFromCloud() {
+      if (!tg?.CloudStorage) return null;
+      try {
+        const countStr = await tgGetItemAsync('c_count');
+        if (!countStr) return await tgGetItemAsync(STORAGE_KEY);
+
+        const count = parseInt(countStr, 10);
+        if (isNaN(count) || count <= 0) return null;
+
+        let full = '';
+        for (let i = 0; i < count; i++) {
+          const part = await tgGetItemAsync(`c_${i}`);
+          if (part === null) return null;
+          full += part;
+        }
+        return full;
+      } catch(e) { return null; }
+    }
+
+    async function saveToCloud(jsonStr) {
+      if (!tg?.CloudStorage) return false;
+      try {
+        const chunks = [];
+        for (let i = 0; i < jsonStr.length; i += CHUNK_SIZE) {
+          chunks.push(jsonStr.slice(i, i + CHUNK_SIZE));
+        }
+        for (let i = 0; i < chunks.length; i++) {
+          const ok = await tgSetItemAsync(`c_${i}`, chunks[i]);
+          if (!ok) return false;
+        }
+        return await tgSetItemAsync('c_count', String(chunks.length));
+      } catch(e) { return false; }
+    }
+
+    function normalizeStateHistory(arr) {
+      if (!Array.isArray(arr)) return [];
+      return arr.map(p => ({
+        ...p,
+        collapsed: p.collapsed !== undefined ? !!p.collapsed : true,
+        objects: (p.objects || []).map(o => ({
+          ...o,
+          collapsed: o.collapsed !== undefined ? !!o.collapsed : true,
+          steps: (o.steps || []).map(s => {
+            if (!s.history) s.history = [];
+            if (s.blocker && s.history.length === 0) {
+              s.history.push({ date: s.updatedAt || 'Ранее', text: s.blocker });
+            }
+            return s;
+          })
+        }))
+      }));
+    }
+
+    async function loadData() {
+      try {
+        let localState = null;
+        const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
+        if (rawLocal) {
+          const res = parseRaw(rawLocal);
+          if (res && res.data) {
+            currentRevision = res.rev || 0;
+            localState = res.data;
+          }
+        }
+
+        if (localState && localState.length > 0) {
+          state = normalizeStateHistory(localState);
+          render();
+          updateSyncTag(`● Версия ${currentRevision}`);
+        } else {
+          render();
+        }
+
+        await syncWithCloud();
+      } catch(e) {
+        console.error("loadData error:", e);
+        render();
+      }
+    }
+
+    async function syncWithCloud(forceToast = false) {
+      try {
+        const cloudRaw = await loadFromCloud();
+        if (!cloudRaw) {
+          updateSyncTag(`● Версия ${currentRevision}`);
+          return;
+        }
+
+        const res = parseRaw(cloudRaw);
+        if (res && res.data) {
+          const isDifferent = JSON.stringify(res.data) !== JSON.stringify(state);
+          if (res.rev > currentRevision || (forceToast && isDifferent) || state.length === 0) {
+            currentRevision = Math.max(currentRevision, res.rev || 0);
+            state = normalizeStateHistory(res.data);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ rev: currentRevision, updatedAt: res.ts, data: state }));
+            localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
+            render();
+            showToast(`Синхронизировано (v${currentRevision})`);
+          } else if (forceToast) {
+            showToast("Версия актуальна");
+          }
+        }
+        updateSyncTag(`● Версия ${currentRevision}`);
+      } catch(e) {}
+    }
+
+    async function manualSync() {
+      updateSyncTag(`⏳ Проверка...`);
+      await syncWithCloud(true);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') syncWithCloud();
+    });
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.obj-dropdown-menu').forEach(m => m.classList.remove('open'));
+    });
+
+    async function saveData() {
+      if (isSaving) return;
+      isSaving = true;
+
+      try {
+        currentRevision++;
+        const now = Date.now();
+        const payload = { rev: currentRevision, updatedAt: now, data: state };
+        const json = JSON.stringify(payload);
+
+        localStorage.setItem(STORAGE_KEY, json);
+        localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
+
+        updateSyncTag(`⏳ v${currentRevision}`);
+        await saveToCloud(json);
+        updateSyncTag(`● Версия ${currentRevision}`);
+      } catch(e) {
+        console.error("saveData error:", e);
+      } finally {
+        isSaving = false;
+        render();
+      }
+    }
+
+    function updateSyncTag(text) {
+      const tag = document.getElementById('syncTag');
+      if (tag) tag.textContent = text;
+    }
+
+    function setReportMode(m) {
+      reportMode = m;
+      document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
+      document.getElementById('modeFull').classList.toggle('active', m === 'full');
+      showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
+    }
+
+    function showTextModal(title, initialValue, onSave) {
+      document.getElementById('textModalTitle').textContent = title;
+      const inp = document.getElementById('textModalInput');
+      inp.value = initialValue || '';
+      textModalCallback = onSave;
+      document.getElementById('textPromptModalOverlay').style.display = 'flex';
+      setTimeout(() => inp.focus(), 60);
+    }
+
+    function closeTextModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('textPromptModalOverlay').style.display = 'none';
+      textModalCallback = null;
+    }
+
+    function submitTextModal() {
+      const val = document.getElementById('textModalInput').value.trim();
+      if (textModalCallback && val) {
+        textModalCallback(val);
+      }
+      closeTextModal();
+    }
+
+    function addProcess() {
+      const input = document.getElementById('newProcInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      state.push({
+        id: Date.now(),
+        title: val,
+        collapsed: false,
+        showArchive: false,
+        objects: []
+      });
+
+      input.value = '';
+      saveData();
+      showToast("Направление добавлено");
+    }
+
+    function editProcessTitle(procId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      showTextModal("✏️ Название направления", p.title, (newTitle) => {
+        p.title = newTitle;
+        saveData();
+        showToast("Обновлено");
+      });
+    }
+
+    function deleteProcess(procId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      if (confirm(`Удалить направление «${p.title}» со всеми объектами?`)) {
+        state = state.filter(x => x.id !== procId);
+        saveData();
+        showToast("Удалено");
+      }
+    }
+
+    function toggleProcessCollapse(procId) {
+      const p = state.find(x => x.id === procId);
+      if (p) {
+        p.collapsed = !p.collapsed;
+        render();
+      }
+    }
+
+    function toggleObjectCollapse(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
+      if (!obj) return;
+      obj.collapsed = !obj.collapsed;
+      render();
+    }
+
+    function toggleMenuGeneric(e, menuId) {
+      e.stopPropagation();
+      const menu = document.getElementById(menuId);
+      const allMenus = document.querySelectorAll('.obj-dropdown-menu');
+      allMenus.forEach(m => { if (m !== menu) m.classList.remove('open'); });
+      if (menu) menu.classList.toggle('open');
+    }
+
+    function moveObject(procId, objId, direction) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const idx = p.objects.findIndex(o => o.id === objId);
+      if (idx < 0) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= p.objects.length) return;
+
+      const item = p.objects.splice(idx, 1)[0];
+      p.objects.splice(newIdx, 0, item);
+      saveData();
+    }
+
+    function deleteObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!p || !obj) return;
+
+      if (confirm(`Удалить объект «${obj.title}»?`)) {
+        p.objects = p.objects.filter(o => o.id !== objId);
+        saveData();
+        showToast("Удалено");
+      }
+    }
+
+    function editObjectTitle(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      showTextModal("✏️ Название объекта / участка", obj.title, (newTitle) => {
+        obj.title = newTitle;
+        saveData();
+        showToast("Обновлено");
+      });
+    }
+
+    function cloneObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const src = p?.objects.find(o => o.id === objId);
+      if (!p || !src) return;
+
+      showTextModal("📋 Копирование объекта", src.title + " (Копия)", (newTitle) => {
+        const nowTs = getTimestampStr();
+        p.objects.push({
+          id: Date.now(),
+          title: newTitle,
+          archived: false,
+          collapsed: false,
+          steps: (src.steps || []).map((s, i) => ({
+            id: Date.now() + i + 1,
+            text: s.text,
+            date: s.date,
+            done: false,
+            blocker: null,
+            history: [],
+            updatedAt: nowTs
+          }))
+        });
+        saveData();
+        showToast("Скопировано");
+      });
+    }
+
+    function openEditStepModal(procId, objId, stepId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      showTextModal("✏️ Описание этапа", step.text, (newText) => {
+        step.text = newText;
+        step.updatedAt = getTimestampStr();
+        saveData();
+        showToast("Этап обновлен");
+      });
+    }
+
+    function openDateModal(procId, objId, stepId) {
+      activeModalTarget = { procId, objId, stepId };
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      document.getElementById('dateModalStepTitle').textContent = `${obj.title} → ${step.text}`;
+      document.getElementById('modalDatePickerInput').value = displayToISO(step.date) || getTodayISO();
+      document.getElementById('dateModalOverlay').style.display = 'flex';
+    }
+
+    function closeDateModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('dateModalOverlay').style.display = 'none';
+    }
+
+    function setModalDateOffset(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      document.getElementById('modalDatePickerInput').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function saveDateFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const iso = document.getElementById('modalDatePickerInput').value;
+      step.date = iso ? isoToDisplay(iso) : '';
+      step.updatedAt = getTimestampStr();
+      closeDateModal();
+      saveData();
+    }
+
+    function clearDateFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      step.date = '';
+      step.updatedAt = getTimestampStr();
+      closeDateModal();
+      saveData();
+    }
+
+    function renderModalHistoryList(step) {
+      const box = document.getElementById('modalHistoryLogBox');
+      box.innerHTML = '';
+      const list = step.history || [];
+
+      if (list.length === 0) {
+        box.innerHTML = `<div style="font-size:11.5px; color:#94a3b8; text-align:center; padding:6px;">Замечаний не зафиксировано</div>`;
+        return;
+      }
+
+      list.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-radius:4px; font-size:12px; border:1px solid #e2e8f0; gap:6px;";
+        row.innerHTML = `
+          <span style="flex:1;"><b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text)}</span>
+          <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px; padding:2px;" onclick="editHistoryItem(${idx})" title="Редактировать">✏️</button>
+          <button style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:700; padding:2px;" onclick="deleteHistoryItem(${idx})" title="Удалить">✕</button>
+        `;
+        box.appendChild(row);
+      });
+    }
+
+    function formatPartyTag(text) {
+      if (!text) return '';
+      return escapeHtml(text)
+        .replace(/[Подрядчик CPP]/g, '<span class="tag-party cpp">CPP</span>')
+        .replace(/[Субподряд КМГИ]/g, '<span class="tag-party kmgi">КМГИ</span>')
+        .replace(/[Заказчик KMG Petrochem]/g, '<span class="tag-party kmgp">Petrochem</span>')
+        .replace(/\[Акимат \/ МИО\]/g, '<span class="tag-party mio">МИО</span>')
+        .replace(/\[НАО \/ Кадастр\]/g, '<span class="tag-party nao">НАО</span>');
+    }
+
+    function editHistoryItem(idx) {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step || !step.history || !step.history[idx]) return;
+
+      showTextModal("✏️ Изменить замечание", step.history[idx].text, (newText) => {
+        step.history[idx].text = newText;
+        if (idx === step.history.length - 1 && step.blocker) {
+          step.blocker = newText;
+        }
+        step.updatedAt = getTimestampStr();
+        renderModalHistoryList(step);
+        saveData();
+        showToast("Запись обновлена");
+      });
+    }
+
+    function deleteHistoryItem(idx) {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step || !step.history) return;
+
+      step.history.splice(idx, 1);
+      step.blocker = step.history.length > 0 ? step.history[step.history.length - 1].text : null;
+      step.updatedAt = getTimestampStr();
+      renderModalHistoryList(step);
+      document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
+      saveData();
+    }
+
+    function selectPartyChip(btn, partyName) {
+      selectedPartyTag = partyName;
+      document.querySelectorAll('.party-chip').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function renderPresetsList() {
+      const container = document.getElementById('modalPresetsList');
+      if (!container) return;
+      container.innerHTML = '';
+      const list = getRiskPresets();
+
+      list.forEach((presetText, idx) => {
+        const row = document.createElement('div');
+        row.className = 'preset-row';
+        row.innerHTML = `
+          <button type="button" class="preset-btn" onclick="applyPresetToInput('${escapeHtml(presetText)}')">${escapeHtml(presetText)}</button>
+          <button type="button" class="preset-del-btn" onclick="deleteRiskPreset(${idx})" title="Удалить шаблон">✕</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function applyPresetToInput(text) {
+      const inp = document.getElementById('customRiskInput');
+      inp.value = text;
+      inp.focus();
+    }
+
+    function promptAddRiskPreset() {
+      showTextModal("➕ Новый шаблон причины", "", (val) => {
+        const list = getRiskPresets();
+        list.push(val);
+        saveRiskPresets(list);
+        renderPresetsList();
+        showToast("Шаблон сохранен");
+      });
+    }
+
+    function deleteRiskPreset(idx) {
+      const list = getRiskPresets();
+      list.splice(idx, 1);
+      saveRiskPresets(list);
+      renderPresetsList();
+    }
+
+    function openRiskModal(procId, objId, stepId) {
+      activeModalTarget = { procId, objId, stepId };
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      if (!step.history) step.history = [];
+      if (step.blocker && step.history.length === 0) {
+        step.history.push({ date: step.updatedAt || 'Ранее', text: step.blocker });
+      }
+
+      document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
+      document.getElementById('customRiskInput').value = '';
+      renderModalHistoryList(step);
+      renderPresetsList();
+
+      document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
+      document.getElementById('riskModalOverlay').style.display = 'flex';
+    }
+
+    function closeRiskModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('riskModalOverlay').style.display = 'none';
+    }
+
+    function appendRiskFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      const rawVal = document.getElementById('customRiskInput').value.trim();
+      if (!rawVal) return;
+
+      const partyPrefix = selectedPartyTag ? `[${selectedPartyTag}] ` : '';
+      const fullEntry = `${partyPrefix}${rawVal}`;
+
+      if (!step.history) step.history = [];
+      const timestamp = getTimestampStr();
+
+      step.history.push({ date: timestamp, text: fullEntry });
+      step.blocker = fullEntry;
+      step.updatedAt = timestamp;
+
+      closeRiskModal();
+      saveData();
+      showToast("Запись сохранена в журнал");
+    }
+
+    function clearBlocker(procId, objId, stepId) {
+      const p = state.find(x => x.id == procId);
+      const obj = p?.objects.find(o => o.id == objId);
+      const step = obj?.steps.find(s => s.id == stepId);
+      if (!step) return;
+
+      step.blocker = null;
+      step.updatedAt = getTimestampStr();
+      saveData();
+      showToast("Блокер снят");
+    }
+
+    function clearRiskFromModal() {
+      const { procId, objId, stepId } = activeModalTarget;
+      clearBlocker(procId, objId, stepId);
+      closeRiskModal();
+    }
+
+    function toggleStep(procId, objId, stepId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (step) {
+        step.done = !step.done;
+        if (step.done) step.blocker = null;
+        step.updatedAt = getTimestampStr();
+        saveData();
+      }
+    }
+
+    function deleteStep(procId, objId, stepId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      obj.steps = obj.steps.filter(s => s.id !== stepId);
+      saveData();
+      showToast("Этап удален");
+    }
+
+    function createObjectWithTemplate(procId, tplKey) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+
+      const titlePlaceholder = tplKey === 'empty' ? "Новый объект" : 
+                               tplKey === 'losses' ? "Участок (сельхозпотери)" :
+                               tplKey === 'szz' ? "Объект (СЗЗ)" : "Новый участок";
+
+      showTextModal("➕ Название объекта / участка", titlePlaceholder, (name) => {
+        const nowTs = getTimestampStr();
+        const templateSteps = WORKFLOW_TEMPLATES[tplKey] || [];
+
+        p.objects.push({
+          id: Date.now(),
+          title: name,
+          archived: false,
+          collapsed: false,
+          steps: templateSteps.map((text, idx) => ({
+            id: Date.now() + idx,
+            text: text,
+            date: "",
+            done: false,
+            blocker: null,
+            history: [],
+            updatedAt: nowTs
+          }))
+        });
+
+        saveData();
+        showToast("Объект создан");
+      });
+    }
+
+    function addCustomStep(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      showTextModal("➕ Добавить этап / задачу", "", (txt) => {
+        if (!obj.steps) obj.steps = [];
+        obj.steps.push({
+          id: Date.now(),
+          text: txt,
+          date: "",
+          done: false,
+          blocker: null,
+          history: [],
+          updatedAt: getTimestampStr()
+        });
+        saveData();
+        showToast("Этап добавлен");
+      });
+    }
+
+    function archiveObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (obj) {
+        obj.archived = true;
+        saveData();
+        showToast("В архиве");
+      }
+    }
+
+    function downloadBackupFile() {
+      try {
+        const str = JSON.stringify(state, null, 2);
+        const blob = new Blob([str], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup_projects_${getTodayISO()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        navigator.clipboard?.writeText(str);
+        showToast("Файл скачан!");
+      } catch(e) {}
+    }
+
+    function triggerImportFile() {
+      document.getElementById('backupFileInput').click();
+    }
+
+    function handleFileImport(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
+          if (Array.isArray(data)) {
+            state = normalizeStateHistory(data);
+            saveData();
+            showToast("База восстановлена из файла!");
+          } else {
+            alert("Некорректная структура файла!");
+          }
+        } catch(err) {
+          alert("Ошибка при чтении JSON-файла!");
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function render() {
+      const root = document.getElementById('processesRoot');
+      if (!root) return;
+      root.innerHTML = '';
+
+      let totalDone = 0;
+      let totalPlan = 0;
+      let totalActiveObjs = 0;
+      let totalBlockers = 0;
+
+      state.forEach(proc => {
+        const row = document.createElement('div');
+        const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true;
+        row.className = `folder-row`;
+
+        const activeObjects = (proc.objects || []).filter(o => !o.archived);
+
+        activeObjects.forEach(o => {
+          totalActiveObjs++;
+          (o.steps || []).forEach(s => {
+            if (s.done) totalDone++;
+            else {
+              totalPlan++;
+              if (s.blocker) totalBlockers++;
+            }
+          });
+        });
+
+        row.innerHTML = `
+          <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
+            <div class="folder-left">
+              <span class="folder-chevron ${isCollapsed ? 'collapsed' : ''}">▼</span>
+              <span class="folder-title-text">${escapeHtml(proc.title)}</span>
+              <span class="counter-badge">${activeObjects.length}</span>
+            </div>
+            <div class="folder-right-tools" onclick="event.stopPropagation()">
+              <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
+              <div class="obj-dropdown-menu" id="fmenu-${proc.id}">
+                <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editProcessTitle(${proc.id})">✏️ Переименовать</button>
+                <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteProcess(${proc.id})">✕ Удалить направление</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="folder-content ${isCollapsed ? 'hidden' : ''}">
+            ${activeObjects.map((obj, objIdx) => {
+              const dCount = (obj.steps || []).filter(s => s.done).length;
+              const tCount = (obj.steps || []).length;
+              const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
+              const isAllDone = tCount > 0 && dCount === tCount;
+              const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
+
+              return `
+                <div class="item-card ${isAllDone ? 'is-complete' : ''}">
+                  <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
+                    <div class="item-title-wrap">
+                      <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
+                      <span class="item-title">${escapeHtml(obj.title)}</span>
+                    </div>
+
+                    <div class="item-meta-right" onclick="event.stopPropagation()">
+                      ${tCount > 0 ? `
+                        <div class="progress-pill ${isAllDone ? 'green' : ''}">
+                          <div class="progress-mini-bar">
+                            <div class="progress-mini-fill" style="width: ${percent}%;"></div>
+                          </div>
+                          <span>${dCount}/${tCount} (${percent}%)</span>
+                        </div>
+                      ` : `
+                        <span class="progress-pill" style="opacity:0.6;">0 задач</span>
+                      `}
+
+                      <button class="btn-item-more" onclick="toggleMenuGeneric(event, 'omenu-${obj.id}')" title="Меню">···</button>
+                      <div class="obj-dropdown-menu" id="omenu-${obj.id}">
+                        <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editObjectTitle(${proc.id},${obj.id})">✏️ Переименовать</button>
+                        <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); cloneObject(${proc.id},${obj.id})">📋 Копировать</button>
+                        ${objIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, -1)">⬆️ Вверх</button>` : ''}
+                        ${objIdx < activeObjects.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, 1)">⬇️ Вниз</button>` : ''}
+                        <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteObject(${proc.id},${obj.id})">✕ Удалить</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
+                    ${isAllDone ? `
+                      <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#059669;">
+                        <span>🎉 Все этапы закрыты</span>
+                        <button class="btn-date-chip" style="background:#059669; color:#fff;" onclick="archiveObject(${proc.id}, ${obj.id})">В архив</button>
+                      </div>
+                    ` : ''}
+
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                      ${(obj.steps || []).map(s => {
+                        const hasBlock = !s.done && !!s.blocker;
+                        const dateMeta = analyzeDeadline(s.date, s.done);
+                        const hist = s.history || [];
+
+                        return `
+                          <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
+                            <div class="step-row-top">
+                              <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                              <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
+                            </div>
+
+                            <div class="step-row-bottom">
+                              <div class="step-chips">
+                                <button type="button" class="btn-date-chip ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                  ${dateMeta.text}
+                                </button>
+                                ${!s.done ? `
+                                  <button class="btn-risk-chip ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
+                                    ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
+                                  </button>
+                                ` : ''}
+                              </div>
+
+                              <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
+                                <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
+                                <div class="obj-dropdown-menu" id="smenu-${s.id}">
+                                  <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
+                                  <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            ${hist.length > 0 ? `
+                              <div class="step-remarks-thread">
+                                ${hist.map((hItem, hIdx) => {
+                                  const isLast = hIdx === hist.length - 1;
+                                  return `
+                                    <div class="step-remark-item ${hasBlock && isLast ? 'is-active-block' : 'is-resolved'}">
+                                      <span class="remark-icon">${hasBlock && isLast ? '🚨' : '✔'}</span>
+                                      <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                        <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text)}
+                                      </span>
+                                      ${isLast && hasBlock ? `
+                                        <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
+                                      ` : ''}
+                                    </div>
+                                  `;
+                                }).join('')}
+                              </div>
+                            ` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+
+                    <button class="btn-date-chip" style="border:1px dashed var(--border); font-size:11.5px; padding:6px; margin-top:2px;" onclick="addCustomStep(${proc.id},${obj.id})">
+                      + Добавить задачу
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+
+            <div class="folder-footer-actions">
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
+              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
+            </div>
+          </div>
+        `;
+
+        root.appendChild(row);
+      });
+
+      const bBox = document.getElementById('kpiBlockersBox');
+      if (bBox) bBox.className = totalBlockers > 0 ? 'kpi-cell danger' : 'kpi-cell';
+
+      document.getElementById('mBlockers').textContent = totalBlockers;
+      document.getElementById('mDone').textContent = totalDone;
+      document.getElementById('mPlan').textContent = totalPlan;
+      document.getElementById('mTotal').textContent = totalActiveObjs;
+    }
+
+    function generateTelegramReport() {
+      const today = getTodayStr();
+      const blockers = [];
+      state.forEach(p => {
+        (p.objects || []).filter(o => !o.archived).forEach(o => {
+          (o.steps || []).forEach(s => {
+            if (!s.done && s.blocker) {
+              const hist = (s.history || []).map(h => `[${h.date}] ${h.text}`);
+              blockers.push({
+                proc: p.title,
+                obj: o.title,
+                step: s.text,
+                date: s.date || 'срок не указан',
+                history: hist.length > 0 ? hist : [s.blocker]
+              });
+            }
+          });
+        });
+      });
+
+      if (reportMode === 'executive') {
+        let txt = `📊 СВОДКА ЗА СЕГОДНЯ | ${today}\n\n`;
+
+        if (blockers.length > 0) {
+          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ (БЛОКЕРЫ):\n`;
+          blockers.forEach(b => {
+            txt += `• ${b.obj} (${b.proc}):\n`;
+            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
+            b.history.forEach(hStr => { txt += `     └ ${hStr}\n`; });
+          });
+          txt += `\n`;
+        }
+
+        let hasDone = false;
+        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА ДЕНЬ:\n`;
+        state.forEach(p => {
+          (p.objects || []).filter(o => !o.archived).forEach(o => {
+            const todayDoneSteps = (o.steps || []).filter(s => s.done);
+            if (todayDoneSteps.length > 0) {
+              hasDone = true;
+              doneTxt += `• ${o.title} (${p.title}):\n`;
+              todayDoneSteps.forEach(s => { doneTxt += `  - ${s.text} [закрыто]\n`; });
+            }
+          });
+        });
+        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
+        txt += doneTxt + `\n`;
+
+        let hasPlan = false;
+        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ:\n`;
+        state.forEach(p => {
+          (p.objects || []).filter(o => !o.archived).forEach(o => {
+            const regularSteps = (o.steps || []).filter(s => !s.done && !s.blocker);
+            if (regularSteps.length > 0) {
+              hasPlan = true;
+              planTxt += `• ${o.title} (${p.title}):\n`;
+              regularSteps.forEach(s => { planTxt += `  - ${s.text}${s.date ? ` [${s.date}]` : ''}\n`; });
+            }
+          });
+        });
+        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
+        txt += planTxt;
+
+        return txt.trim();
+
+      } else {
+        let txt = `📋 СВОДНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
+        if (blockers.length > 0) {
+          txt += `🚨 ЗАДЕРЖКИ (${blockers.length}):\n`;
+          blockers.forEach(b => {
+            txt += `• ${b.obj}: ${b.step} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
+          });
+          txt += `\n`;
+        }
+
+        state.forEach(p => {
+          const active = (p.objects || []).filter(o => !o.archived);
+          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
+          if (active.length === 0) {
+            txt += `  (все объекты в архиве)\n\n`;
+            return;
+          }
+
+          active.forEach(o => {
+            const d = (o.steps || []).filter(s => s.done).length;
+            const t = (o.steps || []).length;
+            txt += `📌 ${o.title} [${d}/${t}]:\n`;
+            (o.steps || []).forEach(s => {
+              const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
+              const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
+              const blockStr = s.blocker ? ` (Задержка: ${s.blocker})` : '';
+              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
+            });
+            txt += `\n`;
+          });
+        });
+
+        return txt.trim();
+      }
+    }
+
+    function copyReport() {
+      const text = generateTelegramReport();
+      navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован!"));
+    }
+
+    function shareToTelegram() {
+      const text = generateTelegramReport();
+      const url = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+      if (tg?.openTelegramLink) tg.openTelegramLink(url);
+      else window.open(url, '_blank');
+    }
+
+    function exportToExcel() {
+      const rows = [];
+      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tИстория замечаний\n";
+
+      state.forEach(p => {
+        (p.objects || []).forEach(o => {
+          const total = (o.steps || []).length;
+          const done = (o.steps || []).filter(s => s.done).length;
+          const pct = total > 0 ? `${Math.round((done / total) * 100)}%` : '0%';
+
+          (o.steps || []).forEach(s => {
+            const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
+            const dateStr = s.date || "Не указан";
+            const histList = (s.history || []).map(h => `[${h.date}] ${h.text}`);
+            const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
+
+            rows.push({
+              "Направление": p.title,
+              "Объект": o.title,
+              "Прогресс": pct,
+              "Этап": s.text,
+              "Срок": dateStr,
+              "Статус": statusStr,
+              "Хронология": fullHistStr
+            });
+            tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
+          });
+        });
+      });
+
+      if (rows.length === 0) return showToast("Нет данных для выгрузки");
+
+      navigator.clipboard.writeText(tsvText);
+      try {
+        if (typeof XLSX !== 'undefined') {
+          const ws = XLSX.utils.json_to_sheet(rows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
+          XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
+          showToast("Excel скачан + скопирован");
+        }
+      } catch(e) {
+        showToast("Таблица скопирована (Ctrl+V)");
+      }
+    }
+
+    function openAiModal() {
+      document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+      document.getElementById('aiModalOverlay').style.display = 'flex';
+    }
+    function closeAiModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('aiModalOverlay').style.display = 'none';
+    }
+    function saveGeminiApiKey() {
+      const val = document.getElementById('geminiApiKeyInput').value.trim();
+      if (!val) return;
+      localStorage.setItem(GEMINI_KEY_STORAGE, val);
+      showToast("Ключ сохранен");
+    }
+
+    async function runAiAnalytics() {
+      const out = document.getElementById('aiOutput-analytics');
+      out.textContent = "⏳ Анализирую...";
+
+      const rawReport = generateTelegramReport();
+      const key = localStorage.getItem(GEMINI_KEY_STORAGE);
+      if (!key) return out.textContent = "⚠️ Укажите API-ключ Gemini";
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
+      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и понятный управленческий отчет для руководства с хронологией рисков и распределением по ответственным ([Подрядчик CPP], [Субподряд КМГИ], [Заказчик KMG Petrochem], [Акимат / МИО], [НАО / Кадастр]). Без сырых таблиц, строго по пунктам:\n${rawReport}`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await response.json();
+        out.textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ";
+      } catch (err) {
+        out.textContent = `Ошибка: ${err.message}`;
+      }
+    }
+
+    function copyAiOutput(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      if (text) navigator.clipboard.writeText(text).then(() => showToast("Скопировано!"));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2200);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, '&quot;');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
