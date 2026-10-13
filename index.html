@@ -3,22 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Управленческий трекер проектов</title>
+  <title>Мониторинг проектов</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --card-subtle: #f1f5f9;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface-subtle: #f8fafc;
       --text-main: #0f172a;
-      --text-muted: #64748b;
+      --text-muted: #475569;
       --text-subtle: #94a3b8;
       --border: #e2e8f0;
-      --border-subtle: #f1f5f9;
+      --border-dark: #cbd5e1;
 
       --brand: #2563eb;
-      --brand-hover: #1d4ed8;
       --brand-light: #eff6ff;
 
       --done: #059669;
@@ -29,1336 +28,811 @@
       --amber-bg: #fffbeb;
       --amber-border: #fde68a;
 
-      --danger: #e11d48;
-      --danger-bg: #fff1f2;
-      --danger-border: #fecdd3;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
 
-      --ai-purple: #7c3aed;
-      --ai-purple-hover: #6d28d9;
-      --ai-purple-bg: #f5f3ff;
-      --ai-purple-border: #ddd6fe;
+      --ai: #7c3aed;
+      --ai-bg: #f5f3ff;
 
-      --neutral-dark: #1e293b;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      --shadow-card: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
-      --radius-lg: 16px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --radius-sm: 6px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 12px 14px 120px 14px;
-      font-size: 14.5px;
-      line-height: 1.5;
-      letter-spacing: -0.01em;
+      padding: 12px 14px 110px 14px;
+      font-size: 14px;
+      line-height: 1.45;
     }
 
     .app-container {
-      max-width: 860px;
+      max-width: 840px;
       margin: 0 auto;
     }
 
-    /* ПАНЕЛЬ РУКОВОДИТЕЛЯ */
-    .dashboard-card {
-      background: var(--card-bg);
+    /* 1. КОМПАКТНЫЙ СТАТУСНЫЙ ДАШБОРД */
+    .dashboard-panel {
+      background: var(--surface);
       border-radius: var(--radius-lg);
-      padding: 16px 18px;
-      margin-bottom: 16px;
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-card);
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
 
-    .dash-top {
+    .dash-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .dash-title {
-      font-size: 18px;
-      font-weight: 800;
+      font-size: 15px;
+      font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       color: var(--text-main);
     }
 
-    .dash-top-actions {
+    .dash-controls {
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .btn-sync-icon {
-      background: #f8fafc;
+    .btn-icon-refresh {
+      background: var(--surface-subtle);
       border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 13px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text-muted);
     }
-    .btn-sync-icon:active {
-      transform: rotate(180deg) scale(0.92);
-      background: #e2e8f0;
-    }
+    .btn-icon-refresh:active { transform: rotate(180deg); }
 
-    .sync-badge {
+    .sync-pill {
       font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: #f0fdf4;
-      color: #047857;
-      border: 1px solid #bbf7d0;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--surface-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
     }
 
-    .btn-ai-trigger {
-      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-      color: #ffffff;
+    .btn-ai-compact {
+      background: var(--ai);
+      color: #fff;
       border: none;
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 5px 12px;
+      border-radius: 6px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      box-shadow: 0 2px 8px rgba(109, 40, 217, 0.25);
-      transition: transform 0.15s, opacity 0.15s;
-    }
-    .btn-ai-trigger:active {
-      transform: scale(0.96);
-      opacity: 0.9;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    @media (max-width: 480px) {
-      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .metric-card {
-      padding: 12px 14px;
-      border-radius: var(--radius-md);
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      background: #ffffff;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.15s;
-    }
-    .metric-card.has-danger {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border-color: var(--danger-border);
-    }
-    .metric-card.is-green {
-      background: var(--done-bg);
-      color: var(--done);
-      border-color: var(--done-border);
-    }
-    .metric-card.is-amber {
-      background: var(--amber-bg);
-      color: var(--amber);
-      border-color: var(--amber-border);
-    }
-    .metric-card.is-blue {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-color: #bfdbfe;
-    }
-
-    .metric-lbl {
-      font-size: 10.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.85;
-    }
-    .metric-num {
-      font-size: 22px;
-      font-weight: 800;
-      margin-top: 3px;
-      line-height: 1.1;
-    }
-
-    .report-modes {
-      display: flex;
-      gap: 6px;
-      background: #f1f5f9;
-      padding: 4px;
-      border-radius: var(--radius-md);
-    }
-    .report-mode-btn {
-      flex: 1;
-      padding: 8px 10px;
-      font-size: 12.5px;
-      font-weight: 700;
-      border-radius: 9px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .report-mode-btn.active {
-      background: #ffffff;
-      color: var(--neutral-dark);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-
-    /* БЫСТРЫЙ ВВОД */
-    .quick-add-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .quick-add-bar input {
-      flex: 1;
-      padding: 12px 16px;
-      font-size: 14.5px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      background: #ffffff;
-      box-shadow: var(--shadow-sm);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .quick-add-bar input:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
-    .btn-dark {
-      background: var(--neutral-dark);
-      color: #ffffff;
-      padding: 12px 20px;
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.15s;
-    }
-    .btn-dark:active {
-      transform: scale(0.97);
-      background: #0f172a;
-    }
-
-    /* ПАПКА ПРОЦЕССА */
-    .process-section {
-      background: #ffffff;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      margin-bottom: 14px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      transition: box-shadow 0.2s ease;
-    }
-    .process-section:hover {
-      box-shadow: var(--shadow-md);
-    }
-
-    .process-sticker-header {
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #ffffff;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.15s;
-    }
-    .process-sticker-header:hover {
-      background: #f8fafc;
-    }
-    .process-section.is-open .process-sticker-header {
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .proc-title-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15.5px;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-    .proc-folder-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .proc-arrow {
-      display: inline-block;
-      font-size: 10px;
-      color: var(--text-muted);
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .proc-arrow.collapsed {
-      transform: rotate(-90deg);
-    }
-
-    .proc-tag-count {
-      font-size: 11px;
-      font-weight: 700;
-      background: #f1f5f9;
-      color: #475569;
-      padding: 3px 9px;
-      border-radius: 20px;
-      white-space: nowrap;
-    }
-
-    .proc-actions {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .proc-btn-tool {
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 700;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      padding: 5px 9px;
-      border-radius: var(--radius-sm);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
-    }
-    .proc-btn-tool:hover {
-      background: #f1f5f9;
-      color: var(--text-main);
-    }
-    .proc-btn-tool.del {
-      color: var(--danger);
-    }
-    .proc-btn-tool.del:hover {
-      background: var(--danger-bg);
-      border-color: var(--danger-border);
-    }
-
-    .process-body {
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #f8fafc;
-    }
-    .process-body.hidden {
-      display: none !important;
-    }
-
-    /* ОБЪЕКТ / УЧАСТОК */
-    .object-card {
-      background: #ffffff;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    }
-    .object-card.completed-obj {
-      background: #fbfdfb;
-      border-color: var(--done-border);
-    }
-
-    .obj-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .obj-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-    }
-    .obj-collapse-arrow {
-      font-size: 9.5px;
-      color: var(--text-muted);
-      transition: transform 0.2s ease;
-      flex-shrink: 0;
-    }
-    .obj-collapse-arrow.collapsed {
-      transform: rotate(-90deg);
-    }
-    .obj-name {
-      font-size: 14.5px;
-      font-weight: 800;
-      color: var(--text-main);
-      overflow-wrap: break-word;
-    }
-
-    .obj-tools {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .obj-tools-left {
-      display: flex;
-      align-items: center;
-    }
-    .obj-btn-group {
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
-    .badge-percent {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 20px;
-      background: #f1f5f9;
-      color: #475569;
-      white-space: nowrap;
+    .metrics-ribbon {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
     }
-    .badge-percent.green {
-      background: var(--done-bg);
-      color: var(--done);
-      border: 1px solid var(--done-border);
+    @media (max-width: 480px) {
+      .metrics-ribbon { grid-template-columns: repeat(2, 1fr); }
     }
 
-    .btn-icon-tool {
-      background: #ffffff;
+    .kpi-cell {
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 7px;
-      font-size: 12px;
+      background: var(--surface-subtle);
+      display: flex;
+      flex-direction: column;
+    }
+    .kpi-cell.danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+    .kpi-cell.green { background: var(--done-bg); border-color: var(--done-border); color: var(--done); }
+
+    .kpi-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
+    }
+    .kpi-val {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    .format-switch {
+      display: flex;
+      background: var(--surface-subtle);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      gap: 4px;
+    }
+    .format-btn {
+      flex: 1;
+      padding: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
       cursor: pointer;
-      color: #475569;
-      line-height: 1;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .format-btn.active {
+      background: #fff;
+      color: var(--text-main);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    /* 2. СТРОКА ВВОДА НАПРАВЛЕНИЯ */
+    .input-group {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .input-group input {
+      flex: 1;
+      padding: 9px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      outline: none;
+    }
+    .input-group input:focus { border-color: var(--brand); }
+    .btn-action-dark {
+      background: var(--neutral-dark);
+      color: #fff;
+      padding: 9px 16px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* 3. НАПРАВЛЕНИЕ / ПАПКА */
+    .folder-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    .folder-header {
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+    }
+    .folder-header:hover { background: var(--surface-subtle); }
+    .folder-card.is-open .folder-header { border-bottom: 1px solid var(--border); }
+
+    .folder-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .folder-arrow {
+      font-size: 9px;
+      color: var(--text-subtle);
+      transition: transform 0.2s ease;
+    }
+    .folder-arrow.collapsed { transform: rotate(-90deg); }
+
+    .counter-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--surface-subtle);
+      color: var(--text-muted);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .folder-right-tools {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-tool-subtle {
+      color: var(--text-muted);
+      font-size: 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-tool-subtle:hover {
+      background: var(--surface-subtle);
+      border-color: var(--border);
+      color: var(--text-main);
+    }
+    .btn-tool-subtle.del:hover {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger);
+    }
+
+    .folder-content {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fafbfc;
+    }
+    .folder-content.hidden { display: none !important; }
+
+    /* 4. ОБЪЕКТЫ / УЧАСТКИ */
+    .item-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .item-card.is-complete {
+      background: #fbfdfb;
+      border-color: var(--done-border);
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .item-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+    .item-arrow {
+      font-size: 8px;
+      color: var(--text-subtle);
+      transition: transform 0.2s ease;
+    }
+    .item-arrow.collapsed { transform: rotate(-90deg); }
+    .item-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      overflow-wrap: break-word;
+    }
+
+    .item-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Компактный индикатор прогресса */
+    .progress-pill {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
+      gap: 6px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
     }
-    .btn-icon-tool:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+    .progress-pill.green {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+      color: var(--done);
     }
-    .btn-icon-tool.del {
-      color: var(--danger);
-      font-weight: 800;
+    .progress-mini-bar {
+      width: 32px;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      overflow: hidden;
     }
-    .btn-icon-tool.del:hover {
+    .progress-mini-fill {
+      height: 100%;
+      background: var(--brand);
+    }
+    .progress-pill.green .progress-mini-fill {
+      background: var(--done);
+    }
+
+    .item-actions-quiet {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .btn-quiet {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-subtle);
+      border-radius: 4px;
+      padding: 3px 5px;
+      font-size: 11.5px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-quiet:hover {
+      background: var(--surface-subtle);
+      border-color: var(--border);
+      color: var(--text-main);
+    }
+    .btn-quiet.del:hover {
       background: var(--danger-bg);
+      color: var(--danger);
       border-color: var(--danger-border);
     }
 
     @media (max-width: 600px) {
-      .obj-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-      }
-      .obj-title-wrap { width: 100%; }
-      .obj-name { font-size: 14px; line-height: 1.35; }
-      .obj-tools {
-        width: 100%;
+      .item-header { flex-direction: column; align-items: stretch; gap: 6px; }
+      .item-meta-right {
         justify-content: space-between;
-        padding-top: 5px;
-        border-top: 1px dashed var(--border-subtle);
+        padding-top: 4px;
+        border-top: 1px dashed var(--border);
       }
-      .btn-icon-tool { padding: 4px 7px; font-size: 12px; }
-      .proc-title-group { font-size: 15px; gap: 6px; flex-wrap: wrap; }
     }
 
-    .progress-bar-bg {
-      width: 100%;
-      height: 4px;
-      background: #f1f5f9;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--brand);
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
-    .progress-bar-fill.done { background: var(--done); }
-
-    .obj-body {
+    .item-body {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 4px;
+      gap: 6px;
       padding-top: 6px;
       border-top: 1px dashed var(--border);
     }
-    .obj-body.hidden {
-      display: none !important;
-    }
+    .item-body.hidden { display: none !important; }
 
-    /* ШАГИ */
-    .steps-list {
+    /* 5. ЭТАПЫ РАБОТ */
+    .step-unit {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-    }
-
-    .step-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 10px 12px;
+      gap: 4px;
+      padding: 8px 10px;
       border-radius: var(--radius-sm);
-      background: #f8fafc;
+      background: var(--surface-subtle);
       border: 1px solid var(--border);
-      transition: background 0.15s, border-color 0.15s;
     }
-    .step-item.is-done {
-      background: var(--done-bg);
-      border-color: var(--done-border);
-    }
-    .step-item.has-blocker {
-      background: var(--danger-bg);
-      border-color: var(--danger-border);
-    }
+    .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
+    .step-unit.blocked { background: var(--danger-bg); border-color: var(--danger-border); }
 
-    .step-header-line {
+    .step-row-top {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      width: 100%;
+      gap: 8px;
     }
-    .step-chk {
-      width: 18px;
-      height: 18px;
+    .step-check {
+      width: 17px;
+      height: 17px;
       cursor: pointer;
       accent-color: var(--done);
-      margin-top: 1px;
-      flex-shrink: 0;
+      margin-top: 2px;
     }
-    .step-title {
-      font-size: 14px;
+    .step-text {
+      font-size: 13.5px;
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer;
-      line-height: 1.35;
       flex: 1;
-      overflow-wrap: break-word;
     }
-    .step-item.is-done .step-title {
+    .step-unit.done .step-text {
       text-decoration: line-through;
       color: var(--done);
       opacity: 0.75;
     }
 
-    .step-footer-line {
+    .step-row-bottom {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-left: 28px;
+      padding-left: 25px;
     }
-
-    .step-actions-left {
+    .step-chips {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
     }
 
-    .step-date-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #ffffff;
+    .btn-date-chip {
+      background: #fff;
       border: 1px solid var(--border);
-      color: #334155;
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .step-date-btn:active { transform: scale(0.96); }
-    .step-date-btn.overdue {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #991b1b;
-    }
-    .step-date-btn.urgent {
-      background: #fef3c7;
-      border-color: #fde68a;
-      color: #92400e;
-    }
-    .step-date-btn.done {
-      background: #ffffff;
-      border-color: var(--done-border);
-      color: var(--done);
-    }
-    .step-date-btn.empty {
-      color: var(--brand);
-      border-style: dashed;
-      border-color: var(--brand-border);
-      background: #eff6ff;
-    }
-
-    .btn-blocker-trigger {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 8px;
+      padding: 2px 7px;
+      border-radius: 4px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      color: #64748b;
-      white-space: nowrap;
-      transition: all 0.15s;
+      color: var(--text-muted);
     }
-    .btn-blocker-trigger:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
-    .btn-blocker-trigger.active {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #991b1b;
-      font-weight: 700;
-    }
+    .btn-date-chip.overdue { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .btn-date-chip.urgent { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+    .btn-date-chip.done { border-color: var(--done-border); color: var(--done); }
 
-    .step-updated-badge {
+    .btn-risk-chip {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .btn-risk-chip.active { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+
+    .step-timestamp {
       font-size: 10px;
       color: var(--text-subtle);
-      font-weight: 500;
-      letter-spacing: -0.2px;
-      white-space: nowrap;
-      user-select: none;
-      padding-left: 2px;
     }
 
-    .mini-del {
-      background: none;
-      border: none;
-      color: var(--danger);
-      font-size: 13px;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 800;
-      line-height: 1;
-    }
-    .mini-del:hover {
-      background: var(--danger-bg);
-    }
-
-    /* БЛОК ХРОНОЛОГИИ */
-    .blocker-container {
+    /* ЛЕНТА ХРОНОЛОГИИ ЗАМЕЧАНИЙ */
+    .timeline-log {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      margin-left: 28px;
+      gap: 3px;
+      margin-left: 25px;
       margin-top: 2px;
     }
-    .blocker-banner-row {
+    .timeline-entry {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 6px;
-      background: #ffffff;
-      border: 1px solid #fca5a5;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #fff;
+      border: 1px solid #fecaca;
+      font-size: 11.5px;
       color: #991b1b;
       font-weight: 600;
     }
-    .blocker-banner-row.info-row {
-      border-color: #cbd5e1;
-      color: #475569;
-      background: #f8fafc;
-    }
-    .blocker-banner-row span.reason-text { flex: 1; cursor: pointer; }
-    .blocker-clear-btn { background: none; border: none; color: #991b1b; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; white-space: nowrap; }
-
-    .all-done-banner {
-      background: var(--done-bg);
-      border: 1px dashed var(--done-border);
-      border-radius: var(--radius-sm);
-      padding: 9px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .all-done-banner span {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--done);
-    }
-    .btn-finish-work {
-      background: var(--done);
-      color: #ffffff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .step-add-toggle-btn {
-      background: #ffffff;
-      border: 1px dashed #cbd5e1;
+    .timeline-entry.resolved {
+      border-color: var(--border);
       color: var(--text-muted);
-      border-radius: var(--radius-sm);
-      padding: 7px;
-      font-size: 12px;
+      background: var(--surface-subtle);
+    }
+    .btn-clear-inline {
+      background: none;
+      border: none;
+      color: #991b1b;
+      font-size: 10.5px;
       font-weight: 700;
       cursor: pointer;
-      text-align: center;
-      margin-top: 2px;
-      transition: background 0.15s, color 0.15s;
-    }
-    .step-add-toggle-btn:hover {
-      background: #f8fafc;
-      color: var(--text-main);
     }
 
-    .step-fast-add {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 2px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .template-chips-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-bottom: 2px;
-    }
-    .tpl-chip {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .tpl-chip:hover {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-    .tpl-chip.preset-all {
-      background: var(--done-bg);
-      border-color: var(--done-border);
-      color: var(--done);
-      font-weight: 700;
-    }
-
-    .sfa-row-1 {
+    /* СЛУЖЕБНЫЙ БЛОК ДОБАВЛЕНИЯ */
+    .folder-footer-actions {
       display: flex;
       gap: 6px;
+      margin-top: 2px;
     }
-    .sfa-row-1 input[type="text"] {
+    .btn-add-obj-subtle {
       flex: 1;
-      padding: 8px 10px;
-      font-size: 13px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      outline: none;
-    }
-    .sfa-row-1 input[type="date"] {
-      width: 130px;
-      padding: 7px 8px;
-      font-size: 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      outline: none;
       background: #fff;
-    }
-
-    .sfa-row-2 {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-add-step {
-      background: var(--neutral-dark);
-      color: #ffffff;
-      border: none;
-      padding: 7px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .proc-add-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .btn-new-obj {
-      flex: 1;
-      background: #ffffff;
-      color: var(--neutral-dark);
-      border: 1px dashed #94a3b8;
-      padding: 10px 8px;
+      border: 1px dashed var(--border-dark);
+      padding: 8px;
       border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      transition: background 0.15s;
-    }
-    .btn-new-obj:hover {
-      background: #f8fafc;
-    }
-    .btn-new-obj.template {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-
-    .archive-section {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-    }
-    .archive-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .archive-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .archive-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 8px;
-      background: #f8fafc;
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      font-size: 13px;
-    }
-    .btn-restore {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    .backup-footer {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 24px;
-      margin-bottom: 20px;
-    }
-    .backup-btn {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 7px 14px;
-      border-radius: var(--radius-md);
       font-size: 12px;
       font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.15s;
+      text-align: center;
     }
-    .backup-btn:hover {
-      background: #f8fafc;
-      color: var(--text-main);
-    }
+    .btn-add-obj-subtle:hover { background: #fff; border-color: var(--brand); color: var(--brand); }
 
-    /* ПРЕМИАЛЬНАЯ СТЕКЛЯННАЯ ПАНЕЛЬ ДЕЙСТВИЙ */
-    .floating-action-bar {
+    /* 6. ПЛАВАЮЩАЯ ПАНЕЛЬ ДЕЙСТВИЙ */
+    .floating-bar {
       position: fixed;
       bottom: 12px;
       left: 12px;
       right: 12px;
-      max-width: 836px;
+      max-width: 816px;
       margin: 0 auto;
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      border-radius: 20px;
-      padding: 8px 10px;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
       z-index: 100;
     }
-
     .fab-btn {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 11px 8px;
-      font-size: 13.5px;
+      padding: 10px;
+      font-size: 13px;
       font-weight: 700;
-      border-radius: 14px;
+      border-radius: 8px;
       border: none;
+      color: #fff;
       cursor: pointer;
-      color: #ffffff;
-      transition: transform 0.15s, opacity 0.15s;
     }
-    .fab-btn:active {
-      transform: scale(0.97);
-    }
-    .fab-btn.copy { background: linear-gradient(135deg, #10b981, #059669); }
-    .fab-btn.excel { background: linear-gradient(135deg, #059669, #047857); }
-    .fab-btn.send { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .fab-btn.copy { background: #059669; }
+    .fab-btn.excel { background: #0284c7; }
+    .fab-btn.send { background: #1e293b; }
 
-    /* МОДАЛЬНЫЕ ОКНА */
+    /* 7. МОДАЛЬНЫЕ ОКНА */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.5);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
       display: none;
       justify-content: center;
       align-items: flex-end;
       z-index: 1000;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(3px);
     }
-    @media (min-width: 600px) {
-      .modal-overlay { align-items: center; }
-    }
-
-    .modal-sheet {
-      background: #ffffff;
+    @media (min-width: 600px) { .modal-overlay { align-items: center; } }
+    .modal-box {
+      background: #fff;
       width: 100%;
-      max-width: 520px;
-      border-radius: 20px 20px 0 0;
-      padding: 20px;
-      box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+      max-width: 480px;
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      max-height: 88vh;
+      gap: 10px;
+      max-height: 85vh;
       overflow-y: auto;
     }
-    @media (min-width: 600px) {
-      .modal-sheet { border-radius: 20px; }
-    }
+    @media (min-width: 600px) { .modal-box { border-radius: 16px; } }
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .modal-close {
-      background: #f1f5f9;
+    .modal-top { display: flex; justify-content: space-between; align-items: center; }
+    .modal-head-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
+    .modal-x {
+      background: var(--surface-subtle);
       border: none;
-      width: 28px;
-      height: 28px;
+      width: 26px; height: 26px;
       border-radius: 50%;
-      font-size: 14px;
-      color: #64748b;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-step-name {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: -6px;
     }
 
-    .modal-preset-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .preset-btn {
-      text-align: left;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 600;
-      color: #1e293b;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.15s;
-    }
-    .preset-btn:hover {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-
-    .modal-input {
+    .modal-input-field {
       width: 100%;
-      padding: 11px 12px;
+      padding: 9px 11px;
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
+      border-radius: 6px;
+      font-size: 13.5px;
       outline: none;
     }
-    .modal-input:focus { border-color: var(--brand); }
+    .modal-input-field:focus { border-color: var(--brand); }
 
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .modal-btn-primary {
-      flex: 1;
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .modal-btn-danger {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .modal-actions-row { display: flex; gap: 6px; margin-top: 4px; }
+    .btn-m-primary { flex: 1; background: var(--brand); color: #fff; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-m-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 
-    .ai-output-box {
-      background: #f8fafc;
+    .preset-list { display: flex; flex-direction: column; gap: 4px; }
+    .preset-btn {
+      text-align: left;
+      background: var(--surface-subtle);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      font-size: 13px;
-      line-height: 1.55;
-      color: #1e293b;
-      white-space: pre-wrap;
-      max-height: 300px;
-      overflow-y: auto;
-      min-height: 120px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
     }
+    .preset-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
 
-    .toast {
+    .toast-msg {
       position: fixed;
-      top: 16px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
       background: #0f172a;
-      color: #ffffff;
-      padding: 8px 18px;
+      color: #fff;
+      padding: 7px 16px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       display: none;
       z-index: 2000;
-      white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-
-    .history-log-box {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 150px;
-      overflow-y: auto;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      padding: 8px;
-      border-radius: var(--radius-sm);
-    }
-    .history-log-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #334155;
-      background: #ffffff;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border-subtle);
-    }
-    .history-log-item .hist-text { flex: 1; }
-    .history-log-item .hist-del { color: var(--danger); background: none; border: none; cursor: pointer; font-weight: 800; font-size: 12px; padding: 2px 4px; }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    <div class="dashboard-card">
-      <div class="dash-top">
+    <!-- ДАШБОРД -->
+    <div class="dashboard-panel">
+      <div class="dash-header">
         <div class="dash-title">
           <span>📊</span> Мониторинг проектов
         </div>
-        <div class="dash-top-actions">
-          <button class="btn-sync-icon" onclick="manualSync()" title="Синхронизировать данные">🔄</button>
-          <button class="btn-ai-trigger" onclick="openAiModal()">✨ AI-Отчет</button>
-          <div class="sync-badge" id="syncTag">● Загрузка...</div>
+        <div class="dash-controls">
+          <button class="btn-icon-refresh" onclick="manualSync()" title="Синхронизировать">🔄</button>
+          <button class="btn-ai-compact" onclick="openAiModal()">✨ AI-Отчет</button>
+          <div class="sync-pill" id="syncTag">● Загрузка</div>
         </div>
       </div>
 
-      <div class="metrics-grid">
-        <div class="metric-card" id="mBlockersCard">
-          <span class="metric-lbl">Задержки</span>
-          <span class="metric-num" id="mBlockers">0</span>
+      <div class="metrics-ribbon">
+        <div class="kpi-cell danger" id="kpiBlockersBox">
+          <span class="kpi-title">Задержки</span>
+          <span class="kpi-val" id="mBlockers">0</span>
         </div>
-        <div class="metric-card is-green">
-          <span class="metric-lbl">Сделано</span>
-          <span class="metric-num" id="mDone">0</span>
+        <div class="kpi-cell green">
+          <span class="kpi-title">Сделано</span>
+          <span class="kpi-val" id="mDone">0</span>
         </div>
-        <div class="metric-card is-amber">
-          <span class="metric-lbl">В работе</span>
-          <span class="metric-num" id="mPlan">0</span>
+        <div class="kpi-cell">
+          <span class="kpi-title">В работе</span>
+          <span class="kpi-val" id="mPlan">0</span>
         </div>
-        <div class="metric-card is-blue">
-          <span class="metric-lbl">Объектов</span>
-          <span class="metric-num" id="mTotal">0</span>
+        <div class="kpi-cell">
+          <span class="kpi-title">Объектов</span>
+          <span class="kpi-val" id="mTotal">0</span>
         </div>
       </div>
 
-      <div class="report-modes">
-        <button class="report-mode-btn active" id="modeExecutive" onclick="setReportMode('executive')">
+      <div class="format-switch">
+        <button class="format-btn active" id="modeExecutive" onclick="setReportMode('executive')">
           ⚡ Сводка за сегодня
         </button>
-        <button class="report-mode-btn" id="modeFull" onclick="setReportMode('full')">
-          📋 Полный отчет (Таблица)
+        <button class="format-btn" id="modeFull" onclick="setReportMode('full')">
+          📋 Полный отчет
         </button>
       </div>
     </div>
 
-    <div class="quick-add-bar">
-      <input type="text" id="newProcInput" placeholder="Новое направление (напр. Сервитуты)..." onkeydown="if(event.key==='Enter') addProcess()">
-      <button class="btn-dark" onclick="addProcess()">+ Процесс</button>
+    <!-- ВВОД НАПРАВЛЕНИЯ -->
+    <div class="input-group">
+      <input type="text" id="newProcInput" placeholder="Новое направление..." onkeydown="if(event.key==='Enter') addProcess()">
+      <button class="btn-action-dark" onclick="addProcess()">+ Процесс</button>
     </div>
 
+    <!-- СПИСОК ПРОЦЕССОВ -->
     <div id="processesRoot"></div>
 
-    <div class="backup-footer">
-      <button class="backup-btn" onclick="exportBackup()">📥 Экспорт бэкапа (копия)</button>
-      <button class="backup-btn" onclick="importBackup()">📤 Восстановить из файла</button>
+    <!-- БЭКАП В ПОДВАЛЕ -->
+    <div style="display:flex; justify-content:center; gap:8px; margin-top:20px;">
+      <button class="btn-tool-subtle" style="border-color:var(--border);" onclick="exportBackup()">📥 Копия данных</button>
+      <button class="btn-tool-subtle" style="border-color:var(--border);" onclick="importBackup()">📤 Восстановить</button>
     </div>
   </div>
 
-  <div class="floating-action-bar">
-    <button class="fab-btn copy" onclick="copyReport()">
-      📋 Текст
-    </button>
-    <button class="fab-btn excel" onclick="exportToExcel()">
-      📊 Excel
-    </button>
-    <button class="fab-btn send" onclick="shareToTelegram()">
-      ✈️ Telegram
-    </button>
+  <!-- НИЖНЯЯ ПАНЕЛЬ ДЕЙСТВИЙ -->
+  <div class="floating-bar">
+    <button class="fab-btn copy" onclick="copyReport()">📋 Скопировать</button>
+    <button class="fab-btn excel" onclick="exportToExcel()">📊 Скачать Excel</button>
+    <button class="fab-btn send" onclick="shareToTelegram()">✈️ В Telegram</button>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: AI-ОТЧЕТ И НАСТРОЙКИ КЛЮЧА -->
+  <!-- МОДАЛЬНОЕ ОКНО AI -->
   <div class="modal-overlay" id="aiModalOverlay" onclick="closeAiModal(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title" style="color:var(--ai-purple); display:flex; align-items:center; gap:6px;">
-          <span>✨</span> AI-Генератор отчета
-        </div>
-        <button class="modal-close" onclick="closeAiModal()">✕</button>
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" style="color:var(--ai);">✨ AI-Генератор отчета</div>
+        <button class="modal-x" onclick="closeAiModal()">✕</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:12px;">
-        <div>
-          <label style="font-size:12px; font-weight:700; color:var(--text-muted);">API-ключ Gemini (Google AI Studio):</label>
-          <div style="display:flex; gap:6px; margin-top:4px;">
-            <input type="password" id="geminiApiKeyInput" class="modal-input" placeholder="AIzaSy...">
-            <button class="btn-dark" style="padding: 10px 14px; font-size:13px;" onclick="saveGeminiApiKey()">Сохранить</button>
-            <button class="modal-btn-danger" style="padding: 10px 14px; font-size:13px; font-weight:800;" onclick="clearGeminiApiKey()" title="Очистить ключ">✕</button>
-          </div>
-        </div>
-
-        <hr style="border:none; border-top:1px solid var(--border);">
-
-        <div>
-          <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
-            Создать лаконичный и красивый отчет для руководства с полной хронологией.
-          </p>
-          <button class="modal-btn-primary" style="background:var(--ai-purple);" onclick="runAiAnalytics()">
-            ✨ Сгенерировать чистый AI-отчет
-          </button>
-        </div>
-
-        <div class="ai-output-box" id="aiOutput-analytics">Результат отчета появится здесь...</div>
-
-        <div style="display:flex; gap:6px;">
-          <button class="btn-dark" style="background:#10b981; flex:1;" onclick="copyAiOutput('aiOutput-analytics')">📋 Скопировать текст</button>
-          <button class="modal-btn-danger" style="padding:9px 14px; font-weight:800;" onclick="clearAiReport()" title="Очистить отчет">✕</button>
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ключ Gemini API:</label>
+        <div style="display:flex; gap:6px; margin-top:3px;">
+          <input type="password" id="geminiApiKeyInput" class="modal-input-field" placeholder="AIzaSy...">
+          <button class="btn-action-dark" onclick="saveGeminiApiKey()">ОК</button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
-  <div class="modal-overlay" id="confirmDeleteOverlay" onclick="closeConfirmModal(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:400px;">
-      <div class="modal-header">
-        <div class="modal-title" style="color:var(--danger);">🗑 Подтверждение удаления</div>
-        <button class="modal-close" onclick="closeConfirmModal()">✕</button>
+      <button class="btn-m-primary" style="background:var(--ai);" onclick="runAiAnalytics()">
+        Сгенерировать сводку
+      </button>
+
+      <div style="background:var(--surface-subtle); border:1px solid var(--border); padding:10px; border-radius:6px; font-size:12.5px; line-height:1.45; max-height:220px; overflow-y:auto; white-space:pre-wrap;" id="aiOutput-analytics">
+        Результат появится здесь...
       </div>
-      <p id="confirmDeleteMessage" style="font-size:14px; color:#334155; margin:6px 0;">Вы уверены, что хотите удалить?</p>
-      <div class="modal-actions">
-        <button class="modal-btn-danger" id="confirmDeleteBtn" style="flex:1;">Да, удалить</button>
-        <button class="btn-dark" style="background:#64748b; padding:10px 16px;" onclick="closeConfirmModal()">Отмена</button>
-      </div>
+
+      <button class="btn-action-dark" style="background:#059669;" onclick="copyAiOutput('aiOutput-analytics')">
+        Скопировать результат
+      </button>
     </div>
   </div>
 
   <!-- МОДАЛЬНОЕ ОКНО ДАТЫ -->
   <div class="modal-overlay" id="dateModalOverlay" onclick="closeDateModal(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">📅 Выбрать срок этапа</div>
-        <button class="modal-close" onclick="closeDateModal()">✕</button>
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title">📅 Выбор срока</div>
+        <button class="modal-x" onclick="closeDateModal()">✕</button>
       </div>
-      <div class="modal-step-name" id="dateModalStepTitle">Этап...</div>
+      <div style="font-size:12px; color:var(--text-muted);" id="dateModalStepTitle">Этап...</div>
 
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Точная дата по календарю:</label>
-        <input type="date" id="modalDatePickerInput" class="modal-input" style="font-size:16px;">
-      </div>
+      <input type="date" id="modalDatePickerInput" class="modal-input-field">
 
-      <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Быстрый выбор:</label>
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
-          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(0)">Сегодня</button>
-          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(1)">Завтра</button>
-          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(3)">+3 дня</button>
-          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(7)">+7 дней</button>
-          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(15)">+15 дней</button>
-          <button type="button" class="preset-btn" style="justify-content:center;" onclick="setModalDateOffset(30)">+1 месяц</button>
-        </div>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px;">
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(0)">Сегодня</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(1)">Завтра</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(3)">+3 дня</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(7)">+7 дней</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(15)">+15 дней</button>
+        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(30)">+1 мес</button>
       </div>
 
-      <div class="modal-actions">
-        <button class="modal-btn-primary" onclick="saveDateFromModal()">Сохранить срок</button>
-        <button class="modal-btn-danger" onclick="clearDateFromModal()">Без даты</button>
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="saveDateFromModal()">Сохранить</button>
+        <button class="btn-m-danger" onclick="clearDateFromModal()">Без даты</button>
       </div>
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ХРОНОЛОГИЯ ЗАДЕРЖЕК И ИЗМЕНЕНИЙ -->
+  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">🚨 Хронология задержек и изменений</div>
-        <button class="modal-close" onclick="closeRiskModal()">✕</button>
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" style="color:var(--danger);">🚨 Хронология замечаний</div>
+        <button class="modal-x" onclick="closeRiskModal()">✕</button>
       </div>
-      <div class="modal-step-name" id="riskModalStepTitle">Этап...</div>
+      <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
 
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Сохраненная история:</label>
-        <div class="history-log-box" id="modalHistoryLogBox"></div>
-      </div>
+      <div style="display:flex; flex-direction:column; gap:4px; max-height:140px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
 
-      <div class="modal-preset-grid">
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Оплата не идет у подрядчика')">
-          💳 Оплата не идет у подрядчика
-        </button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('На согласовании в акимате / МИО')">
-          🏛 На согласовании в акимате / МИО
-        </button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Замечания НАО / Гипрозем')">
-          📐 Замечания НАО / Гипрозем
-        </button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Спор / согласование со смежниками')">
-          🤝 Спор / согласование со смежниками
-        </button>
-        <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание подписания постановления')">
-          📜 Ожидание подписания постановления
-        </button>
+      <div class="preset-list">
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Оплата не идет у подрядчика')">💳 Оплата не идет у подрядчика</button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('На согласовании в акимате / МИО')">🏛 На согласовании в акимате / МИО</button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Замечания НАО / Гипрозем')">📐 Замечания НАО / Гипрозем</button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Спор со смежниками')">🤝 Спор со смежниками</button>
+        <button type="button" class="preset-btn" onclick="selectRiskPreset('Ожидание подписания постановления')">📜 Ожидание постановления</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Новая запись / изменение:</label>
-        <input type="text" id="customRiskInput" class="modal-input" placeholder="Например: Загрузили повторно 02.10.2026...">
-      </div>
+      <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Новый статус / замечание...">
 
-      <div class="modal-actions">
-        <button class="modal-btn-primary" onclick="appendRiskFromModal()">➕ Добавить запись</button>
-        <button class="modal-btn-danger" id="riskClearBtn" onclick="clearRiskFromModal()" title="Снять статус активного блокера">Снять блокер</button>
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="appendRiskFromModal()">➕ Добавить запись</button>
+        <button class="btn-m-danger" id="riskClearBtn" onclick="clearRiskFromModal()">Снять блокер</button>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toastMsg">Отчет скопирован!</div>
+  <div class="toast-msg" id="toastMsg">Готово!</div>
 
   <script>
     const tg = window.Telegram?.WebApp;
@@ -1373,7 +847,6 @@
 
     let reportMode = 'executive';
     let activeModalTarget = { procId: null, objId: null, stepId: null };
-    let deleteCallbackAction = null;
     let currentRevision = 0;
     let isSaving = false;
 
@@ -1420,7 +893,7 @@
 
     function analyzeDeadline(dateStr, isDone) {
       if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
-      if (!dateStr) return { cls: 'empty', text: '📅 Выбрать дату' };
+      if (!dateStr) return { cls: 'empty', text: '📅 Срок' };
 
       const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
       if (!m) return { cls: '', text: dateStr };
@@ -1431,9 +904,9 @@
       target.setHours(0,0,0,0);
 
       const diff = Math.round((target - today) / 86400000);
-      if (diff < 0) return { cls: 'overdue', text: `🔴 Просрочено (${dateStr})` };
-      if (diff === 0) return { cls: 'urgent', text: `🟠 Сегодня (${dateStr})` };
-      if (diff <= 2) return { cls: 'urgent', text: `🟡 ${diff} дн. (${dateStr})` };
+      if (diff < 0) return { cls: 'overdue', text: `🔴 ${dateStr}` };
+      if (diff === 0) return { cls: 'urgent', text: `🟠 Сегодня` };
+      if (diff <= 2) return { cls: 'urgent', text: `🟡 ${diff} дн.` };
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
@@ -1466,11 +939,8 @@
 
     async function loadFromCloud() {
       if (!tg?.CloudStorage) return null;
-
       const countStr = await tgGetItemAsync('c_count');
-      if (!countStr) {
-        return await tgGetItemAsync(STORAGE_KEY);
-      }
+      if (!countStr) return await tgGetItemAsync(STORAGE_KEY);
 
       const count = parseInt(countStr, 10);
       if (isNaN(count) || count <= 0) return null;
@@ -1486,39 +956,15 @@
 
     async function saveToCloud(jsonStr) {
       if (!tg?.CloudStorage) return false;
-
       const chunks = [];
       for (let i = 0; i < jsonStr.length; i += CHUNK_SIZE) {
         chunks.push(jsonStr.slice(i, i + CHUNK_SIZE));
       }
-
       for (let i = 0; i < chunks.length; i++) {
         const ok = await tgSetItemAsync(`c_${i}`, chunks[i]);
         if (!ok) return false;
       }
-      const countOk = await tgSetItemAsync('c_count', String(chunks.length));
-      return countOk;
-    }
-
-    async function loadData() {
-      let localState = null;
-
-      const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
-      if (rawLocal) {
-        const res = parseRaw(rawLocal);
-        if (res && res.data) {
-          currentRevision = res.rev || 0;
-          localState = res.data;
-        }
-      }
-
-      if (localState && localState.length > 0) {
-        state = normalizeStateHistory(localState);
-        render();
-        updateSyncTag(`● v${currentRevision}`);
-      }
-
-      await syncWithCloud();
+      return await tgSetItemAsync('c_count', String(chunks.length));
     }
 
     function normalizeStateHistory(arr) {
@@ -1539,10 +985,30 @@
       }));
     }
 
+    async function loadData() {
+      let localState = null;
+      const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
+      if (rawLocal) {
+        const res = parseRaw(rawLocal);
+        if (res && res.data) {
+          currentRevision = res.rev || 0;
+          localState = res.data;
+        }
+      }
+
+      if (localState && localState.length > 0) {
+        state = normalizeStateHistory(localState);
+        render();
+        updateSyncTag(`● v${currentRevision}`);
+      }
+
+      await syncWithCloud();
+    }
+
     async function syncWithCloud(forceToast = false) {
       const cloudRaw = await loadFromCloud();
       if (!cloudRaw) {
-        updateSyncTag(`● Готово (v${currentRevision})`);
+        updateSyncTag(`● v${currentRevision}`);
         return;
       }
 
@@ -1555,24 +1021,22 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ rev: currentRevision, updatedAt: res.ts, data: state }));
           localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
           render();
-          showToast(`Синхронизировано (v${currentRevision})!`);
+          showToast(`Синхронизировано (v${currentRevision})`);
         } else if (forceToast) {
-          showToast("У вас уже актуальная версия!");
+          showToast("Версия актуальна");
         }
       }
       updateSyncTag(`● v${currentRevision}`);
     }
 
     async function manualSync() {
-      haptic();
-      updateSyncTag(`⏳ Синхронизация...`);
+      updateSyncTag(`⏳...`);
       await syncWithCloud(true);
     }
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') syncWithCloud();
     });
-    window.addEventListener('focus', () => syncWithCloud());
 
     async function saveData() {
       if (isSaving) return;
@@ -1586,14 +1050,10 @@
       localStorage.setItem(STORAGE_KEY, json);
       localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
 
-      updateSyncTag(`⏳ Сохранение v${currentRevision}...`);
-      const ok = await saveToCloud(json);
-      if (ok) {
-        updateSyncTag(`● Сохранено (v${currentRevision})`);
-      } else {
-        updateSyncTag(`⚠️ Ошибка облака (v${currentRevision})`);
-      }
-      
+      updateSyncTag(`⏳ v${currentRevision}`);
+      await saveToCloud(json);
+      updateSyncTag(`● v${currentRevision}`);
+
       isSaving = false;
       render();
     }
@@ -1603,47 +1063,11 @@
       if (tag) tag.textContent = text;
     }
 
-    function haptic() {
-      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-    }
-
     function setReportMode(m) {
       reportMode = m;
       document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
       document.getElementById('modeFull').classList.toggle('active', m === 'full');
-      showToast(m === 'executive' ? "Формат: Сводка за сегодня" : "Формат: Полный отчет (Таблица)");
-    }
-
-    function requestDelete(message, onConfirm) {
-      if (tg?.showConfirm) {
-        tg.showConfirm(message, (ok) => {
-          if (ok) {
-            onConfirm();
-            haptic();
-            saveData();
-          }
-        });
-      } else {
-        document.getElementById('confirmDeleteMessage').textContent = message;
-        deleteCallbackAction = onConfirm;
-        document.getElementById('confirmDeleteOverlay').style.display = 'flex';
-        haptic();
-      }
-    }
-
-    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-      if (deleteCallbackAction) {
-        deleteCallbackAction();
-        haptic();
-        saveData();
-      }
-      closeConfirmModal();
-    });
-
-    function closeConfirmModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('confirmDeleteOverlay').style.display = 'none';
-      deleteCallbackAction = null;
+      showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
     }
 
     function addProcess() {
@@ -1660,9 +1084,8 @@
       });
 
       input.value = '';
-      haptic();
       saveData();
-      showToast("Направление добавлено!");
+      showToast("Направление добавлено");
     }
 
     function editProcessTitle(procId) {
@@ -1671,27 +1094,24 @@
       const newTitle = prompt("Название направления:", p.title);
       if (newTitle && newTitle.trim()) {
         p.title = newTitle.trim();
-        haptic();
         saveData();
-        showToast("Направление обновлено!");
       }
     }
 
     function deleteProcess(procId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
-
-      requestDelete(`Удалить направление «${p.title}» со всеми объектами?`, () => {
+      if (confirm(`Удалить направление «${p.title}» со всеми объектами?`)) {
         state = state.filter(x => x.id !== procId);
-        showToast("Направление удалено");
-      });
+        saveData();
+        showToast("Удалено");
+      }
     }
 
     function toggleProcessCollapse(procId) {
       const p = state.find(x => x.id === procId);
       if (p) {
         p.collapsed = !p.collapsed;
-        haptic();
         render();
       }
     }
@@ -1701,9 +1121,7 @@
       if (!p) return;
       const obj = p.objects.find(o => o.id === objId);
       if (!obj) return;
-
       obj.collapsed = !obj.collapsed;
-      haptic();
       render();
     }
 
@@ -1717,7 +1135,6 @@
 
       const item = p.objects.splice(idx, 1)[0];
       p.objects.splice(newIdx, 0, item);
-      haptic();
       saveData();
     }
 
@@ -1726,52 +1143,53 @@
       const obj = p?.objects.find(o => o.id === objId);
       if (!p || !obj) return;
 
-      requestDelete(`Удалить объект «${obj.title}» навсегда?`, () => {
+      if (confirm(`Удалить объект «${obj.title}»?`)) {
         p.objects = p.objects.filter(o => o.id !== objId);
-        showToast("Объект удален");
-      });
-    }
-
-    function toggleAddStepForm(procId, objId) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      obj.showAddForm = !obj.showAddForm;
-      render();
-    }
-
-    function archiveObject(procId, objId) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      obj.archived = true;
-      showToast(`«${obj.title}» в архиве!`);
-      haptic();
-      saveData();
-    }
-
-    function restoreObject(procId, objId) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      obj.archived = false;
-      showToast(`«${obj.title}» возвращен в работу`);
-      haptic();
-      saveData();
-    }
-
-    function toggleArchiveView(procId) {
-      const p = state.find(x => x.id === procId);
-      if (p) {
-        p.showArchive = !p.showArchive;
-        render();
+        saveData();
+        showToast("Удалено");
       }
+    }
+
+    function editObjectTitle(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const obj = p.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      const newTitle = prompt("Название объекта:", obj.title);
+      if (newTitle && newTitle.trim()) {
+        obj.title = newTitle.trim();
+        saveData();
+      }
+    }
+
+    function cloneObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      if (!p) return;
+      const src = p.objects.find(o => o.id === objId);
+      if (!src) return;
+
+      const newTitle = prompt("Имя для копии:", src.title + " (Копия)");
+      if (!newTitle || !newTitle.trim()) return;
+
+      const nowTs = getTimestampStr();
+      p.objects.push({
+        id: Date.now(),
+        title: newTitle.trim(),
+        archived: false,
+        collapsed: false,
+        steps: (src.steps || []).map((s, i) => ({
+          id: Date.now() + i + 1,
+          text: s.text,
+          date: s.date,
+          done: false,
+          blocker: null,
+          history: [],
+          updatedAt: nowTs
+        }))
+      });
+      saveData();
+      showToast("Скопировано");
     }
 
     function openDateModal(procId, objId, stepId) {
@@ -1784,7 +1202,6 @@
       document.getElementById('dateModalStepTitle').textContent = `${obj.title} → ${step.text}`;
       document.getElementById('modalDatePickerInput').value = displayToISO(step.date) || getTodayISO();
       document.getElementById('dateModalOverlay').style.display = 'flex';
-      haptic();
     }
 
     function closeDateModal(e) {
@@ -1796,7 +1213,6 @@
       const d = new Date();
       d.setDate(d.getDate() + days);
       document.getElementById('modalDatePickerInput').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      haptic();
     }
 
     function saveDateFromModal() {
@@ -1810,8 +1226,6 @@
       step.date = iso ? isoToDisplay(iso) : '';
       step.updatedAt = getTimestampStr();
       closeDateModal();
-      showToast("Срок сохранен!");
-      haptic();
       saveData();
     }
 
@@ -1825,8 +1239,6 @@
       step.date = '';
       step.updatedAt = getTimestampStr();
       closeDateModal();
-      showToast("Срок очищен");
-      haptic();
       saveData();
     }
 
@@ -1836,16 +1248,16 @@
       const list = step.history || [];
 
       if (list.length === 0) {
-        box.innerHTML = `<div style="font-size:12px; color:#94a3b8; text-align:center; padding:6px;">Записей пока нет</div>`;
+        box.innerHTML = `<div style="font-size:11.5px; color:#94a3b8; text-align:center; padding:6px;">Замечаний не зафиксировано</div>`;
         return;
       }
 
       list.forEach((item, idx) => {
         const row = document.createElement('div');
-        row.className = 'history-log-item';
+        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:4px 8px; border-radius:4px; font-size:11.5px; border:1px solid #e2e8f0;";
         row.innerHTML = `
-          <span class="hist-text"><b>${escapeHtml(item.date)}:</b> ${escapeHtml(item.text)}</span>
-          <button class="hist-del" onclick="deleteHistoryItem(${idx})" title="Удалить эту запись">✕</button>
+          <span><b>[${escapeHtml(item.date)}]:</b> ${escapeHtml(item.text)}</span>
+          <button style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:700; padding:2px;" onclick="deleteHistoryItem(${idx})">✕</button>
         `;
         box.appendChild(row);
       });
@@ -1859,11 +1271,7 @@
       if (!step || !step.history) return;
 
       step.history.splice(idx, 1);
-      if (step.history.length === 0) {
-        step.blocker = null;
-      } else {
-        step.blocker = step.history[step.history.length - 1].text;
-      }
+      step.blocker = step.history.length > 0 ? step.history[step.history.length - 1].text : null;
       step.updatedAt = getTimestampStr();
       renderModalHistoryList(step);
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
@@ -1888,7 +1296,6 @@
 
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
       document.getElementById('riskModalOverlay').style.display = 'flex';
-      haptic();
     }
 
     function closeRiskModal(e) {
@@ -1909,26 +1316,18 @@
       if (!step) return;
 
       const val = document.getElementById('customRiskInput').value.trim();
-      if (!val) {
-        showToast("Введите текст изменения");
-        return;
-      }
+      if (!val) return;
 
       if (!step.history) step.history = [];
       const timestamp = getTimestampStr();
 
-      step.history.push({
-        date: timestamp,
-        text: val
-      });
-
+      step.history.push({ date: timestamp, text: val });
       step.blocker = val;
       step.updatedAt = timestamp;
 
       closeRiskModal();
-      showToast("Запись зафиксирована в истории!");
-      haptic();
       saveData();
+      showToast("Запись сохранена");
     }
 
     function clearBlocker(procId, objId, stepId) {
@@ -1939,190 +1338,14 @@
 
       step.blocker = null;
       step.updatedAt = getTimestampStr();
-      showToast("Задержка снята (история сохранена)");
-      haptic();
       saveData();
+      showToast("Блокер снят");
     }
 
     function clearRiskFromModal() {
       const { procId, objId, stepId } = activeModalTarget;
       clearBlocker(procId, objId, stepId);
       closeRiskModal();
-    }
-
-    function promptAddObject(procId) {
-      const name = prompt("Название объекта / участка (напр. Макат - Дорога Ескене):");
-      if (!name || !name.trim()) return;
-
-      const p = state.find(x => x.id === procId);
-      if (p) {
-        p.objects.push({
-          id: Date.now(),
-          title: name.trim(),
-          archived: false,
-          collapsed: false,
-          showAddForm: false,
-          steps: []
-        });
-        haptic();
-        saveData();
-        showToast("Объект создан!");
-      }
-    }
-
-    function createObjectWithStandardWorkflow(procId) {
-      const name = prompt("Название объекта:");
-      if (!name || !name.trim()) return;
-
-      const p = state.find(x => x.id === procId);
-      if (p) {
-        const nowTs = getTimestampStr();
-        p.objects.push({
-          id: Date.now(),
-          title: name.trim(),
-          archived: false,
-          collapsed: false,
-          showAddForm: false,
-          steps: STANDARD_WORKFLOW.map((text, idx) => ({
-            id: Date.now() + idx,
-            text: text,
-            date: "",
-            done: false,
-            blocker: null,
-            history: [],
-            updatedAt: nowTs
-          }))
-        });
-        showToast("Создан объект с 5 этапами!");
-        haptic();
-        saveData();
-      }
-    }
-
-    function cloneObject(procId, objId) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const src = p.objects.find(o => o.id === objId);
-      if (!src) return;
-
-      const newTitle = prompt("Имя для копии:", src.title + " (Копия)");
-      if (!newTitle || !newTitle.trim()) return;
-
-      const nowTs = getTimestampStr();
-      p.objects.push({
-        id: Date.now(),
-        title: newTitle.trim(),
-        archived: false,
-        collapsed: false,
-        showAddForm: false,
-        steps: (src.steps || []).map((s, i) => ({
-          id: Date.now() + i + 1,
-          text: s.text,
-          date: s.date,
-          done: false,
-          blocker: null,
-          history: [],
-          updatedAt: nowTs
-        }))
-      });
-      showToast("Структура скопирована!");
-      haptic();
-      saveData();
-    }
-
-    function applyStandardWorkflowToObject(procId, objId) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      const nowTs = getTimestampStr();
-      STANDARD_WORKFLOW.forEach((stepText, idx) => {
-        obj.steps.push({
-          id: Date.now() + idx,
-          text: stepText,
-          date: "",
-          done: false,
-          blocker: null,
-          history: [],
-          updatedAt: nowTs
-        });
-      });
-
-      showToast("5 этапов добавлены!");
-      haptic();
-      saveData();
-    }
-
-    function quickAddStepChip(procId, objId, stepText) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      obj.steps.push({
-        id: Date.now(),
-        text: stepText,
-        date: "",
-        done: false,
-        blocker: null,
-        history: [],
-        updatedAt: getTimestampStr()
-      });
-
-      haptic();
-      saveData();
-      showToast("Этап добавлен!");
-    }
-
-    function editObjectTitle(procId, objId) {
-      const p = state.find(x => x.id === procId);
-      if (!p) return;
-      const obj = p.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      const newTitle = prompt("Название объекта:", obj.title);
-      if (newTitle && newTitle.trim()) {
-        obj.title = newTitle.trim();
-        haptic();
-        saveData();
-      }
-    }
-
-    function addStepToObject(procId, objId) {
-      const tInput = document.getElementById(`txt-${objId}`);
-      const dInput = document.getElementById(`date-cal-${objId}`);
-      if (!tInput) return;
-
-      const txt = tInput.value.trim();
-      const isoDate = dInput ? dInput.value : '';
-      const dispDate = isoToDisplay(isoDate);
-
-      if (!txt) {
-        showToast("Введите название этапа");
-        return;
-      }
-
-      const p = state.find(x => x.id === procId);
-      const obj = p?.objects.find(o => o.id === objId);
-      if (!obj) return;
-
-      if (!obj.steps) obj.steps = [];
-
-      obj.steps.push({
-        id: Date.now(),
-        text: txt,
-        date: dispDate,
-        done: false,
-        blocker: null,
-        history: [],
-        updatedAt: getTimestampStr()
-      });
-
-      tInput.value = '';
-      haptic();
-      saveData();
-      showToast("Этап успешно добавлен!");
     }
 
     function toggleStep(procId, objId, stepId) {
@@ -2133,7 +1356,6 @@
         step.done = !step.done;
         if (step.done) step.blocker = null;
         step.updatedAt = getTimestampStr();
-        haptic();
         saveData();
       }
     }
@@ -2144,11 +1366,10 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      const newTxt = prompt("Описание этапа / задачи:", step.text);
+      const newTxt = prompt("Описание этапа:", step.text);
       if (newTxt && newTxt.trim()) {
         step.text = newTxt.trim();
         step.updatedAt = getTimestampStr();
-        haptic();
         saveData();
       }
     }
@@ -2159,201 +1380,65 @@
       if (!obj) return;
 
       obj.steps = obj.steps.filter(s => s.id !== stepId);
-      haptic();
       saveData();
-      showToast("Этап удален");
     }
 
-    function exportBackup() {
-      const str = JSON.stringify(state, null, 2);
-      navigator.clipboard.writeText(str).then(() => {
-        showToast("Бэкап скопирован в буфер!");
-      }).catch(() => {
-        prompt("Скопируйте текст бэкапа:", str);
-      });
-    }
+    function createObjectFast(procId, isStandard) {
+      const name = prompt("Название объекта / участка:");
+      if (!name || !name.trim()) return;
 
-    function importBackup() {
-      const str = prompt("Вставьте текст бэкапа:");
-      if (!str) return;
-      try {
-        const parsed = JSON.parse(str);
-        const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
-        if (Array.isArray(data) && data.length > 0) {
-          state = normalizeStateHistory(data);
-          saveData();
-          showToast("Данные восстановлены!");
-        } else {
-          alert("Неверный формат данных!");
-        }
-      } catch(e) {
-        alert("Ошибка при чтении данных!");
-      }
-    }
-
-    /* ВЫГРУЗКА В EXCEL */
-    function exportToExcel() {
-      haptic();
-
-      const rows = [];
-      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tИстория задержек и изменений\n";
-
-      state.forEach(p => {
-        (p.objects || []).forEach(o => {
-          const total = (o.steps || []).length;
-          const done = (o.steps || []).filter(s => s.done).length;
-          const pct = total > 0 ? `${Math.round((done / total) * 100)}%` : '0%';
-
-          if (!o.steps || o.steps.length === 0) {
-            rows.push({
-              "Направление": p.title,
-              "Объект": o.title,
-              "В архиве": o.archived ? "Да" : "Нет",
-              "Прогресс": pct,
-              "Этап": "—",
-              "Срок": "—",
-              "Статус": "Нет этапов",
-              "История изменений": "—",
-              "Изменено": "—"
-            });
-            tsvText += `${p.title}\t${o.title}\t${pct}\t—\t—\tНет этапов\t—\n`;
-          } else {
-            o.steps.forEach(s => {
-              const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
-              const dateStr = s.date || "Не указан";
-              
-              const histList = (s.history || []).map(h => `[${h.date}] ${h.text}`);
-              const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
-
-              rows.push({
-                "Направление": p.title,
-                "Объект": o.title,
-                "В архиве": o.archived ? "Да" : "Нет",
-                "Прогресс": pct,
-                "Этап": s.text,
-                "Срок": dateStr,
-                "Статус": statusStr,
-                "История изменений": fullHistStr,
-                "Изменено": s.updatedAt || "—"
-              });
-              tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
-            });
-          }
+      const p = state.find(x => x.id === procId);
+      if (p) {
+        const nowTs = getTimestampStr();
+        p.objects.push({
+          id: Date.now(),
+          title: name.trim(),
+          archived: false,
+          collapsed: false,
+          steps: isStandard ? STANDARD_WORKFLOW.map((text, idx) => ({
+            id: Date.now() + idx,
+            text: text,
+            date: "",
+            done: false,
+            blocker: null,
+            history: [],
+            updatedAt: nowTs
+          })) : []
         });
+        saveData();
+        showToast("Объект создан");
+      }
+    }
+
+    function addCustomStep(procId, objId) {
+      const txt = prompt("Название этапа:");
+      if (!txt || !txt.trim()) return;
+
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!obj) return;
+
+      if (!obj.steps) obj.steps = [];
+      obj.steps.push({
+        id: Date.now(),
+        text: txt.trim(),
+        date: "",
+        done: false,
+        blocker: null,
+        history: [],
+        updatedAt: getTimestampStr()
       });
+      saveData();
+    }
 
-      if (rows.length === 0) {
-        showToast("Нет данных для выгрузки");
-        return;
+    function archiveObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (obj) {
+        obj.archived = true;
+        saveData();
+        showToast("В архиве");
       }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(tsvText);
-      }
-
-      try {
-        if (typeof XLSX !== 'undefined') {
-          const ws = XLSX.utils.json_to_sheet(rows);
-          ws['!cols'] = [
-            { wch: 22 }, { wch: 28 }, { wch: 10 }, { wch: 10 },
-            { wch: 32 }, { wch: 16 }, { wch: 14 }, { wch: 45 }, { wch: 18 }
-          ];
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
-          XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
-          showToast("Таблица скопирована + скачивание!");
-        } else {
-          showToast("Таблица скопирована! Вставьте в Excel (Ctrl+V)");
-        }
-      } catch (err) {
-        showToast("Таблица скопирована! Вставьте в Excel (Ctrl+V)");
-      }
-    }
-
-    /* AI-ОТЧЕТ */
-    function openAiModal() {
-      document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
-      document.getElementById('aiModalOverlay').style.display = 'flex';
-      haptic();
-    }
-
-    function closeAiModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('aiModalOverlay').style.display = 'none';
-    }
-
-    function saveGeminiApiKey() {
-      const val = document.getElementById('geminiApiKeyInput').value.trim();
-      if (!val) {
-        showToast("Введите корректный ключ");
-        return;
-      }
-      localStorage.setItem(GEMINI_KEY_STORAGE, val);
-      showToast("API-ключ сохранен!");
-      haptic();
-    }
-
-    function clearGeminiApiKey() {
-      localStorage.removeItem(GEMINI_KEY_STORAGE);
-      document.getElementById('geminiApiKeyInput').value = '';
-      showToast("Ключ удален");
-      haptic();
-    }
-
-    function clearAiReport() {
-      document.getElementById('aiOutput-analytics').textContent = "Результат отчета появится здесь...";
-      showToast("Текст очищен");
-      haptic();
-    }
-
-    async function runAiAnalytics() {
-      const out = document.getElementById('aiOutput-analytics');
-      out.textContent = "⏳ Анализирую проекты и формирую отчет...";
-      haptic();
-
-      const rawReport = generateTelegramReport();
-      const rawKey = localStorage.getItem(GEMINI_KEY_STORAGE);
-      if (!rawKey || !rawKey.trim()) {
-        out.textContent = "⚠️ Пожалуйста, укажите и сохраните ваш API-ключ Gemini выше.";
-        return;
-      }
-
-      const key = rawKey.trim();
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
-      
-      const promptText = `Ты — ведущий эксперт по управлению проектами (PMO). Составь чистый, красивый, лаконичный и понятный управленческий отчет для руководства с учетом хронологии решения вопросов.
-НИКАКИХ СЫРЫХ ТАБЛИЦ И МАРКДАУН-РАМОК (вроде |---|). Используй аккуратные списки с эмодзи:
-1. 📊 Краткий итог (общая динамика).
-2. 🚨 Требует внимания / Блокеры (с цепочкой: причина ➔ что предпринято).
-3. 📌 Статус ключевых объектов (кратко по пунктам).
-Пиши строго по делу, без лишних вступлений и шаблонных завершений.`;
-
-      const bodyPayload = { contents: [{ parts: [{ text: `${promptText}\n\nДанные проекта:\n${rawReport}` }] }] };
-
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bodyPayload)
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error?.message || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        out.textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ.";
-      } catch (err) {
-        out.textContent = `⚠️ Ошибка Google AI: ${err.message}`;
-      }
-    }
-
-    function copyAiOutput(elementId) {
-      const text = document.getElementById(elementId).innerText;
-      if (!text || text.includes("появится здесь") || text.includes("⏳")) return;
-      haptic();
-      navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован!"));
     }
 
     function render() {
@@ -2368,10 +1453,9 @@
       state.forEach(proc => {
         const card = document.createElement('div');
         const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true;
-        card.className = `process-section ${!isCollapsed ? 'is-open' : ''}`;
+        card.className = `folder-card ${!isCollapsed ? 'is-open' : ''}`;
 
         const activeObjects = (proc.objects || []).filter(o => !o.archived);
-        const archivedObjects = (proc.objects || []).filter(o => o.archived);
 
         activeObjects.forEach(o => {
           totalActiveObjs++;
@@ -2385,19 +1469,19 @@
         });
 
         card.innerHTML = `
-          <div class="process-sticker-header" onclick="toggleProcessCollapse(${proc.id})">
-            <div class="proc-title-group">
-              <span class="proc-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
-              <span class="proc-folder-badge">📁 ${escapeHtml(proc.title)}</span>
-              <span class="proc-tag-count">${activeObjects.length} в работе</span>
+          <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
+            <div class="folder-left">
+              <span class="folder-arrow ${isCollapsed ? 'collapsed' : ''}">▼</span>
+              <span>📁 ${escapeHtml(proc.title)}</span>
+              <span class="counter-badge">${activeObjects.length}</span>
             </div>
-            <div class="proc-actions" onclick="event.stopPropagation()">
-              <button class="proc-btn-tool" onclick="editProcessTitle(${proc.id})" title="Переименовать направление">✏️</button>
-              <button class="proc-btn-tool del" onclick="deleteProcess(${proc.id})" title="Удалить направление">✕</button>
+            <div class="folder-right-tools" onclick="event.stopPropagation()">
+              <button class="btn-tool-subtle" onclick="editProcessTitle(${proc.id})" title="Изменить">✏️</button>
+              <button class="btn-tool-subtle del" onclick="deleteProcess(${proc.id})" title="Удалить">✕</button>
             </div>
           </div>
 
-          <div class="process-body ${isCollapsed ? 'hidden' : ''}">
+          <div class="folder-content ${isCollapsed ? 'hidden' : ''}">
             ${activeObjects.map((obj, objIdx) => {
               const dCount = (obj.steps || []).filter(s => s.done).length;
               const tCount = (obj.steps || []).length;
@@ -2406,42 +1490,38 @@
               const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
 
               return `
-                <div class="object-card ${isAllDone ? 'completed-obj' : ''}">
-                  <div class="obj-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
-                    <div class="obj-title-wrap">
-                      <span class="obj-collapse-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
-                      <span class="obj-name">📌 ${escapeHtml(obj.title)}</span>
+                <div class="item-card ${isAllDone ? 'is-complete' : ''}">
+                  <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
+                    <div class="item-title-wrap">
+                      <span class="item-arrow ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
+                      <span class="item-title">📌 ${escapeHtml(obj.title)}</span>
                     </div>
-                    
-                    <div class="obj-tools" onclick="event.stopPropagation()">
-                      <div class="obj-tools-left">
-                        ${tCount > 0 ? `
-                          <span class="badge-percent ${isAllDone ? 'green' : ''}">${dCount}/${tCount} (${percent}%)</span>
-                        ` : ''}
-                      </div>
-                      <div class="obj-btn-group">
-                        ${objIdx > 0 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, -1)" title="Выше">⬆️</button>` : ''}
-                        ${objIdx < activeObjects.length - 1 ? `<button class="btn-icon-tool" onclick="moveObject(${proc.id}, ${obj.id}, 1)" title="Ниже">⬇️</button>` : ''}
-                        <button class="btn-icon-tool" onclick="editObjectTitle(${proc.id},${obj.id})" title="Переименовать">✏️</button>
-                        <button class="btn-icon-tool" onclick="cloneObject(${proc.id},${obj.id})" title="Копировать">📋</button>
-                        <button class="btn-icon-tool del" onclick="deleteObject(${proc.id},${obj.id})" title="Удалить объект">✕</button>
+
+                    <div class="item-meta-right" onclick="event.stopPropagation()">
+                      ${tCount > 0 ? `
+                        <div class="progress-pill ${isAllDone ? 'green' : ''}">
+                          <div class="progress-mini-bar">
+                            <div class="progress-mini-fill" style="width: ${percent}%;"></div>
+                          </div>
+                          <span>${dCount}/${tCount} (${percent}%)</span>
+                        </div>
+                      ` : ''}
+
+                      <div class="item-actions-quiet">
+                        ${objIdx > 0 ? `<button class="btn-quiet" onclick="moveObject(${proc.id}, ${obj.id}, -1)">▲</button>` : ''}
+                        ${objIdx < activeObjects.length - 1 ? `<button class="btn-quiet" onclick="moveObject(${proc.id}, ${obj.id}, 1)">▼</button>` : ''}
+                        <button class="btn-quiet" onclick="editObjectTitle(${proc.id},${obj.id})">✏️</button>
+                        <button class="btn-quiet" onclick="cloneObject(${proc.id},${obj.id})">📋</button>
+                        <button class="btn-quiet del" onclick="deleteObject(${proc.id},${obj.id})">✕</button>
                       </div>
                     </div>
                   </div>
 
-                  ${tCount > 0 ? `
-                    <div class="progress-bar-bg" onclick="toggleObjectCollapse(${proc.id}, ${obj.id})" style="cursor:pointer;">
-                      <div class="progress-bar-fill ${isAllDone ? 'done' : ''}" style="width: ${percent}%;"></div>
-                    </div>
-                  ` : ''}
-
-                  <div class="obj-body ${isObjCollapsed ? 'hidden' : ''}">
+                  <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
                     ${isAllDone ? `
-                      <div class="all-done-banner">
-                        <span>🎉 Все этапы успешно закрыты!</span>
-                        <button class="btn-finish-work" onclick="archiveObject(${proc.id}, ${obj.id})">
-                          🏁 В архив
-                        </button>
+                      <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#059669;">
+                        <span>🎉 Все этапы закрыты</span>
+                        <button class="btn-tool-subtle" style="background:#059669; color:#fff;" onclick="archiveObject(${proc.id}, ${obj.id})">В архив</button>
                       </div>
                     ` : ''}
 
@@ -2452,36 +1532,36 @@
                         const hist = s.history || [];
 
                         return `
-                          <div class="step-item ${s.done ? 'is-done' : ''} ${hasBlock ? 'has-blocker' : ''}">
-                            <div class="step-header-line">
-                              <input type="checkbox" class="step-chk" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
-                              <span class="step-title" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})" title="Изменить текст">${escapeHtml(s.text)}</span>
+                          <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
+                            <div class="step-row-top">
+                              <input type="checkbox" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                              <span class="step-text" onclick="editStepText(${proc.id}, ${obj.id}, ${s.id})">${escapeHtml(s.text)}</span>
                             </div>
 
-                            <div class="step-footer-line">
-                              <div class="step-actions-left">
-                                <button type="button" class="step-date-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                            <div class="step-row-bottom">
+                              <div class="step-chips">
+                                <button type="button" class="btn-date-chip ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
                                   ${dateMeta.text}
                                 </button>
-                                <button class="btn-blocker-trigger ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                  ${hasBlock ? '🚨 Задержка' : (hist.length > 0 ? '📜 История (' + hist.length + ')' : '+ риск')}
+                                <button class="btn-risk-chip ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                  ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
                                 </button>
-                                ${s.updatedAt ? `<span class="step-updated-badge">изм. ${s.updatedAt}</span>` : ''}
+                                ${s.updatedAt ? `<span class="step-timestamp">${s.updatedAt}</span>` : ''}
                               </div>
-                              <button class="mini-del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})" title="Удалить шаг">✕</button>
+                              <button class="btn-tool-subtle del" onclick="deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕</button>
                             </div>
 
                             ${hist.length > 0 ? `
-                              <div class="blocker-container">
+                              <div class="timeline-log">
                                 ${hist.map((hItem, hIdx) => {
                                   const isLast = hIdx === hist.length - 1;
                                   return `
-                                    <div class="blocker-banner-row ${!hasBlock && isLast ? 'info-row' : ''}">
-                                      <span class="reason-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                        ${hasBlock && isLast ? '🚨' : '📝'} [${escapeHtml(hItem.date)}] ${escapeHtml(hItem.text)}
+                                    <div class="timeline-entry ${!hasBlock && isLast ? 'resolved' : ''}">
+                                      <span style="flex:1; cursor:pointer;" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                        ${hasBlock && isLast ? '🚨' : '✔'} [${escapeHtml(hItem.date)}]: ${escapeHtml(hItem.text)}
                                       </span>
                                       ${isLast && hasBlock ? `
-                                        <button class="blocker-clear-btn" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
+                                        <button class="btn-clear-inline" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
                                       ` : ''}
                                     </div>
                                   `;
@@ -2493,74 +1573,30 @@
                       }).join('')}
                     </div>
 
-                    ${!obj.showAddForm ? `
-                      <button class="step-add-toggle-btn" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">
-                        + Добавить этап / шаблоны
-                      </button>
-                    ` : `
-                      <div class="step-fast-add">
-                        <div class="template-chips-bar">
-                          <button type="button" class="tpl-chip preset-all" onclick="applyStandardWorkflowToObject(${proc.id}, ${obj.id})">⚡ + 5 этапов</button>
-                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт сверки НАО')">+ Акт НАО</button>
-                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Экспликация Гипрозем')">+ Экспликация</button>
-                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Утверждение ЗУП МИО')">+ ЗУП МИО</button>
-                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Постановление акима')">+ Постановление</button>
-                          <button type="button" class="tpl-chip" onclick="quickAddStepChip(${proc.id}, ${obj.id}, 'Акт на землю, регистрация')">+ Акт на землю</button>
-                        </div>
-
-                        <div class="sfa-row-1">
-                          <input type="text" id="txt-${obj.id}" placeholder="Свое название шага..." onkeydown="if(event.key==='Enter') addStepToObject(${proc.id}, ${obj.id})">
-                          <input type="date" id="date-cal-${obj.id}" value="${getTodayISO()}">
-                        </div>
-
-                        <div class="sfa-row-2">
-                          <button type="button" class="tpl-chip" onclick="toggleAddStepForm(${proc.id}, ${obj.id})">Скрыть</button>
-                          <button type="button" class="btn-add-step" onclick="addStepToObject(${proc.id}, ${obj.id})">Добавить</button>
-                        </div>
-                      </div>
-                    `}
+                    <button class="btn-tool-subtle" style="border:1px dashed var(--border); font-size:11.5px; padding:5px; margin-top:2px;" onclick="addCustomStep(${proc.id},${obj.id})">
+                      + Добавить задачу в объект
+                    </button>
                   </div>
                 </div>
               `;
             }).join('')}
 
-            <div class="proc-add-actions">
-              <button class="btn-new-obj template" onclick="createObjectWithStandardWorkflow(${proc.id})">
-                ⚡ Создать объект с 5 этапами
+            <div class="folder-footer-actions">
+              <button class="btn-add-obj-subtle" onclick="createObjectFast(${proc.id}, true)">
+                ⚡ + Объект (5 этапов)
               </button>
-              <button class="btn-new-obj" onclick="promptAddObject(${proc.id})">
+              <button class="btn-add-obj-subtle" onclick="createObjectFast(${proc.id}, false)">
                 + Пустой объект
               </button>
             </div>
-
-            ${archivedObjects.length > 0 ? `
-              <div class="archive-section">
-                <div class="archive-header" onclick="toggleArchiveView(${proc.id})">
-                  <span>🗄 Архив закрытых объектов (${archivedObjects.length})</span>
-                  <span>${proc.showArchive ? '▲ Скрыть' : '▼ Показать'}</span>
-                </div>
-                ${proc.showArchive ? `
-                  <div class="archive-list">
-                    ${archivedObjects.map(ao => `
-                      <div class="archive-item">
-                        <span style="font-weight:700; color:#166534;">✔ 📌 ${escapeHtml(ao.title)} (100%)</span>
-                        <button class="btn-restore" onclick="restoreObject(${proc.id},${ao.id})">↩ Вернуть</button>
-                      </div>
-                    `).join('')}
-                  </div>
-                ` : ''}
-              </div>
-            ` : ''}
           </div>
         `;
 
         root.appendChild(card);
       });
 
-      const bCard = document.getElementById('mBlockersCard');
-      if (bCard) {
-        bCard.className = totalBlockers > 0 ? 'metric-card has-danger' : 'metric-card';
-      }
+      const bBox = document.getElementById('kpiBlockersBox');
+      if (bBox) bBox.className = totalBlockers > 0 ? 'kpi-cell danger' : 'kpi-cell';
 
       document.getElementById('mBlockers').textContent = totalBlockers;
       document.getElementById('mDone').textContent = totalDone;
@@ -2596,9 +1632,7 @@
           blockers.forEach(b => {
             txt += `• ${b.obj} (${b.proc}):\n`;
             txt += `  ⚠️ ${b.step} [${b.date}]\n`;
-            b.history.forEach(hStr => {
-              txt += `     └ ${hStr}\n`;
-            });
+            b.history.forEach(hStr => { txt += `     └ ${hStr}\n`; });
           });
           txt += `\n`;
         }
@@ -2611,9 +1645,7 @@
             if (todayDoneSteps.length > 0) {
               hasDone = true;
               doneTxt += `• ${o.title} (${p.title}):\n`;
-              todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]\n`;
-              });
+              todayDoneSteps.forEach(s => { doneTxt += `  - ${s.text} [закрыто]\n`; });
             }
           });
         });
@@ -2628,9 +1660,7 @@
             if (regularSteps.length > 0) {
               hasPlan = true;
               planTxt += `• ${o.title} (${p.title}):\n`;
-              regularSteps.forEach(s => {
-                planTxt += `  - ${s.text}${s.date ? ` [${s.date}]` : ''}\n`;
-              });
+              regularSteps.forEach(s => { planTxt += `  - ${s.text}${s.date ? ` [${s.date}]` : ''}\n`; });
             }
           });
         });
@@ -2641,9 +1671,8 @@
 
       } else {
         let txt = `📋 СВОДНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
-
         if (blockers.length > 0) {
-          txt += `🚨 БЛОКЕРЫ / ЗАДЕРЖКИ (${blockers.length}):\n`;
+          txt += `🚨 ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
             txt += `• ${b.obj}: ${b.step} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
           });
@@ -2658,29 +1687,14 @@
             return;
           }
 
-          txt += `┌───────────────────────┬───────┬────────────┐\n`;
-          txt += `│ Объект                │ Готов │ Статус     │\n`;
-          txt += `├───────────────────────┼───────┼────────────┤\n`;
-
           active.forEach(o => {
             const d = (o.steps || []).filter(s => s.done).length;
             const t = (o.steps || []).length;
-            const hasBlk = (o.steps || []).some(s => !s.done && s.blocker);
-
-            const title = (o.title.length > 21 ? o.title.slice(0, 20) + '…' : o.title).padEnd(21, ' ');
-            const prog = `${d}/${t}`.padStart(5, ' ');
-            const status = (hasBlk ? '⚠️ Блокер' : (d === t && t > 0 ? '✔ Готово' : 'В работе')).padEnd(10, ' ');
-
-            txt += `│ ${title} │ ${prog} │ ${status} │\n`;
-          });
-          txt += `└───────────────────────┴───────┴────────────┘\n\n`;
-
-          active.forEach(o => {
-            txt += `📌 ${o.title}:\n`;
+            txt += `📌 ${o.title} [${d}/${t}]:\n`;
             (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
-              const blockStr = s.blocker ? ` (БЛОКЕР: ${s.blocker})` : '';
+              const blockStr = s.blocker ? ` (Задержка: ${s.blocker})` : '';
               txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
             txt += `\n`;
@@ -2693,36 +1707,129 @@
 
     function copyReport() {
       const text = generateTelegramReport();
-      haptic();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован в буфер!"));
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        showToast("Отчет скопирован в буфер!");
-      }
+      navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован!"));
     }
 
     function shareToTelegram() {
       const text = generateTelegramReport();
-      haptic();
       const url = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
-      if (tg?.openTelegramLink) {
-        tg.openTelegramLink(url);
-      } else {
-        window.open(url, '_blank');
+      if (tg?.openTelegramLink) tg.openTelegramLink(url);
+      else window.open(url, '_blank');
+    }
+
+    function exportToExcel() {
+      const rows = [];
+      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tИстория замечаний\n";
+
+      state.forEach(p => {
+        (p.objects || []).forEach(o => {
+          const total = (o.steps || []).length;
+          const done = (o.steps || []).filter(s => s.done).length;
+          const pct = total > 0 ? `${Math.round((done / total) * 100)}%` : '0%';
+
+          (o.steps || []).forEach(s => {
+            const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
+            const dateStr = s.date || "Не указан";
+            const histList = (s.history || []).map(h => `[${h.date}] ${h.text}`);
+            const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
+
+            rows.push({
+              "Направление": p.title,
+              "Объект": o.title,
+              "Прогресс": pct,
+              "Этап": s.text,
+              "Срок": dateStr,
+              "Статус": statusStr,
+              "Хронология": fullHistStr
+            });
+            tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
+          });
+        });
+      });
+
+      if (rows.length === 0) return showToast("Нет данных для выгрузки");
+
+      navigator.clipboard.writeText(tsvText);
+      try {
+        if (typeof XLSX !== 'undefined') {
+          const ws = XLSX.utils.json_to_sheet(rows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
+          XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
+          showToast("Excel скачан + скопирован");
+        }
+      } catch(e) {
+        showToast("Таблица скопирована (Ctrl+V)");
       }
+    }
+
+    function openAiModal() {
+      document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+      document.getElementById('aiModalOverlay').style.display = 'flex';
+    }
+    function closeAiModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('aiModalOverlay').style.display = 'none';
+    }
+    function saveGeminiApiKey() {
+      const val = document.getElementById('geminiApiKeyInput').value.trim();
+      if (!val) return;
+      localStorage.setItem(GEMINI_KEY_STORAGE, val);
+      showToast("Ключ сохранен");
+    }
+
+    async function runAiAnalytics() {
+      const out = document.getElementById('aiOutput-analytics');
+      out.textContent = "⏳ Анализирую...";
+
+      const rawReport = generateTelegramReport();
+      const key = localStorage.getItem(GEMINI_KEY_STORAGE);
+      if (!key) return out.textContent = "⚠️ Укажите API-ключ Gemini";
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
+      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и красивый управленческий отчет для руководства с хронологией ключевых рисков без сырых таблиц. Данные:\n${rawReport}`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await response.json();
+        out.textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ";
+      } catch (err) {
+        out.textContent = `Ошибка: ${err.message}`;
+      }
+    }
+
+    function copyAiOutput(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      if (text) navigator.clipboard.writeText(text).then(() => showToast("Скопировано!"));
+    }
+
+    function exportBackup() {
+      navigator.clipboard.writeText(JSON.stringify(state, null, 2)).then(() => showToast("Бэкап в буфере"));
+    }
+
+    function importBackup() {
+      const str = prompt("Вставьте текст бэкапа:");
+      if (!str) return;
+      try {
+        const parsed = JSON.parse(str);
+        const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
+        if (Array.isArray(data)) {
+          state = normalizeStateHistory(data);
+          saveData();
+          showToast("Восстановлено");
+        }
+      } catch(e) { alert("Ошибка чтения данных"); }
     }
 
     function showToast(msg) {
       const t = document.getElementById('toastMsg');
       t.textContent = msg;
       t.style.display = 'block';
-      setTimeout(() => { t.style.display = 'none'; }, 2400);
+      setTimeout(() => { t.style.display = 'none'; }, 2200);
     }
 
     function escapeHtml(str) {
