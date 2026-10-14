@@ -403,7 +403,7 @@
       position: relative;
     }
 
-    /* КОМПАКТНАЯ ШКАЛА ПРОГРЕССА (ЭКОНОМИЯ МЕСТА ДЛЯ ДЛИННЫХ НАЗВАНИЙ) */
+    /* КОМПАКТНАЯ ШКАЛА ПРОГРЕССА */
     .progress-pill {
       display: inline-flex;
       align-items: center;
@@ -507,7 +507,7 @@
     }
     .item-body.hidden { display: none !important; }
 
-    /* КОМПАКТНЫЙ КОНВЕЙЕР (ПОМЕЩАЕТСЯ НА ЭКРАНЕ СМАРТФОНА) */
+    /* КОМПАКТНЫЙ КОНВЕЙЕР */
     .conveyor-strip {
       display: flex;
       align-items: center;
@@ -569,7 +569,7 @@
       user-select: none;
     }
 
-    /* ЭТАПЫ: НАЗВАНИЕ И ··· ВЕРХНЕЙ СТРОКОЙ, ЧИПЫ ВТОРОЙ СТРОКОЙ */
+    /* ЭТАПЫ */
     .step-unit {
       display: flex;
       flex-direction: column;
@@ -622,14 +622,14 @@
     .step-chips-bar {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       flex-wrap: wrap;
       padding-left: 22px;
     }
 
-    /* ЧИПЫ ДАТЫ, ДОКУМЕНТА И ЗАДЕРЖКИ */
+    /* ЧИПЫ ДАТЫ И ЗАДЕРЖКИ */
     .chip-btn {
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 4px;
       font-size: 10.5px;
       font-weight: 600;
@@ -642,7 +642,7 @@
       background: transparent;
       border: 1px dashed #cbd5e1;
       color: var(--text-muted);
-      opacity: 0.75;
+      opacity: 0.8;
     }
     .chip-btn.ghost:hover {
       opacity: 1;
@@ -651,12 +651,6 @@
       color: var(--text-main);
     }
 
-    .chip-btn.doc-active {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1d4ed8;
-      font-weight: 700;
-    }
     .chip-btn.date-normal {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -748,7 +742,7 @@
       flex-shrink: 0;
     }
 
-    /* ПОДСВЕТКА СТОРОН */
+    /* ПОДСВЕТКА СТОРОН И НОМЕРА ДОКУМЕНТА */
     .tag-party {
       display: inline-block;
       padding: 1px 5px;
@@ -764,6 +758,41 @@
     .tag-party.kmgp { background: #eff6ff; color: #1d4ed8; }
     .tag-party.mio { background: #f3e8ff; color: #6b21a8; }
     .tag-party.nao { background: #ecfdf5; color: #047857; }
+
+    .tag-doc {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-right: 4px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    /* БЫСТРЫЕ КНОПКИ ТИПОВ ДОКУМЕНТОВ В МОДАЛКЕ */
+    .doc-prefix-bar {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin: 3px 0 4px 0;
+    }
+    .doc-prefix-btn {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .doc-prefix-btn:hover {
+      background: var(--brand-light);
+      border-color: var(--brand-border);
+    }
 
     /* РОВНАЯ ОДНОСТРОЧНАЯ ПАНЕЛЬ КНОПОК ВНИЗУ ОБЪЕКТА */
     .obj-bottom-bar {
@@ -914,7 +943,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-height: 85vh;
+      max-height: 88vh;
       overflow-y: auto;
     }
     @media (min-width: 600px) { .modal-box { border-radius: 16px; } }
@@ -933,10 +962,10 @@
 
     .modal-input-field {
       width: 100%;
-      padding: 9px 11px;
+      padding: 8px 11px;
       border: 1px solid var(--border);
       border-radius: 6px;
-      font-size: 13.5px;
+      font-size: 13px;
       outline: none;
     }
     .modal-input-field:focus { border-color: var(--brand); }
@@ -946,7 +975,7 @@
     .btn-m-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 
     /* ШАБЛОНЫ ПРИЧИН */
-    .preset-list { display: flex; flex-direction: column; gap: 4px; }
+    .preset-list { display: flex; flex-direction: column; gap: 4px; max-height: 135px; overflow-y: auto; }
     .preset-row {
       display: flex;
       align-items: center;
@@ -961,8 +990,8 @@
       text-align: left;
       background: transparent;
       border: none;
-      padding: 8px 10px;
-      font-size: 12.5px;
+      padding: 7px 10px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer;
@@ -1170,7 +1199,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ -->
+  <!-- МОДАЛЬНОЕ ОКНО ХРОНОЛОГИИ ЗАМЕЧАНИЙ (С ДОКУМЕНТОМ И НОМЕРАМИ) -->
   <div class="modal-overlay" id="riskModalOverlay" onclick="closeRiskModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -1179,8 +1208,10 @@
       </div>
       <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
 
-      <div style="display:flex; flex-direction:column; gap:4px; max-height:140px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
+      <!-- ИСТОРИЯ -->
+      <div style="display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
 
+      <!-- ОТВЕТСТВЕННАЯ СТОРОНА -->
       <div>
         <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
         <div class="party-chips-ribbon">
@@ -1192,6 +1223,7 @@
         </div>
       </div>
 
+      <!-- ШАБЛОНЫ ПРИЧИН -->
       <div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Быстрые шаблоны причин:</label>
@@ -1200,8 +1232,21 @@
         <div class="preset-list" id="modalPresetsList"></div>
       </div>
 
+      <!-- ДОКУМЕНТ / СЗ / НОМЕР ПИСЬМА -->
       <div>
-        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Текст замечания / статус:</label>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">📄 Документ / СЗ / № письма:</label>
+        <div class="doc-prefix-bar">
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('customDocInput', 'СЗ № ')">+ СЗ №</button>
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('customDocInput', 'Исх. № ')">+ Исх. №</button>
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('customDocInput', 'Вх. № ')">+ Вх. №</button>
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('customDocInput', 'Протокол № ')">+ Протокол №</button>
+        </div>
+        <input type="text" id="customDocInput" class="modal-input-field" placeholder="Например: СЗ №45 от 14.10 на имя Жукенова..." onkeydown="if(event.key==='Enter') appendRiskFromModal()">
+      </div>
+
+      <!-- СУТЬ ЗАМЕЧАНИЯ -->
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Текст замечания / причина:</label>
         <input type="text" id="customRiskInput" class="modal-input-field" placeholder="Нажмите на шаблон или введите причину..." onkeydown="if(event.key==='Enter') appendRiskFromModal()">
       </div>
 
@@ -1212,7 +1257,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ВВОДА / РЕДАКТИРОВАНИЯ ТЕКСТА, СЗ И ЗАМЕЧАНИЙ -->
+  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА И ЗАМЕЧАНИЙ (С ДОКУМЕНТОМ И СТОРОНОЙ) -->
   <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -1222,19 +1267,28 @@
 
       <div id="editModalPartyBox" style="display:none;">
         <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
-        <div class="party-chips-ribbon" style="margin-top:4px;">
+        <div class="party-chips-ribbon" style="margin-top:4px; margin-bottom:8px;">
           <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Подрядчик CPP')">Подрядчик CPP</button>
           <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Субподряд КМГИ')">Субподряд КМГИ</button>
           <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Заказчик KMG Petrochem')">Заказчик KMG Petrochem</button>
           <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Акимат / МИО')">Акимат / МИО</button>
           <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'НАО / Кадастр')">НАО / Кадастр</button>
         </div>
+
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">📄 Документ / СЗ / № письма:</label>
+        <div class="doc-prefix-bar">
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('editModalDocInput', 'СЗ № ')">+ СЗ №</button>
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('editModalDocInput', 'Исх. № ')">+ Исх. №</button>
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('editModalDocInput', 'Вх. № ')">+ Вх. №</button>
+          <button type="button" class="doc-prefix-btn" onclick="insertDocPrefix('editModalDocInput', 'Протокол № ')">+ Протокол №</button>
+        </div>
+        <input type="text" id="editModalDocInput" class="modal-input-field" style="margin-bottom:6px;" placeholder="Например: СЗ №45 от 14.10...">
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Текст причины / замечания:</label>
       </div>
 
       <input type="text" id="textModalInput" class="modal-input-field" placeholder="Введите текст..." onkeydown="if(event.key==='Enter') submitTextModal()">
       <div class="modal-actions-row">
         <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
-        <button class="btn-m-danger" id="textModalClearBtn" style="display:none;" onclick="clearTextModalValue()">Очистить</button>
         <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
       </div>
     </div>
@@ -1273,7 +1327,7 @@
     let reportMode = 'executive';
     let filterOnlyIssues = false;
     let pinnedStepsMap = {};
-    let expandedAllStepsObjMap = {}; // Локальное раскрытие всех этапов внутри конкретного объекта
+    let expandedAllStepsObjMap = {};
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
@@ -1282,7 +1336,6 @@
     let selectedPartyTag = 'Подрядчик CPP';
     let editModalPartyTag = '';
     let textModalCallback = null;
-    let textModalClearCallback = null;
     let confirmModalCallback = null;
 
     const DEFAULT_RISK_PRESETS = [
@@ -1394,7 +1447,6 @@
       return { cls: 'date-normal', text: `📅 ${dateStr}` };
     }
 
-    /* УМНОЕ СОКРАЩЕНИЕ НАЗВАНИЙ ДЛЯ МОБИЛЬНОГО КОНВЕЙЕРА */
     function shortenStepName(name) {
       if (!name) return '';
       const s = name.trim();
@@ -1422,12 +1474,28 @@
       return s.trim().replace(/\s+/g, ' ');
     }
 
-    function extractPartyAndText(rawText) {
+    function insertDocPrefix(inputId, prefixStr) {
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      const cur = inp.value.trim();
+      if (!cur) {
+        inp.value = prefixStr;
+      } else if (!cur.startsWith(prefixStr.trim())) {
+        inp.value = `${prefixStr}${cur}`;
+      }
+      inp.focus();
+    }
+
+    /* РАЗБОР СТОРОНЫ, ДОКУМЕНТА И ТЕКСТА ПРИЧИНЫ */
+    function extractPartyAndText(rawText, explicitDoc = '') {
       let str = sanitizeRemark(rawText);
       let party = '';
-      const openB = String.fromCharCode(91);
-      const closeB = String.fromCharCode(93);
+      let doc = sanitizeRemark(explicitDoc || '');
 
+      const openB = String.fromCharCode(91); // '['
+      const closeB = String.fromCharCode(93); // ']'
+
+      // 1. Извлекаем сторону в начале: [Подрядчик CPP]
       if (str.startsWith(openB)) {
         const closeIdx = str.indexOf(closeB);
         if (closeIdx > 1 && closeIdx < 45) {
@@ -1435,13 +1503,26 @@
           str = str.slice(closeIdx + 1).trim();
         }
       }
-      return { party, text: str };
+
+      // 2. Извлекаем документ, если он был записан в скобках [📄 ...]
+      if (str.startsWith(openB)) {
+        const closeIdx2 = str.indexOf(closeB);
+        if (closeIdx2 > 1 && closeIdx2 < 65) {
+          const secondTag = str.slice(1, closeIdx2).trim();
+          if (secondTag.startsWith('📄') || secondTag.toLowerCase().includes('сз') || secondTag.toLowerCase().includes('исх')) {
+            if (!doc) doc = secondTag.replace(/^📄\s*/, '').trim();
+            str = str.slice(closeIdx2 + 1).trim();
+          }
+        }
+      }
+
+      return { party, doc, text: str };
     }
 
-    function formatPartyTag(rawText) {
-      if (!rawText) return '';
-      const parsed = extractPartyAndText(rawText);
-      let badgeHtml = '';
+    function formatPartyTag(rawText, explicitDoc = '') {
+      if (!rawText && !explicitDoc) return '';
+      const parsed = extractPartyAndText(rawText, explicitDoc);
+      let html = '';
 
       if (parsed.party) {
         let cls = '';
@@ -1464,10 +1545,14 @@
           cls = 'nao';
           shortName = 'НАО / Кадастр';
         }
-        badgeHtml = `<span class="tag-party ${cls}">${escapeHtml(shortName)}</span>`;
+        html += `<span class="tag-party ${cls}">${escapeHtml(shortName)}</span>`;
       }
 
-      return badgeHtml + escapeHtml(parsed.text);
+      if (parsed.doc) {
+        html += `<span class="tag-doc">📄 ${escapeHtml(parsed.doc)}</span>`;
+      }
+
+      return html + escapeHtml(parsed.text);
     }
 
     let state = [];
@@ -1559,13 +1644,17 @@
           collapsed: true,
           steps: (o.steps || []).map(s => {
             const histClean = (s.history || [])
-              .map(h => ({ date: h.date || 'Ранее', text: sanitizeRemark(h.text || '') }))
-              .filter(h => h.text.length > 0);
+              .map(h => ({
+                date: h.date || 'Ранее',
+                text: sanitizeRemark(h.text || ''),
+                doc: sanitizeRemark(h.doc || '')
+              }))
+              .filter(h => h.text.length > 0 || h.doc.length > 0);
             
             if (s.blocker && histClean.length === 0) {
               const blkClean = sanitizeRemark(s.blocker);
               if (blkClean.length > 0) {
-                histClean.push({ date: s.updatedAt || 'Ранее', text: blkClean });
+                histClean.push({ date: s.updatedAt || 'Ранее', text: blkClean, doc: sanitizeRemark(s.doc || '') });
               }
             }
 
@@ -1750,19 +1839,18 @@
       closeConfirmModal();
     }
 
-    function showTextModal(title, initialValue, onSave, withPartySelector = false, initialParty = '', onClear = null) {
+    function showTextModal(title, initialValue, onSave, withRemarkFields = false, initialParty = '', initialDoc = '') {
       document.getElementById('textModalTitle').textContent = title;
       const inp = document.getElementById('textModalInput');
       inp.value = initialValue || '';
       textModalCallback = onSave;
-      textModalClearCallback = onClear;
-
-      const clearBtn = document.getElementById('textModalClearBtn');
-      clearBtn.style.display = (onClear && initialValue) ? 'block' : 'none';
 
       const partyBox = document.getElementById('editModalPartyBox');
-      if (withPartySelector) {
+      const docInp = document.getElementById('editModalDocInput');
+
+      if (withRemarkFields) {
         partyBox.style.display = 'block';
+        if (docInp) docInp.value = initialDoc || '';
         editModalPartyTag = initialParty || selectedPartyTag || 'Подрядчик CPP';
         document.querySelectorAll('.edit-party-chip').forEach(btn => {
           const isMatch = btn.textContent.toLowerCase().includes(editModalPartyTag.toLowerCase()) ||
@@ -1771,6 +1859,7 @@
         });
       } else {
         partyBox.style.display = 'none';
+        if (docInp) docInp.value = '';
       }
 
       document.getElementById('textPromptModalOverlay').style.display = 'flex';
@@ -1787,19 +1876,14 @@
       if (e && e.target !== e.currentTarget) return;
       document.getElementById('textPromptModalOverlay').style.display = 'none';
       textModalCallback = null;
-      textModalClearCallback = null;
     }
 
     function submitTextModal() {
       const val = document.getElementById('textModalInput').value.trim();
-      if (textModalCallback && val) {
-        textModalCallback(val, editModalPartyTag);
+      const docVal = document.getElementById('editModalDocInput')?.value.trim() || '';
+      if (textModalCallback && (val || docVal)) {
+        textModalCallback(val, editModalPartyTag, docVal);
       }
-      closeTextModal();
-    }
-
-    function clearTextModalValue() {
-      if (textModalClearCallback) textModalClearCallback();
       closeTextModal();
     }
 
@@ -1925,7 +2009,6 @@
           steps: (src.steps || []).map((s, i) => ({
             id: Date.now() + i + 1,
             text: s.text,
-            doc: s.doc || "",
             date: s.date,
             done: false,
             blocker: null,
@@ -1936,32 +2019,6 @@
         saveData();
         showToast("Скопировано");
       });
-    }
-
-    function openDocModal(procId, objId, stepId) {
-      const p = state.find(x => x.id === procId);
-      const obj = p?.objects.find(o => o.id === objId);
-      const step = obj?.steps.find(s => s.id === stepId);
-      if (!step) return;
-
-      showTextModal(
-        "📄 Документ / СЗ / № письма",
-        step.doc || "",
-        (newDoc) => {
-          step.doc = sanitizeRemark(newDoc);
-          step.updatedAt = getTimestampStr();
-          saveData();
-          showToast("Документ привязан");
-        },
-        false,
-        "",
-        () => {
-          step.doc = "";
-          step.updatedAt = getTimestampStr();
-          saveData();
-          showToast("Метка документа удалена");
-        }
-      );
     }
 
     function moveStep(procId, objId, stepId, direction) {
@@ -2057,7 +2114,7 @@
         row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:6px 8px; border-radius:6px; font-size:12px; border:1px solid #e2e8f0; gap:6px;";
         row.innerHTML = `
           <span style="flex:1; cursor:pointer;" onclick="editHistoryItem(${idx})" title="Нажмите для редактирования">
-            <b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text)}
+            <b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text, item.doc)}
           </span>
           <button type="button" class="preset-act-btn" onclick="editHistoryItem(${idx})" title="Редактировать">✏️</button>
           <button type="button" class="preset-act-btn del" onclick="deleteHistoryItem(${idx})" title="Удалить">✕</button>
@@ -2066,6 +2123,7 @@
       });
     }
 
+    /* РЕДАКТИРОВАНИЕ ЗАМЕЧАНИЯ ВМЕСТЕ С НОМЕРОМ ДОКУМЕНТА И СТОРОНОЙ */
     function editHistoryItem(idx) {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -2073,22 +2131,26 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (!step || !step.history || !step.history[idx]) return;
 
-      const parsed = extractPartyAndText(step.history[idx].text);
+      const parsed = extractPartyAndText(step.history[idx].text, step.history[idx].doc);
 
       showTextModal(
-        "✏️ Изменить внесенное замечание",
+        "✏️ Изменить замечание и документ",
         parsed.text,
-        (newText, chosenParty) => {
-          const cleaned = sanitizeRemark(newText);
-          if (cleaned) {
+        (newText, chosenParty, newDoc) => {
+          const cleanedText = sanitizeRemark(newText);
+          const cleanedDoc = sanitizeRemark(newDoc);
+          if (cleanedText || cleanedDoc) {
             const openB = String.fromCharCode(91);
             const closeB = String.fromCharCode(93);
             const prefix = chosenParty ? `${openB}${chosenParty}${closeB} ` : '';
-            const finalStr = `${prefix}${cleaned}`;
+            const finalStr = `${prefix}${cleanedText || 'Документ в работе'}`;
 
             step.history[idx].text = finalStr;
+            step.history[idx].doc = cleanedDoc;
+
             if (idx === step.history.length - 1 && step.blocker) {
               step.blocker = finalStr;
+              step.doc = cleanedDoc;
             }
             step.updatedAt = getTimestampStr();
             renderModalHistoryList(step);
@@ -2097,7 +2159,8 @@
           }
         },
         true,
-        parsed.party || selectedPartyTag
+        parsed.party || selectedPartyTag,
+        parsed.doc || ''
       );
     }
 
@@ -2109,7 +2172,13 @@
       if (!step || !step.history) return;
 
       step.history.splice(idx, 1);
-      step.blocker = step.history.length > 0 ? step.history[step.history.length - 1].text : null;
+      if (step.history.length > 0) {
+        const last = step.history[step.history.length - 1];
+        step.blocker = last.text;
+        step.doc = last.doc || '';
+      } else {
+        step.blocker = null;
+      }
       step.updatedAt = getTimestampStr();
       renderModalHistoryList(step);
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
@@ -2192,11 +2261,12 @@
 
       if (!step.history) step.history = [];
       if (step.blocker && step.history.length === 0) {
-        step.history.push({ date: step.updatedAt || 'Ранее', text: sanitizeRemark(step.blocker) });
+        step.history.push({ date: step.updatedAt || 'Ранее', text: sanitizeRemark(step.blocker), doc: sanitizeRemark(step.doc || '') });
       }
 
       document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
       document.getElementById('customRiskInput').value = '';
+      document.getElementById('customDocInput').value = '';
       renderModalHistoryList(step);
       renderPresetsList();
 
@@ -2217,21 +2287,24 @@
       if (!step) return;
 
       const rawVal = sanitizeRemark(document.getElementById('customRiskInput').value);
-      if (!rawVal) {
-        showToast("Введите или выберите причину");
+      const docVal = sanitizeRemark(document.getElementById('customDocInput').value);
+
+      if (!rawVal && !docVal) {
+        showToast("Введите причину или номер документа");
         return;
       }
 
       const openB = String.fromCharCode(91);
       const closeB = String.fromCharCode(93);
       const partyPrefix = selectedPartyTag ? `${openB}${selectedPartyTag}${closeB} ` : '';
-      const fullEntry = `${partyPrefix}${rawVal}`;
+      const fullEntry = `${partyPrefix}${rawVal || 'Документ в работе'}`;
 
       if (!step.history) step.history = [];
       const timestamp = getTimestampStr();
 
-      step.history.push({ date: timestamp, text: fullEntry });
+      step.history.push({ date: timestamp, text: fullEntry, doc: docVal });
       step.blocker = fullEntry;
+      if (docVal) step.doc = docVal;
       step.updatedAt = timestamp;
 
       closeRiskModal();
@@ -2565,7 +2638,6 @@
                           const hasBlock = !s.done && !!s.blocker;
                           const dateMeta = analyzeDeadline(s.date, s.done);
                           const hist = s.history || [];
-                          const hasDoc = !!s.doc;
 
                           return `
                             <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
@@ -2580,7 +2652,6 @@
                                   <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
                                   <div class="obj-dropdown-menu" id="smenu-${s.id}">
                                     <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
-                                    <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openDocModal(${proc.id}, ${obj.id}, ${s.id})">📄 Документ / СЗ</button>
                                     ${sIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, -1)">⬆️ Вверх</button>` : ''}
                                     ${sIdx < stepsArr.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, 1)">⬇️ Вниз</button>` : ''}
                                     <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
@@ -2588,12 +2659,8 @@
                                 </div>
                               </div>
 
-                              <!-- СТРОКА 2: ЧИПЫ ДОКУМЕНТА, СРОКА И ЗАДЕРЖКИ -->
+                              <!-- СТРОКА 2: ЧИПЫ СРОКА И ЗАМЕЧАНИЯ -->
                               <div class="step-chips-bar">
-                                <button type="button" class="chip-btn ${hasDoc ? 'doc-active' : 'ghost'}" onclick="openDocModal(${proc.id}, ${obj.id}, ${s.id})" title="Привязать номер СЗ, письма или документа">
-                                  ${hasDoc ? '📄 ' + escapeHtml(s.doc) : '📄 +Док'}
-                                </button>
-
                                 <button type="button" class="chip-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
                                   ${dateMeta.text}
                                 </button>
@@ -2613,7 +2680,7 @@
                                       <div class="step-remark-item ${hasBlock && isLast ? 'is-active-block' : 'is-resolved'}">
                                         <span class="remark-icon">${hasBlock && isLast ? '🚨' : '✔'}</span>
                                         <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                          <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text)}
+                                          <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text, hItem.doc)}
                                         </span>
                                         ${isLast && hasBlock ? `
                                           <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
@@ -2698,12 +2765,14 @@
         (p.objects || []).filter(o => !o.archived).forEach(o => {
           (o.steps || []).forEach(s => {
             if (!s.done && s.blocker) {
-              const hist = (s.history || []).map(h => `[${h.date}] ${h.text}`);
+              const hist = (s.history || []).map(h => {
+                const docPart = h.doc ? ` [📄 ${h.doc}]` : '';
+                return `[${h.date}]${docPart} ${h.text}`;
+              });
               blockers.push({
                 proc: p.title,
                 obj: o.title,
                 step: s.text,
-                doc: s.doc ? ` (📄 ${s.doc})` : '',
                 date: s.date || 'срок не указан',
                 history: hist.length > 0 ? hist : [s.blocker]
               });
@@ -2719,7 +2788,7 @@
           txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ (БЛОКЕРЫ):\n`;
           blockers.forEach(b => {
             txt += `• ${b.obj} (${b.proc}):\n`;
-            txt += `  ⚠️ ${b.step}${b.doc} [${b.date}]\n`;
+            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
             b.history.forEach(hStr => { txt += `     └ ${hStr}\n`; });
           });
           txt += `\n`;
@@ -2734,8 +2803,7 @@
               hasDone = true;
               doneTxt += `• ${o.title} (${p.title}):\n`;
               todayDoneSteps.forEach(s => {
-                const docInfo = s.doc ? ` [📄 ${s.doc}]` : '';
-                doneTxt += `  - ${s.text}${docInfo} [закрыто]\n`;
+                doneTxt += `  - ${s.text} [закрыто]\n`;
               });
             }
           });
@@ -2750,8 +2818,7 @@
             const nextStep = (o.steps || []).find(s => !s.done && !s.blocker);
             if (nextStep) {
               hasPlan = true;
-              const docInfo = nextStep.doc ? ` (📄 ${nextStep.doc})` : '';
-              planTxt += `• ${o.title}: ${nextStep.text}${docInfo}${nextStep.date ? ` [${nextStep.date}]` : ''}\n`;
+              planTxt += `• ${o.title}: ${nextStep.text}${nextStep.date ? ` [${nextStep.date}]` : ''}\n`;
             }
           });
         });
@@ -2765,7 +2832,7 @@
         if (blockers.length > 0) {
           txt += `🚨 ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step}${b.doc} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
+            txt += `• ${b.obj}: ${b.step} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
           });
           txt += `\n`;
         }
@@ -2785,9 +2852,9 @@
             (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
-              const docStr = s.doc ? ` [📄 ${s.doc}]` : '';
-              const blockStr = s.blocker ? ` (Задержка: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text}${docStr} ${status}${blockStr}\n`;
+              const lastDoc = (s.history && s.history.length > 0 && s.history[s.history.length - 1].doc) ? ` [📄 ${s.history[s.history.length - 1].doc}]` : '';
+              const blockStr = s.blocker ? ` (Задержка: ${s.blocker}${lastDoc})` : '';
+              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
             txt += `\n`;
           });
@@ -2821,9 +2888,10 @@
 
           (o.steps || []).forEach(s => {
             const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
-            const docStr = s.doc || "—";
+            const docsFromHist = (s.history || []).map(h => h.doc).filter(Boolean).join(', ');
+            const docStr = docsFromHist || s.doc || "—";
             const dateStr = s.date || "Не указан";
-            const histList = (s.history || []).map(h => `[${h.date}] ${h.text}`);
+            const histList = (s.history || []).map(h => `[${h.date}]${h.doc ? ' [📄 ' + h.doc + ']' : ''} ${h.text}`);
             const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
 
             rows.push({
