@@ -674,6 +674,13 @@
       backdrop-filter: blur(3px);
     }
     @media (min-width: 600px) { .modal-overlay { align-items: center; } }
+    
+    /* ПОВЕРХ ВСЕХ МОДАЛОК ДЛЯ ВВОДА И ПРАВКИ */
+    #textPromptModalOverlay {
+      z-index: 2500;
+      background: rgba(15, 23, 42, 0.55);
+    }
+
     .modal-box {
       background: #fff;
       width: 100%;
@@ -719,11 +726,11 @@
     .preset-row {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding-right: 6px;
+      padding-right: 4px;
     }
     .preset-btn {
       flex: 1;
@@ -737,15 +744,17 @@
       cursor: pointer;
     }
     .preset-btn:hover { color: var(--brand); }
-    .preset-del-btn {
+    .preset-act-btn {
       background: none;
       border: none;
       color: var(--text-subtle);
       font-size: 12px;
       cursor: pointer;
-      padding: 4px;
+      padding: 4px 5px;
+      border-radius: 4px;
     }
-    .preset-del-btn:hover { color: var(--danger); }
+    .preset-act-btn:hover { background: #e2e8f0; color: var(--text-main); }
+    .preset-act-btn.del:hover { background: var(--danger-bg); color: var(--danger); }
 
     /* ЧИПЫ СТОРОН */
     .party-chips-ribbon {
@@ -754,7 +763,7 @@
       gap: 5px;
       margin: 2px 0;
     }
-    .party-chip {
+    .party-chip, .edit-party-chip {
       background: var(--surface-subtle);
       border: 1px solid var(--border);
       padding: 4px 8px;
@@ -765,7 +774,7 @@
       color: var(--text-muted);
       transition: all 0.15s;
     }
-    .party-chip.selected {
+    .party-chip.selected, .edit-party-chip.selected {
       background: #eff6ff;
       border-color: #3b82f6;
       color: #1d4ed8;
@@ -783,7 +792,7 @@
       font-size: 12.5px;
       font-weight: 600;
       display: none;
-      z-index: 2000;
+      z-index: 3000;
     }
 
     .footer-subtle-wrap {
@@ -871,21 +880,6 @@
     <button class="fab-btn" onclick="shareToTelegram()">✈️ В Telegram</button>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА -->
-  <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-top">
-        <div class="modal-head-title" id="textModalTitle">Редактирование</div>
-        <button class="modal-x" onclick="closeTextModal()">✕</button>
-      </div>
-      <input type="text" id="textModalInput" class="modal-input-field" placeholder="Введите название..." onkeydown="if(event.key==='Enter') submitTextModal()">
-      <div class="modal-actions-row">
-        <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
-        <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
-      </div>
-    </div>
-  </div>
-
   <!-- МОДАЛЬНОЕ ОКНО AI -->
   <div class="modal-overlay" id="aiModalOverlay" onclick="closeAiModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
@@ -952,7 +946,7 @@
       </div>
       <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
 
-      <div style="display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
+      <div style="display:flex; flex-direction:column; gap:4px; max-height:140px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
 
       <div>
         <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
@@ -985,6 +979,34 @@
     </div>
   </div>
 
+  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА И ЗАМЕЧАНИЙ (ВСЕГДА ПОВЕРХ ОСТАЛЬНЫХ ОКОН) -->
+  <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" id="textModalTitle">Редактирование</div>
+        <button class="modal-x" onclick="closeTextModal()">✕</button>
+      </div>
+
+      <!-- Выбор стороны при редактировании замечания -->
+      <div id="editModalPartyBox" style="display:none;">
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
+        <div class="party-chips-ribbon" style="margin-top:4px;">
+          <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Подрядчик CPP')">Подрядчик CPP</button>
+          <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Субподряд КМГИ')">Субподряд КМГИ</button>
+          <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Заказчик KMG Petrochem')">Заказчик KMG Petrochem</button>
+          <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'Акимат / МИО')">Акимат / МИО</button>
+          <button type="button" class="edit-party-chip" onclick="selectEditModalParty(this, 'НАО / Кадастр')">НАО / Кадастр</button>
+        </div>
+      </div>
+
+      <input type="text" id="textModalInput" class="modal-input-field" placeholder="Введите текст..." onkeydown="if(event.key==='Enter') submitTextModal()">
+      <div class="modal-actions-row">
+        <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
+        <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-msg" id="toastMsg">Готово!</div>
 
   <script>
@@ -1005,6 +1027,7 @@
     let currentRevision = 0;
     let isSaving = false;
     let selectedPartyTag = 'Подрядчик CPP';
+    let editModalPartyTag = '';
     let textModalCallback = null;
 
     const DEFAULT_RISK_PRESETS = [
@@ -1114,45 +1137,53 @@
       return s.trim().replace(/\s+/g, ' ');
     }
 
-    function formatPartyTag(rawText) {
-      if (!rawText) return '';
+    /* РАЗБОР СТОРОНЫ И ТЕКСТА ЗАМЕЧАНИЯ */
+    function extractPartyAndText(rawText) {
       let str = sanitizeRemark(rawText);
-      let badgeHtml = '';
+      let party = '';
+      const openB = String.fromCharCode(91);
+      const closeB = String.fromCharCode(93);
 
-      const openBracket = String.fromCharCode(91);
-      const closeBracket = String.fromCharCode(93);
-
-      if (str.startsWith(openBracket)) {
-        const closeIdx = str.indexOf(closeBracket);
-        if (closeIdx > 1 && closeIdx < 40) {
-          const partyRaw = str.slice(1, closeIdx).trim();
+      if (str.startsWith(openB)) {
+        const closeIdx = str.indexOf(closeB);
+        if (closeIdx > 1 && closeIdx < 45) {
+          party = str.slice(1, closeIdx).trim();
           str = str.slice(closeIdx + 1).trim();
-
-          let cls = '';
-          let shortName = partyRaw;
-          const lower = partyRaw.toLowerCase();
-
-          if (lower.includes('cpp') || lower.includes('подрядчик')) {
-            cls = 'cpp';
-            shortName = 'Подрядчик CPP';
-          } else if (lower.includes('кмги') || lower.includes('субподряд') || lower.includes('инжиниринг')) {
-            cls = 'kmgi';
-            shortName = 'Субподряд КМГИ';
-          } else if (lower.includes('petrochem') || lower.includes('заказчик')) {
-            cls = 'kmgp';
-            shortName = 'KMG Petrochem';
-          } else if (lower.includes('акимат') || lower.includes('мио')) {
-            cls = 'mio';
-            shortName = 'Акимат / МИО';
-          } else if (lower.includes('нао') || lower.includes('кадастр') || lower.includes('гипрозем')) {
-            cls = 'nao';
-            shortName = 'НАО / Кадастр';
-          }
-          badgeHtml = `<span class="tag-party ${cls}">${escapeHtml(shortName)}</span>`;
         }
       }
+      return { party, text: str };
+    }
 
-      return badgeHtml + escapeHtml(str);
+    function formatPartyTag(rawText) {
+      if (!rawText) return '';
+      const parsed = extractPartyAndText(rawText);
+      let badgeHtml = '';
+
+      if (parsed.party) {
+        let cls = '';
+        let shortName = parsed.party;
+        const lower = parsed.party.toLowerCase();
+
+        if (lower.includes('cpp') || lower.includes('подрядчик')) {
+          cls = 'cpp';
+          shortName = 'Подрядчик CPP';
+        } else if (lower.includes('кмги') || lower.includes('субподряд') || lower.includes('инжиниринг')) {
+          cls = 'kmgi';
+          shortName = 'Субподряд КМГИ';
+        } else if (lower.includes('petrochem') || lower.includes('заказчик')) {
+          cls = 'kmgp';
+          shortName = 'KMG Petrochem';
+        } else if (lower.includes('акимат') || lower.includes('мио')) {
+          cls = 'mio';
+          shortName = 'Акимат / МИО';
+        } else if (lower.includes('нао') || lower.includes('кадастр') || lower.includes('гипрозем')) {
+          cls = 'nao';
+          shortName = 'НАО / Кадастр';
+        }
+        badgeHtml = `<span class="tag-party ${cls}">${escapeHtml(shortName)}</span>`;
+      }
+
+      return badgeHtml + escapeHtml(parsed.text);
     }
 
     let state = [];
@@ -1220,7 +1251,6 @@
       } catch(e) { return false; }
     }
 
-    /* ПРИНУДИТЕЛЬНОЕ СВОРАЧИВАНИЕ ВСЕХ ПАПОК И ОБЪЕКТОВ ПРИ ЗАГРУЗКЕ / ОБНОВЛЕНИИ */
     function collapseAllItems() {
       state.forEach(p => {
         p.collapsed = true;
@@ -1234,10 +1264,10 @@
       if (!Array.isArray(arr)) return [];
       return arr.map(p => ({
         ...p,
-        collapsed: true, // Всегда свернуто при открытии и обновлении
+        collapsed: true,
         objects: (p.objects || []).map(o => ({
           ...o,
-          collapsed: true, // Всегда свернуто при открытии и обновлении
+          collapsed: true,
           steps: (o.steps || []).map(s => {
             const histClean = (s.history || [])
               .map(h => ({ date: h.date || 'Ранее', text: sanitizeRemark(h.text || '') }))
@@ -1372,13 +1402,34 @@
       showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
     }
 
-    function showTextModal(title, initialValue, onSave) {
+    /* МОДАЛЬНОЕ ОКНО ВВОДА И ПРАВКИ (С ПОДДЕРЖКОЙ ВЫБОРА СТОРОНЫ) */
+    function showTextModal(title, initialValue, onSave, withPartySelector = false, initialParty = '') {
       document.getElementById('textModalTitle').textContent = title;
       const inp = document.getElementById('textModalInput');
       inp.value = initialValue || '';
       textModalCallback = onSave;
+
+      const partyBox = document.getElementById('editModalPartyBox');
+      if (withPartySelector) {
+        partyBox.style.display = 'block';
+        editModalPartyTag = initialParty || selectedPartyTag || 'Подрядчик CPP';
+        document.querySelectorAll('.edit-party-chip').forEach(btn => {
+          const isMatch = btn.textContent.toLowerCase().includes(editModalPartyTag.toLowerCase()) ||
+                          editModalPartyTag.toLowerCase().includes(btn.textContent.toLowerCase());
+          btn.classList.toggle('selected', isMatch);
+        });
+      } else {
+        partyBox.style.display = 'none';
+      }
+
       document.getElementById('textPromptModalOverlay').style.display = 'flex';
       setTimeout(() => inp.focus(), 60);
+    }
+
+    function selectEditModalParty(btn, partyName) {
+      editModalPartyTag = partyName;
+      document.querySelectorAll('.edit-party-chip').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
     }
 
     function closeTextModal(e) {
@@ -1390,7 +1441,7 @@
     function submitTextModal() {
       const val = document.getElementById('textModalInput').value.trim();
       if (textModalCallback && val) {
-        textModalCallback(val);
+        textModalCallback(val, editModalPartyTag);
       }
       closeTextModal();
     }
@@ -1598,16 +1649,19 @@
 
       list.forEach((item, idx) => {
         const row = document.createElement('div');
-        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px 8px; border-radius:4px; font-size:12px; border:1px solid #e2e8f0; gap:6px;";
+        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:6px 8px; border-radius:6px; font-size:12px; border:1px solid #e2e8f0; gap:6px;";
         row.innerHTML = `
-          <span style="flex:1;"><b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text)}</span>
-          <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px; padding:2px;" onclick="editHistoryItem(${idx})" title="Редактировать">✏️</button>
-          <button style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:700; padding:2px;" onclick="deleteHistoryItem(${idx})" title="Удалить">✕</button>
+          <span style="flex:1; cursor:pointer;" onclick="editHistoryItem(${idx})" title="Нажмите для редактирования">
+            <b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text)}
+          </span>
+          <button type="button" class="preset-act-btn" onclick="editHistoryItem(${idx})" title="Редактировать">✏️</button>
+          <button type="button" class="preset-act-btn del" onclick="deleteHistoryItem(${idx})" title="Удалить">✕</button>
         `;
         box.appendChild(row);
       });
     }
 
+    /* РЕДАКТИРОВАНИЕ ВНЕСЕННОГО ЗАМЕЧАНИЯ (ТЕКСТ + ОТВЕТСТВЕННАЯ СТОРОНА) */
     function editHistoryItem(idx) {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -1615,19 +1669,32 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (!step || !step.history || !step.history[idx]) return;
 
-      showTextModal("✏️ Изменить замечание", step.history[idx].text, (newText) => {
-        const cleaned = sanitizeRemark(newText);
-        if (cleaned) {
-          step.history[idx].text = cleaned;
-          if (idx === step.history.length - 1 && step.blocker) {
-            step.blocker = cleaned;
+      const parsed = extractPartyAndText(step.history[idx].text);
+
+      showTextModal(
+        "✏️ Изменить внесенное замечание",
+        parsed.text,
+        (newText, chosenParty) => {
+          const cleaned = sanitizeRemark(newText);
+          if (cleaned) {
+            const openB = String.fromCharCode(91);
+            const closeB = String.fromCharCode(93);
+            const prefix = chosenParty ? `${openB}${chosenParty}${closeB} ` : '';
+            const finalStr = `${prefix}${cleaned}`;
+
+            step.history[idx].text = finalStr;
+            if (idx === step.history.length - 1 && step.blocker) {
+              step.blocker = finalStr;
+            }
+            step.updatedAt = getTimestampStr();
+            renderModalHistoryList(step);
+            saveData();
+            showToast("Замечание обновлено!");
           }
-          step.updatedAt = getTimestampStr();
-          renderModalHistoryList(step);
-          saveData();
-          showToast("Запись обновлена");
-        }
-      });
+        },
+        true,
+        parsed.party || selectedPartyTag
+      );
     }
 
     function deleteHistoryItem(idx) {
@@ -1651,6 +1718,7 @@
       btn.classList.add('selected');
     }
 
+    /* СПИСОК ШАБЛОНОВ С ВОЗМОЖНОСТЬЮ ПРАВКИ КАЖДОГО ШАБЛОНА */
     function renderPresetsList() {
       const container = document.getElementById('modalPresetsList');
       if (!container) return;
@@ -1662,7 +1730,8 @@
         row.className = 'preset-row';
         row.innerHTML = `
           <button type="button" class="preset-btn" onclick="applyPresetByIndex(${idx})">${escapeHtml(presetText)}</button>
-          <button type="button" class="preset-del-btn" onclick="deleteRiskPreset(${idx})" title="Удалить шаблон">✕</button>
+          <button type="button" class="preset-act-btn" onclick="editRiskPreset(${idx})" title="Изменить шаблон">✏️</button>
+          <button type="button" class="preset-act-btn del" onclick="deleteRiskPreset(${idx})" title="Удалить шаблон">✕</button>
         `;
         container.appendChild(row);
       });
@@ -1675,6 +1744,20 @@
         inp.value = list[idx];
         inp.focus();
       }
+    }
+
+    function editRiskPreset(idx) {
+      const list = getRiskPresets();
+      if (!list[idx]) return;
+      showTextModal("✏️ Изменить шаблон причины", list[idx], (newVal) => {
+        const cleaned = sanitizeRemark(newVal);
+        if (cleaned) {
+          list[idx] = cleaned;
+          saveRiskPresets(list);
+          renderPresetsList();
+          showToast("Шаблон обновлен");
+        }
+      });
     }
 
     function promptAddRiskPreset() {
@@ -1731,7 +1814,10 @@
       if (!step) return;
 
       const rawVal = sanitizeRemark(document.getElementById('customRiskInput').value);
-      if (!rawVal) return;
+      if (!rawVal) {
+        showToast("Введите или выберите причину");
+        return;
+      }
 
       const openB = String.fromCharCode(91);
       const closeB = String.fromCharCode(93);
