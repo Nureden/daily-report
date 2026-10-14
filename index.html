@@ -19,6 +19,7 @@
 
       --brand: #2563eb;
       --brand-light: #eff6ff;
+      --brand-border: #bfdbfe;
 
       --done: #059669;
       --done-bg: #ecfdf5;
@@ -50,9 +51,9 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 12px 12px 140px 12px;
+      padding: 12px 12px 120px 12px;
       font-size: 14px;
-      line-height: 1.45;
+      line-height: 1.4;
       letter-spacing: -0.01em;
       min-height: 100vh;
     }
@@ -67,7 +68,7 @@
       background: var(--surface);
       border-radius: var(--radius-card);
       border: 1px solid var(--border);
-      padding: 14px;
+      padding: 13px 14px;
       margin-bottom: 12px;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
@@ -76,7 +77,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .dash-title {
@@ -136,7 +137,7 @@
     }
 
     .kpi-cell {
-      padding: 9px 12px;
+      padding: 8px 11px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
       background: #ffffff;
@@ -155,7 +156,7 @@
     .kpi-cell.green { border-color: var(--done-border); background: var(--done-bg); color: var(--done); }
 
     .kpi-title {
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.4px;
@@ -165,7 +166,7 @@
       align-items: center;
     }
     .kpi-val {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
       line-height: 1.15;
       margin-top: 2px;
@@ -207,8 +208,8 @@
       color: #991b1b;
       padding: 8px 12px;
       border-radius: var(--radius-sm);
-      margin-bottom: 12px;
-      font-size: 12.5px;
+      margin-bottom: 10px;
+      font-size: 12px;
       font-weight: 700;
     }
     .filter-active-banner.show { display: flex; }
@@ -223,35 +224,33 @@
       cursor: pointer;
     }
 
-    /* СТРОКА ВВОДА */
-    .input-group {
+    /* КОМПАКТНАЯ ШАПКА НАПРАВЛЕНИЙ (ВМЕСТО ГРОМОЗДКОГО ИНПУТА) */
+    .section-bar {
       display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+      margin-bottom: 8px;
     }
-    .input-group input {
-      flex: 1;
-      padding: 10px 14px;
-      font-size: 13.5px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: #fff;
-      outline: none;
+    .section-bar-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
     }
-    .input-group input:focus { border-color: var(--brand); }
-    .btn-action-quiet {
+    .btn-add-proc-compact {
       background: #ffffff;
       color: var(--brand);
-      border: 1px solid #bfdbfe;
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
+      border: 1px solid var(--brand-border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      white-space: nowrap;
       transition: all 0.15s;
     }
-    .btn-action-quiet:hover { background: var(--brand-light); }
+    .btn-add-proc-compact:hover { background: var(--brand-light); }
 
     /* РЕЕСТР НАПРАВЛЕНИЙ */
     .registry-card {
@@ -267,7 +266,7 @@
     .folder-row:last-child { border-bottom: none; }
 
     .folder-header {
-      padding: 12px 14px;
+      padding: 11px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -286,14 +285,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-main);
       flex: 1;
       min-width: 0;
     }
     .folder-chevron {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-subtle);
       transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       width: 14px;
@@ -314,7 +313,7 @@
       font-weight: 700;
       background: var(--surface-subtle);
       color: var(--text-muted);
-      padding: 2px 7px;
+      padding: 1px 7px;
       border-radius: 12px;
       border: 1px solid var(--border);
       flex-shrink: 0;
@@ -354,7 +353,7 @@
       background: #ffffff;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      padding: 9px 12px;
+      padding: 8px 11px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -404,7 +403,7 @@
       position: relative;
     }
 
-    /* ШКАЛА ПРОГРЕССА С ЦВЕТОВОЙ ИНДИКАЦИЕЙ */
+    /* ЧЕСТНАЯ ШКАЛА ПРОГРЕССА (БЕЗ ЛОЖНОГО ЗАПОЛНЕНИЯ НА 0%) */
     .progress-pill {
       display: inline-flex;
       align-items: center;
@@ -412,7 +411,7 @@
       background: var(--surface-subtle);
       border: 1px solid var(--border);
       padding: 2px 7px;
-      border-radius: 4px;
+      border-radius: 5px;
       font-size: 11px;
       font-weight: 700;
       color: var(--text-muted);
@@ -423,6 +422,16 @@
       border-color: var(--done-border);
       color: var(--done);
     }
+    .progress-pill.pill-danger {
+      background: #fff5f5;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+    .progress-pill.pill-amber {
+      background: #fffbeb;
+      border-color: #fcd34d;
+      color: #b45309;
+    }
     .progress-mini-bar {
       width: 28px;
       height: 5px;
@@ -430,8 +439,8 @@
       border-radius: 3px;
       overflow: hidden;
     }
-    .progress-mini-bar.track-danger { background: #fecaca; }
-    .progress-mini-bar.track-amber { background: #fde68a; }
+    .progress-pill.pill-danger .progress-mini-bar { background: #fee2e2; }
+    .progress-pill.pill-amber .progress-mini-bar { background: #fef3c7; }
 
     .progress-mini-fill {
       height: 100%;
@@ -493,17 +502,79 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      padding-top: 6px;
+      padding-top: 7px;
       border-top: 1px dashed var(--border);
     }
     .item-body.hidden { display: none !important; }
 
-    /* ЭТАПЫ */
+    /* 1. ГОРИЗОНТАЛЬНЫЙ КОНВЕЙЕР ЭТАПОВ */
+    .conveyor-strip {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      overflow-x: auto;
+      padding: 2px 1px 5px 1px;
+      scrollbar-width: none;
+    }
+    .conveyor-strip::-webkit-scrollbar { display: none; }
+
+    .conv-node {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      background: var(--surface-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .conv-node:hover { border-color: #94a3b8; color: var(--text-main); }
+    .conv-node.c-done {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+      color: var(--done);
+    }
+    .conv-node.c-blocked {
+      background: var(--danger-bg);
+      border-color: #fca5a5;
+      color: #991b1b;
+      font-weight: 700;
+    }
+    .conv-node.c-overdue {
+      background: #fffbeb;
+      border-color: #fcd34d;
+      color: #92400e;
+      font-weight: 700;
+    }
+    .conv-node.c-current {
+      background: var(--brand-light);
+      border-color: #93c5fd;
+      color: var(--brand);
+      font-weight: 700;
+    }
+    .conv-node.c-pinned {
+      box-shadow: 0 0 0 1.5px var(--text-main);
+    }
+    .conv-arrow {
+      color: #cbd5e1;
+      font-size: 9px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    /* ОДНОСТРОЧНЫЕ КОМПАКТНЫЕ ЭТАПЫ */
     .step-unit {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      padding: 8px 10px;
+      padding: 6px 9px;
       border-radius: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
@@ -512,25 +583,32 @@
     .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
     .step-unit.blocked { background: #fffbfb; border-color: #fecaca; }
 
-    .step-row-top {
+    .step-main-line {
       display: flex;
-      align-items: flex-start;
-      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .step-left-part {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex: 1;
+      min-width: 150px;
     }
     .step-check {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       cursor: pointer;
       accent-color: var(--done);
-      margin-top: 2px;
       flex-shrink: 0;
     }
     .step-text {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer;
-      flex: 1;
       overflow-wrap: break-word;
       user-select: none;
     }
@@ -540,55 +618,87 @@
       opacity: 0.75;
     }
 
-    .step-row-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-left: 24px;
-    }
-    .step-chips {
+    .step-right-part {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       flex-wrap: wrap;
+      margin-left: auto;
     }
 
-    .btn-date-chip {
-      background: #fff;
-      border: 1px solid var(--border);
-      padding: 2px 7px;
+    /* ЧИПЫ ДАТЫ, ДОКУМЕНТА И ЗАДЕРЖКИ (ПРИЗРАЧНЫЕ КОГДА ПУСТЫЕ) */
+    .chip-btn {
+      padding: 2px 6px;
       border-radius: 4px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      line-height: 1.3;
+    }
+    .chip-btn.ghost {
+      background: transparent;
+      border: 1px dashed transparent;
+      color: var(--text-subtle);
+      opacity: 0.75;
+    }
+    .chip-btn.ghost:hover {
+      opacity: 1;
+      background: #ffffff;
+      border-color: var(--border);
       color: var(--text-muted);
     }
-    .btn-date-chip.overdue { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
-    .btn-date-chip.urgent { background: #fef3c7; border-color: #fde68a; color: #92400e; }
-    .btn-date-chip.done { border-color: var(--done-border); color: var(--done); }
 
-    .btn-risk-chip {
-      background: #fff;
+    .chip-btn.doc-active {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+    .chip-btn.date-normal {
+      background: #ffffff;
       border: 1px solid var(--border);
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
       color: var(--text-muted);
     }
-    .btn-risk-chip.active { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .chip-btn.overdue {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      font-weight: 700;
+    }
+    .chip-btn.urgent {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-weight: 700;
+    }
+    .chip-btn.done {
+      background: transparent;
+      border: 1px solid var(--done-border);
+      color: var(--done);
+    }
+    .chip-btn.risk-active {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      font-weight: 700;
+    }
+    .chip-btn.risk-notes {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
 
     .step-del-btn {
       background: transparent;
       border: none;
       color: var(--text-subtle);
-      font-size: 15px;
-      padding: 2px 6px;
+      font-size: 14px;
+      padding: 1px 5px;
       cursor: pointer;
       line-height: 1;
       border-radius: 4px;
-      transition: background 0.15s, color 0.15s;
     }
     .step-del-btn:hover { background: var(--surface-subtle); color: var(--text-main); }
 
@@ -596,32 +706,32 @@
     .step-remarks-thread {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      margin-left: 24px;
-      margin-top: 3px;
+      gap: 3px;
+      margin-left: 22px;
+      margin-top: 2px;
     }
     .step-remark-item {
       display: flex;
       align-items: flex-start;
       gap: 6px;
-      padding: 5px 8px;
+      padding: 4px 8px;
       border-radius: 4px;
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: 11.5px;
+      line-height: 1.35;
       overflow-wrap: break-word;
       word-break: break-word;
     }
     .step-remark-item.is-active-block {
       background: #fef2f2;
-      border-left: 3px solid #ef4444;
+      border-left: 2.5px solid #ef4444;
       color: #991b1b;
     }
     .step-remark-item.is-resolved {
       background: #f8fafc;
-      border-left: 3px solid #94a3b8;
+      border-left: 2.5px solid #94a3b8;
       color: #64748b;
     }
-    .remark-icon { font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+    .remark-icon { font-size: 10.5px; flex-shrink: 0; margin-top: 1px; }
     .remark-date { font-weight: 700; opacity: 0.85; margin-right: 4px; }
     .remark-text { flex: 1; cursor: pointer; min-width: 0; }
     .btn-remark-clear {
@@ -640,11 +750,11 @@
     /* ПОДСВЕТКА СТОРОН */
     .tag-party {
       display: inline-block;
-      padding: 1px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
-      margin-right: 5px;
+      margin-right: 4px;
       background: #e2e8f0;
       color: #1e293b;
     }
@@ -653,6 +763,28 @@
     .tag-party.kmgp { background: #eff6ff; color: #1d4ed8; }
     .tag-party.mio { background: #f3e8ff; color: #6b21a8; }
     .tag-party.nao { background: #ecfdf5; color: #047857; }
+
+    /* СТРОКА НИЖНИХ ДЕЙСТВИЙ В ОБЪЕКТЕ */
+    .obj-bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .btn-subtle-link {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+    }
+    .btn-subtle-link:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
 
     /* ШАБЛОНЫ */
     .folder-footer-actions {
@@ -667,9 +799,9 @@
     .btn-add-obj-subtle {
       background: #fff;
       border: 1px dashed var(--border);
-      padding: 7px 4px;
+      padding: 6px 4px;
       border-radius: var(--radius-sm);
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
@@ -678,19 +810,19 @@
     }
     .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
 
-    /* БЛОК АРХИВА ВНУТРИ ПАПКИ */
+    /* АРХИВ ВНУТРИ ПАПКИ */
     .archive-box {
       margin-top: 4px;
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 7px 10px;
+      padding: 6px 10px;
     }
     .archive-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
@@ -699,8 +831,8 @@
     .archive-list {
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      margin-top: 7px;
+      gap: 4px;
+      margin-top: 6px;
       padding-top: 6px;
       border-top: 1px dashed var(--border);
     }
@@ -714,43 +846,41 @@
       border-radius: 4px;
     }
 
-    /* ПАНЕЛЬ ОТЧЕТОВ */
+    /* КОМПАКТНАЯ ПАНЕЛЬ ОТЧЕТОВ */
     .floating-bar {
       position: fixed;
-      bottom: 12px;
+      bottom: 10px;
       left: 12px;
       right: 12px;
-      max-width: 796px;
+      max-width: 560px;
       margin: 0 auto;
-      background: rgba(15, 23, 42, 0.88);
+      background: rgba(15, 23, 42, 0.9);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
-      padding: 6px;
+      border-radius: 12px;
+      padding: 5px;
       display: flex;
-      gap: 6px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+      gap: 5px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
       z-index: 100;
     }
     .fab-btn {
       flex: 1;
-      padding: 10px 4px;
-      font-size: 13px;
+      padding: 8px 4px;
+      font-size: 12.5px;
       font-weight: 700;
-      border-radius: 9px;
+      border-radius: 8px;
       border: none;
       color: #fff;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.09);
       cursor: pointer;
       white-space: nowrap;
       text-align: center;
       transition: background 0.15s, transform 0.15s;
     }
-    .fab-btn:active {
-      transform: scale(0.97);
-      background: rgba(255, 255, 255, 0.18);
-    }
+    .fab-btn:hover { background: rgba(255, 255, 255, 0.16); }
+    .fab-btn:active { transform: scale(0.97); }
 
     /* МОДАЛЬНЫЕ ОКНА */
     .modal-overlay {
@@ -889,7 +1019,7 @@
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      margin-top: 24px;
+      margin-top: 22px;
     }
     .footer-rev-tag {
       font-size: 11px;
@@ -914,7 +1044,7 @@
       </div>
 
       <div class="metrics-ribbon">
-        <div class="kpi-cell danger clickable" id="kpiBlockersBox" onclick="toggleBlockersFilter()" title="Нажмите, чтобы показать только проблемные участки">
+        <div class="kpi-cell danger clickable" id="kpiBlockersBox" onclick="toggleBlockersFilter()" title="Нажмите, чтобы отфильтровать проблемные участки">
           <span class="kpi-title">
             <span>Задержки</span>
             <span style="font-size:9px; opacity:0.75;">🔍 фильтр</span>
@@ -935,12 +1065,13 @@
         </div>
       </div>
 
+      <!-- ЖИВОЙ ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА ЭКРАНА И ОТЧЕТА -->
       <div class="format-switch">
         <button class="format-btn active" id="modeExecutive" onclick="setReportMode('executive')">
-          ⚡ Сводка за сегодня
+          ⚡ Фокус в работе (Сводка)
         </button>
         <button class="format-btn" id="modeFull" onclick="setReportMode('full')">
-          📋 Полный отчет
+          📋 Полный реестр (Все этапы)
         </button>
       </div>
     </div>
@@ -951,10 +1082,10 @@
       <button class="btn-reset-filter" onclick="toggleBlockersFilter()">Показать все ✕</button>
     </div>
 
-    <!-- ВВОД НАПРАВЛЕНИЯ -->
-    <div class="input-group">
-      <input type="text" id="newProcInput" placeholder="Новое направление..." onkeydown="if(event.key==='Enter') addProcess()">
-      <button class="btn-action-quiet" onclick="addProcess()">+ Добавить</button>
+    <!-- КОМПАКТНАЯ ШАПКА РЕЕСТРА -->
+    <div class="section-bar">
+      <span class="section-bar-title">Направления и участки</span>
+      <button class="btn-add-proc-compact" onclick="openAddProcessModal()">+ Направление</button>
     </div>
 
     <!-- ЕДИНЫЙ РЕЕСТР ПРОЦЕССОВ -->
@@ -963,18 +1094,18 @@
     <!-- СЛУЖЕБНЫЙ ПОДВАЛ -->
     <div class="footer-subtle-wrap">
       <div style="display:flex; gap:8px;">
-        <button class="btn-date-chip" onclick="downloadBackupFile()">📥 Скачать файл бэкапа</button>
-        <button class="btn-date-chip" onclick="triggerImportFile()">📤 Загрузить файл</button>
+        <button class="chip-btn date-normal" onclick="downloadBackupFile()">📥 Скачать файл бэкапа</button>
+        <button class="chip-btn date-normal" onclick="triggerImportFile()">📤 Загрузить файл</button>
       </div>
       <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
       <div class="footer-rev-tag" id="syncTag">● Синхронизировано</div>
     </div>
   </div>
 
-  <!-- ПАНЕЛЬ ОТЧЕТОВ -->
+  <!-- КОМПАКТНАЯ ПАНЕЛЬ ОТЧЕТОВ -->
   <div class="floating-bar">
-    <button class="fab-btn" onclick="copyReport()">📋 Скопировать</button>
-    <button class="fab-btn" onclick="exportToExcel()">📊 Скачать Excel</button>
+    <button class="fab-btn" onclick="copyReport()">📋 Текст</button>
+    <button class="fab-btn" onclick="exportToExcel()">📊 Excel</button>
     <button class="fab-btn" onclick="shareToTelegram()">✈️ В Telegram</button>
   </div>
 
@@ -1020,12 +1151,12 @@
       <input type="date" id="modalDatePickerInput" class="modal-input-field">
 
       <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px;">
-        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(0)">Сегодня</button>
-        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(1)">Завтра</button>
-        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(3)">+3 дня</button>
-        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(7)">+7 дней</button>
-        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(15)">+15 дней</button>
-        <button type="button" class="preset-btn" style="text-align:center;" onclick="setModalDateOffset(30)">+1 мес</button>
+        <button type="button" class="preset-btn" style="text-align:center; background:var(--surface-subtle); border-radius:6px;" onclick="setModalDateOffset(0)">Сегодня</button>
+        <button type="button" class="preset-btn" style="text-align:center; background:var(--surface-subtle); border-radius:6px;" onclick="setModalDateOffset(1)">Завтра</button>
+        <button type="button" class="preset-btn" style="text-align:center; background:var(--surface-subtle); border-radius:6px;" onclick="setModalDateOffset(3)">+3 дня</button>
+        <button type="button" class="preset-btn" style="text-align:center; background:var(--surface-subtle); border-radius:6px;" onclick="setModalDateOffset(7)">+7 дней</button>
+        <button type="button" class="preset-btn" style="text-align:center; background:var(--surface-subtle); border-radius:6px;" onclick="setModalDateOffset(15)">+15 дней</button>
+        <button type="button" class="preset-btn" style="text-align:center; background:var(--surface-subtle); border-radius:6px;" onclick="setModalDateOffset(30)">+1 мес</button>
       </div>
 
       <div class="modal-actions-row">
@@ -1077,7 +1208,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА И ЗАМЕЧАНИЙ -->
+  <!-- МОДАЛЬНОЕ ОКНО ВВОДА / РЕДАКТИРОВАНИЯ ТЕКСТА, СЗ И ЗАМЕЧАНИЙ -->
   <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -1099,6 +1230,7 @@
       <input type="text" id="textModalInput" class="modal-input-field" placeholder="Введите текст..." onkeydown="if(event.key==='Enter') submitTextModal()">
       <div class="modal-actions-row">
         <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
+        <button class="btn-m-danger" id="textModalClearBtn" style="display:none;" onclick="clearTextModalValue()">Очистить</button>
         <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
       </div>
     </div>
@@ -1136,6 +1268,7 @@
 
     let reportMode = 'executive';
     let filterOnlyIssues = false;
+    let pinnedStepsMap = {}; // Ручной просмотр этапа из конвейера в режиме Фокус
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
@@ -1144,6 +1277,7 @@
     let selectedPartyTag = 'Подрядчик CPP';
     let editModalPartyTag = '';
     let textModalCallback = null;
+    let textModalClearCallback = null;
     let confirmModalCallback = null;
 
     const DEFAULT_RISK_PRESETS = [
@@ -1236,11 +1370,11 @@
     }
 
     function analyzeDeadline(dateStr, isDone) {
-      if (isDone) return { cls: 'done', text: dateStr || '✔ Выполнено' };
-      if (!dateStr) return { cls: 'empty', text: '📅 Срок' };
+      if (isDone) return { cls: 'done', text: dateStr || '✔ Готово' };
+      if (!dateStr) return { cls: 'ghost', text: '+ Срок' };
 
       const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-      if (!m) return { cls: '', text: dateStr };
+      if (!m) return { cls: 'date-normal', text: dateStr };
 
       const target = new Date(m[3] ? parseInt(m[3]) : new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
       const today = new Date();
@@ -1249,10 +1383,17 @@
 
       const diff = Math.round((target - today) / 86400000);
       if (diff < 0) return { cls: 'overdue', text: `🔴 Просрочено (${Math.abs(diff)} дн.)` };
-      if (diff === 0) return { cls: 'urgent', text: `🟠 Срок сегодня` };
+      if (diff === 0) return { cls: 'urgent', text: `🟠 Сегодня` };
       if (diff === 1) return { cls: 'urgent', text: `🟡 Завтра` };
       if (diff <= 3) return { cls: 'urgent', text: `🟡 Через ${diff} дн.` };
-      return { cls: '', text: `📅 ${dateStr}` };
+      return { cls: 'date-normal', text: `📅 ${dateStr}` };
+    }
+
+    function shortenStepName(name) {
+      if (!name) return '';
+      const s = name.trim();
+      if (s.length <= 16) return s;
+      return s.slice(0, 14) + '…';
     }
 
     function sanitizeRemark(text) {
@@ -1379,6 +1520,7 @@
 
     function collapseAllItems() {
       filterOnlyIssues = false;
+      pinnedStepsMap = {};
       state.forEach(p => {
         p.collapsed = true;
         p.showArchive = false;
@@ -1412,6 +1554,7 @@
             return {
               ...s,
               text: sanitizeRemark(s.text || 'Этап'),
+              doc: s.doc ? sanitizeRemark(s.doc) : '',
               blocker: s.blocker ? sanitizeRemark(s.blocker) : null,
               history: histClean
             };
@@ -1543,11 +1686,22 @@
       if (tag) tag.textContent = text;
     }
 
+    /* ПЕРЕКЛЮЧЕНИЕ ЖИВОГО РЕЖИМА ЭКРАНА И ФОРМАТА ОТЧЕТА */
     function setReportMode(m) {
       reportMode = m;
       document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
       document.getElementById('modeFull').classList.toggle('active', m === 'full');
-      showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
+      render();
+      showToast(m === 'executive' ? "⚡ Режим: Фокус на активных этапах" : "📋 Режим: Полный список всех этапов");
+    }
+
+    function toggleConveyorPin(objId, stepId) {
+      if (pinnedStepsMap[objId] === stepId) {
+        delete pinnedStepsMap[objId];
+      } else {
+        pinnedStepsMap[objId] = stepId;
+      }
+      render();
     }
 
     function toggleBlockersFilter() {
@@ -1573,11 +1727,15 @@
       closeConfirmModal();
     }
 
-    function showTextModal(title, initialValue, onSave, withPartySelector = false, initialParty = '') {
+    function showTextModal(title, initialValue, onSave, withPartySelector = false, initialParty = '', onClear = null) {
       document.getElementById('textModalTitle').textContent = title;
       const inp = document.getElementById('textModalInput');
       inp.value = initialValue || '';
       textModalCallback = onSave;
+      textModalClearCallback = onClear;
+
+      const clearBtn = document.getElementById('textModalClearBtn');
+      clearBtn.style.display = (onClear && initialValue) ? 'block' : 'none';
 
       const partyBox = document.getElementById('editModalPartyBox');
       if (withPartySelector) {
@@ -1606,6 +1764,7 @@
       if (e && e.target !== e.currentTarget) return;
       document.getElementById('textPromptModalOverlay').style.display = 'none';
       textModalCallback = null;
+      textModalClearCallback = null;
     }
 
     function submitTextModal() {
@@ -1616,22 +1775,23 @@
       closeTextModal();
     }
 
-    function addProcess() {
-      const input = document.getElementById('newProcInput');
-      const val = input.value.trim();
-      if (!val) return;
+    function clearTextModalValue() {
+      if (textModalClearCallback) textModalClearCallback();
+      closeTextModal();
+    }
 
-      state.push({
-        id: Date.now(),
-        title: val,
-        collapsed: false,
-        showArchive: false,
-        objects: []
+    function openAddProcessModal() {
+      showTextModal("➕ Новое направление", "", (val) => {
+        state.push({
+          id: Date.now(),
+          title: sanitizeRemark(val),
+          collapsed: false,
+          showArchive: false,
+          objects: []
+        });
+        saveData();
+        showToast("Направление добавлено");
       });
-
-      input.value = '';
-      saveData();
-      showToast("Направление добавлено");
     }
 
     function moveProcess(procId, direction) {
@@ -1742,6 +1902,7 @@
           steps: (src.steps || []).map((s, i) => ({
             id: Date.now() + i + 1,
             text: s.text,
+            doc: s.doc || "",
             date: s.date,
             done: false,
             blocker: null,
@@ -1752,6 +1913,33 @@
         saveData();
         showToast("Скопировано");
       });
+    }
+
+    /* ПРИВЯЗКА ДОКУМЕНТА / СЗ / ИСХОДЯЩЕГО НОМЕРА К ЭТАПУ */
+    function openDocModal(procId, objId, stepId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      const step = obj?.steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      showTextModal(
+        "📄 Документ / СЗ / № письма",
+        step.doc || "",
+        (newDoc) => {
+          step.doc = sanitizeRemark(newDoc);
+          step.updatedAt = getTimestampStr();
+          saveData();
+          showToast("Документ привязан");
+        },
+        false,
+        "",
+        () => {
+          step.doc = "";
+          step.updatedAt = getTimestampStr();
+          saveData();
+          showToast("Метка документа удалена");
+        }
+      );
     }
 
     function moveStep(procId, objId, stepId, direction) {
@@ -2091,6 +2279,7 @@
           steps: templateSteps.map((text, idx) => ({
             id: Date.now() + idx,
             text: text,
+            doc: "",
             date: "",
             done: false,
             blocker: null,
@@ -2113,15 +2302,18 @@
         const cleaned = sanitizeRemark(txt);
         if (cleaned) {
           if (!obj.steps) obj.steps = [];
+          const newId = Date.now();
           obj.steps.push({
-            id: Date.now(),
+            id: newId,
             text: cleaned,
+            doc: "",
             date: "",
             done: false,
             blocker: null,
             history: [],
             updatedAt: getTimestampStr()
           });
+          pinnedStepsMap[obj.id] = newId;
           saveData();
           showToast("Этап добавлен");
         }
@@ -2273,9 +2465,22 @@
 
                 const objBlockers = stepsArr.filter(s => !s.done && s.blocker).length;
                 const objOverdues = stepsArr.filter(s => !s.done && !s.blocker && isStepOverdue(s.date, s.done)).length;
-                const barColorClass = objBlockers > 0 ? 'is-danger' : (objOverdues > 0 ? 'is-amber' : '');
-                const trackColorClass = objBlockers > 0 ? 'track-danger' : (objOverdues > 0 ? 'track-amber' : '');
-                const visualWidth = (percent === 0 && (objBlockers > 0 || objOverdues > 0)) ? 25 : percent;
+
+                // Честная шкала: без фальшивого заполнения при 0%, но с подсветкой самой капсулы
+                const pillStateClass = isAllDone ? 'green' : (objBlockers > 0 ? 'pill-danger' : (objOverdues > 0 ? 'pill-amber' : ''));
+                const barFillClass = objBlockers > 0 ? 'is-danger' : (objOverdues > 0 ? 'is-amber' : '');
+
+                // Определяем первый незавершенный этап (текущее звено конвейера)
+                const firstUnfinished = stepsArr.find(s => !s.done);
+                const currentActiveStepId = firstUnfinished ? firstUnfinished.id : null;
+                const pinnedStepId = pinnedStepsMap[obj.id] || null;
+
+                // В режиме "Фокус" (executive) показываем под конвейером только проблемные, текущий активный или выбранный кликом этап
+                const stepsToRender = (reportMode === 'executive' && !isAllDone)
+                  ? stepsArr.filter(s => (!s.done && (s.blocker || isStepOverdue(s.date, s.done))) || s.id === currentActiveStepId || s.id === pinnedStepId)
+                  : stepsArr;
+
+                const hiddenStepsCount = stepsArr.length - stepsToRender.length;
 
                 return `
                   <div class="item-card ${isAllDone ? 'is-complete' : ''}">
@@ -2287,9 +2492,9 @@
 
                       <div class="item-meta-right" onclick="event.stopPropagation()">
                         ${tCount > 0 ? `
-                          <div class="progress-pill ${isAllDone ? 'green' : ''}">
-                            <div class="progress-mini-bar ${trackColorClass}">
-                              <div class="progress-mini-fill ${barColorClass}" style="width: ${visualWidth}%;"></div>
+                          <div class="progress-pill ${pillStateClass}">
+                            <div class="progress-mini-bar">
+                              <div class="progress-mini-fill ${barFillClass}" style="width: ${percent}%;"></div>
                             </div>
                             <span>${dCount}/${tCount} (${percent}%)</span>
                           </div>
@@ -2309,45 +2514,76 @@
                     </div>
 
                     <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
+                      <!-- 1. ГОРИЗОНТАЛЬНЫЙ КОНВЕЙЕР ЭТАПОВ -->
+                      ${stepsArr.length > 1 ? `
+                        <div class="conveyor-strip" title="Нажмите на этап, чтобы развернуть его">
+                          ${stepsArr.map((st, idx) => {
+                            const stOverdue = isStepOverdue(st.date, st.done);
+                            const nodeCls = st.done ? 'c-done' : (st.blocker ? 'c-blocked' : (stOverdue ? 'c-overdue' : (st.id === currentActiveStepId ? 'c-current' : '')));
+                            const pinCls = (pinnedStepId === st.id) ? 'c-pinned' : '';
+                            const iconPrefix = st.done ? '✔ ' : (st.blocker ? '🚨 ' : (stOverdue ? '🔴 ' : (st.id === currentActiveStepId ? '▶ ' : '')));
+                            return `
+                              <span class="conv-node ${nodeCls}${pinCls}" onclick="toggleConveyorPin(${obj.id},${st.id})">
+                                ${iconPrefix}${escapeHtml(shortenStepName(st.text))}
+                              </span>
+                              ${idx < stepsArr.length - 1 ? `<span class="conv-arrow">➔</span>` : ''}
+                            `;
+                          }).join('')}
+                        </div>
+                      ` : ''}
+
                       ${isAllDone ? `
                         <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#059669;">
                           <span>🎉 Все этапы закрыты</span>
-                          <button class="btn-date-chip" style="background:#059669; color:#fff;" onclick="archiveObject(${proc.id}, ${obj.id})">В архив</button>
+                          <button class="chip-btn date-normal" style="background:#059669; color:#fff; border:none;" onclick="archiveObject(${proc.id}, ${obj.id})">В архив</button>
                         </div>
                       ` : ''}
 
                       <div style="display:flex; flex-direction:column; gap:5px;">
-                        ${stepsArr.map((s, sIdx) => {
+                        ${stepsToRender.map((s) => {
+                          const sIdx = stepsArr.findIndex(x => x.id === s.id);
                           const hasBlock = !s.done && !!s.blocker;
                           const dateMeta = analyzeDeadline(s.date, s.done);
                           const hist = s.history || [];
+                          const hasDoc = !!s.doc;
 
                           return `
                             <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
-                              <div class="step-row-top">
-                                <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
-                                <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
-                              </div>
+                              <!-- ОДНОСТРОЧНАЯ КОМПАКТНАЯ СТРУКТУРА ЭТАПА -->
+                              <div class="step-main-line">
+                                <div class="step-left-part">
+                                  <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                                  <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
+                                </div>
 
-                              <div class="step-row-bottom">
-                                <div class="step-chips">
-                                  <button type="button" class="btn-date-chip ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                <div class="step-right-part">
+                                  <!-- Кнопка документа / СЗ -->
+                                  <button type="button" class="chip-btn ${hasDoc ? 'doc-active' : 'ghost'}" onclick="openDocModal(${proc.id}, ${obj.id}, ${s.id})" title="Привязать номер СЗ, письма или документа">
+                                    ${hasDoc ? '📄 ' + escapeHtml(s.doc) : '📄 +Док'}
+                                  </button>
+
+                                  <!-- Кнопка срока -->
+                                  <button type="button" class="chip-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
                                     ${dateMeta.text}
                                   </button>
+
+                                  <!-- Кнопка замечания -->
                                   ${!s.done ? `
-                                    <button class="btn-risk-chip ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
+                                    <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
                                       ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
                                     </button>
                                   ` : ''}
-                                </div>
 
-                                <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
-                                  <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
-                                  <div class="obj-dropdown-menu" id="smenu-${s.id}">
-                                    <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
-                                    ${sIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, -1)">⬆️ Вверх</button>` : ''}
-                                    ${sIdx < stepsArr.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, 1)">⬇️ Вниз</button>` : ''}
-                                    <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
+                                  <!-- Меню этапа ··· -->
+                                  <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
+                                    <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
+                                    <div class="obj-dropdown-menu" id="smenu-${s.id}">
+                                      <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
+                                      <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openDocModal(${proc.id}, ${obj.id}, ${s.id})">📄 Документ / СЗ</button>
+                                      ${sIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, -1)">⬆️ Вверх</button>` : ''}
+                                      ${sIdx < stepsArr.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, 1)">⬇️ Вниз</button>` : ''}
+                                      <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -2375,9 +2611,16 @@
                         }).join('')}
                       </div>
 
-                      <button class="btn-date-chip" style="border:1px dashed var(--border); font-size:11.5px; padding:6px; margin-top:2px;" onclick="addCustomStep(${proc.id},${obj.id})">
-                        + Добавить задачу
-                      </button>
+                      <div class="obj-bottom-bar">
+                        ${hiddenStepsCount > 0 ? `
+                          <button type="button" class="btn-subtle-link" onclick="setReportMode('full')">
+                            👁 Показать остальные этапы (${hiddenStepsCount})
+                          </button>
+                        ` : ''}
+                        <button type="button" class="btn-subtle-link" onclick="addCustomStep(${proc.id},${obj.id})">
+                          + Добавить задачу
+                        </button>
+                      </div>
                     </div>
                   </div>
                 `;
@@ -2403,7 +2646,7 @@
                       ${archivedObjects.map(ao => `
                         <div class="archive-row-item">
                           <span style="font-weight:700; color:var(--done);">✔ ${escapeHtml(ao.title)}</span>
-                          <button class="btn-date-chip" onclick="restoreObject(${proc.id},${ao.id})">↩ Вернуть</button>
+                          <button class="chip-btn date-normal" onclick="restoreObject(${proc.id},${ao.id})">↩ Вернуть</button>
                         </div>
                       `).join('')}
                     </div>
@@ -2442,6 +2685,7 @@
                 proc: p.title,
                 obj: o.title,
                 step: s.text,
+                doc: s.doc ? ` (📄 ${s.doc})` : '',
                 date: s.date || 'срок не указан',
                 history: hist.length > 0 ? hist : [s.blocker]
               });
@@ -2457,21 +2701,24 @@
           txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ (БЛОКЕРЫ):\n`;
           blockers.forEach(b => {
             txt += `• ${b.obj} (${b.proc}):\n`;
-            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
+            txt += `  ⚠️ ${b.step}${b.doc} [${b.date}]\n`;
             b.history.forEach(hStr => { txt += `     └ ${hStr}\n`; });
           });
           txt += `\n`;
         }
 
         let hasDone = false;
-        let doneTxt = `✅ РЕЗУЛЬТАТЫ ЗА ДЕНЬ:\n`;
+        let doneTxt = `✅ ВЫПОЛНЕННЫЕ ЭТАПЫ:\n`;
         state.forEach(p => {
           (p.objects || []).filter(o => !o.archived).forEach(o => {
             const todayDoneSteps = (o.steps || []).filter(s => s.done);
             if (todayDoneSteps.length > 0) {
               hasDone = true;
               doneTxt += `• ${o.title} (${p.title}):\n`;
-              todayDoneSteps.forEach(s => { doneTxt += `  - ${s.text} [закрыто]\n`; });
+              todayDoneSteps.forEach(s => {
+                const docInfo = s.doc ? ` [📄 ${s.doc}]` : '';
+                doneTxt += `  - ${s.text}${docInfo} [закрыто]\n`;
+              });
             }
           });
         });
@@ -2479,14 +2726,14 @@
         txt += doneTxt + `\n`;
 
         let hasPlan = false;
-        let planTxt = `⏳ В ШТАТНОЙ РАБОТЕ:\n`;
+        let planTxt = `⏳ ТЕКУЩИЙ ФОКУС В РАБОТЕ:\n`;
         state.forEach(p => {
           (p.objects || []).filter(o => !o.archived).forEach(o => {
-            const regularSteps = (o.steps || []).filter(s => !s.done && !s.blocker);
-            if (regularSteps.length > 0) {
+            const nextStep = (o.steps || []).find(s => !s.done && !s.blocker);
+            if (nextStep) {
               hasPlan = true;
-              planTxt += `• ${o.title} (${p.title}):\n`;
-              regularSteps.forEach(s => { planTxt += `  - ${s.text}${s.date ? ` [${s.date}]` : ''}\n`; });
+              const docInfo = nextStep.doc ? ` (📄 ${nextStep.doc})` : '';
+              planTxt += `• ${o.title}: ${nextStep.text}${docInfo}${nextStep.date ? ` [${nextStep.date}]` : ''}\n`;
             }
           });
         });
@@ -2496,11 +2743,11 @@
         return txt.trim();
 
       } else {
-        let txt = `📋 СВОДНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
+        let txt = `📋 ПОЛНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
         if (blockers.length > 0) {
           txt += `🚨 ЗАДЕРЖКИ (${blockers.length}):\n`;
           blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
+            txt += `• ${b.obj}: ${b.step}${b.doc} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
           });
           txt += `\n`;
         }
@@ -2520,8 +2767,9 @@
             (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
+              const docStr = s.doc ? ` [📄 ${s.doc}]` : '';
               const blockStr = s.blocker ? ` (Задержка: ${s.blocker})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
+              txt += `  ${icon} ${s.text}${docStr} ${status}${blockStr}\n`;
             });
             txt += `\n`;
           });
@@ -2545,7 +2793,7 @@
 
     function exportToExcel() {
       const rows = [];
-      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tСрок\tСтатус\tИстория замечаний\n";
+      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tДокумент / СЗ\tСрок\tСтатус\tИстория замечаний\n";
 
       state.forEach(p => {
         (p.objects || []).forEach(o => {
@@ -2555,6 +2803,7 @@
 
           (o.steps || []).forEach(s => {
             const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
+            const docStr = s.doc || "—";
             const dateStr = s.date || "Не указан";
             const histList = (s.history || []).map(h => `[${h.date}] ${h.text}`);
             const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
@@ -2564,11 +2813,12 @@
               "Объект": o.title,
               "Прогресс": pct,
               "Этап": s.text,
+              "Документ / СЗ": docStr,
               "Срок": dateStr,
               "Статус": statusStr,
               "Хронология": fullHistStr
             });
-            tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
+            tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${docStr}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
           });
         });
       });
@@ -2613,7 +2863,7 @@
       if (!key) return out.textContent = "⚠️ Укажите API-ключ Gemini";
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
-      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и понятный управленческий отчет для руководства с хронологией рисков и распределением по ответственным ([Подрядчик CPP], [Субподряд КМГИ], [Заказчик KMG Petrochem], [Акимат / МИО], [НАО / Кадастр]). Без сырых таблиц, строго по пунктам:\n${rawReport}`;
+      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и понятный управленческий отчет для руководства с хронологией рисков, номерами документов/СЗ и распределением по ответственным ([Подрядчик CPP], [Субподряд КМГИ], [Заказчик KMG Petrochem], [Акимат / МИО], [НАО / Кадастр]). Без сырых таблиц, строго по пунктам:\n${rawReport}`;
 
       try {
         const response = await fetch(url, {
