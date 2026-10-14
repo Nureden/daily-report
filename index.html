@@ -249,6 +249,7 @@
       font-weight: 700;
       cursor: pointer;
       transition: all 0.15s;
+      outline: none;
     }
     .btn-add-proc-compact:hover { background: var(--brand-light); }
 
@@ -308,6 +309,7 @@
       text-overflow: ellipsis;
     }
 
+    /* СЧЕТЧИК ОБЪЕКТОВ В ПАПКЕ С ЦВЕТОВЫМ СТАТУСОМ */
     .counter-badge {
       font-size: 11px;
       font-weight: 700;
@@ -317,6 +319,21 @@
       border-radius: 12px;
       border: 1px solid var(--border);
       flex-shrink: 0;
+    }
+    .counter-badge.badge-danger {
+      background: #fff5f5;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+    .counter-badge.badge-amber {
+      background: #fffbeb;
+      border-color: #fcd34d;
+      color: #b45309;
+    }
+    .counter-badge.badge-green {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+      color: var(--done);
     }
 
     .folder-right-tools {
@@ -637,6 +654,7 @@
       white-space: nowrap;
       transition: all 0.15s;
       line-height: 1.3;
+      outline: none;
     }
     .chip-btn.ghost {
       background: transparent;
@@ -794,7 +812,7 @@
       border-color: var(--brand-border);
     }
 
-    /* РОВНАЯ ОДНОСТРОЧНАЯ ПАНЕЛЬ КНОПОК ВНИЗУ ОБЪЕКТА */
+    /* РОВНАЯ ОДНОСТРОЧНАЯ ПАНЕЛЬ КНОПОК ВНИЗУ ОБЪЕКТА (БЕЗ ЗАЛИПАНИЯ ФОКУСА) */
     .obj-bottom-bar {
       display: flex;
       align-items: stretch;
@@ -817,8 +835,25 @@
       align-items: center;
       justify-content: center;
       gap: 4px;
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
-    .btn-subtle-link:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    @media (hover: hover) {
+      .btn-subtle-link:hover {
+        border-color: var(--brand);
+        color: var(--brand);
+        background: var(--brand-light);
+      }
+    }
+    .btn-subtle-link:focus {
+      outline: none;
+      background: #ffffff;
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    .btn-subtle-link:active {
+      background: var(--surface-subtle);
+    }
 
     /* ШАБЛОНЫ */
     .folder-footer-actions {
@@ -841,8 +876,11 @@
       cursor: pointer;
       text-align: center;
       transition: all 0.15s;
+      outline: none;
     }
-    .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    @media (hover: hover) {
+      .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    }
 
     /* АРХИВ ВНУТРИ ПАПКИ */
     .archive-box {
@@ -1118,7 +1156,7 @@
     <!-- КОМПАКТНАЯ ШАПКА РЕЕСТРА -->
     <div class="section-bar">
       <span class="section-bar-title">Направления и участки</span>
-      <button class="btn-add-proc-compact" onclick="openAddProcessModal()">+ Направление</button>
+      <button class="btn-add-proc-compact" onclick="this.blur(); openAddProcessModal()">+ Направление</button>
     </div>
 
     <!-- ЕДИНЫЙ РЕЕСТР ПРОЦЕССОВ -->
@@ -1127,8 +1165,8 @@
     <!-- СЛУЖЕБНЫЙ ПОДВАЛ -->
     <div class="footer-subtle-wrap">
       <div style="display:flex; gap:8px;">
-        <button class="chip-btn date-normal" onclick="downloadBackupFile()">📥 Скачать файл бэкапа</button>
-        <button class="chip-btn date-normal" onclick="triggerImportFile()">📤 Загрузить файл</button>
+        <button class="chip-btn date-normal" onclick="this.blur(); downloadBackupFile()">📥 Скачать файл бэкапа</button>
+        <button class="chip-btn date-normal" onclick="this.blur(); triggerImportFile()">📤 Загрузить файл</button>
       </div>
       <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
       <div class="footer-rev-tag" id="syncTag">● Синхронизировано</div>
@@ -1409,18 +1447,29 @@
       return p.length === 3 ? `до ${p[2]}.${p[1]}.${p[0]}` : isoStr;
     }
 
+    function parseRuDateParts(dateStr) {
+      if (!dateStr) return null;
+      const clean = String(dateStr).replace('до ', '').trim();
+      const parts = clean.split('.');
+      if (parts.length < 2) return null;
+      const d = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const y = parts[2] ? parseInt(parts[2], 10) : new Date().getFullYear();
+      if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+      return { d, m, y };
+    }
+
     function displayToISO(dispStr) {
-      if (!dispStr) return '';
-      const m = dispStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-      if (!m) return '';
-      return `${m[3] || new Date().getFullYear()}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+      const p = parseRuDateParts(dispStr);
+      if (!p) return '';
+      return `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
     }
 
     function isStepOverdue(dateStr, isDone) {
       if (isDone || !dateStr) return false;
-      const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-      if (!m) return false;
-      const target = new Date(m[3] ? parseInt(m[3]) : new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
+      const p = parseRuDateParts(dateStr);
+      if (!p) return false;
+      const target = new Date(p.y, p.m - 1, p.d);
       const today = new Date();
       today.setHours(0,0,0,0);
       target.setHours(0,0,0,0);
@@ -1431,10 +1480,10 @@
       if (isDone) return { cls: 'done', text: dateStr || '✔ Готово' };
       if (!dateStr) return { cls: 'ghost', text: '+ Срок' };
 
-      const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-      if (!m) return { cls: 'date-normal', text: dateStr };
+      const p = parseRuDateParts(dateStr);
+      if (!p) return { cls: 'date-normal', text: dateStr };
 
-      const target = new Date(m[3] ? parseInt(m[3]) : new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
+      const target = new Date(p.y, p.m - 1, p.d);
       const today = new Date();
       today.setHours(0,0,0,0);
       target.setHours(0,0,0,0);
@@ -1465,28 +1514,40 @@
       return s.slice(0, 9) + '…';
     }
 
+    /* ОЧИСТКА ТЕКСТА И АВТОУДАЛЕНИЕ ДУБЛЕЙ "№ №" */
     function sanitizeRemark(text) {
       if (!text) return '';
       let s = String(text);
       if (s.includes('tag-party') || s.includes('lass="')) {
         s = s.replace(/<[^>]*>/g, '').replace(/(Petrochem\s*){2,}/g, '');
       }
-      return s.trim().replace(/\s+/g, ' ');
+      s = s.trim().replace(/\s+/g, ' ');
+      while (s.includes('№ №')) {
+        s = s.replace('№ №', '№');
+      }
+      while (s.includes('№№')) {
+        s = s.replace('№№', '№');
+      }
+      return s.trim();
     }
 
     function insertDocPrefix(inputId, prefixStr) {
       const inp = document.getElementById(inputId);
       if (!inp) return;
-      const cur = inp.value.trim();
+      let cur = inp.value.trim();
       if (!cur) {
         inp.value = prefixStr;
-      } else if (!cur.startsWith(prefixStr.trim())) {
-        inp.value = `${prefixStr}${cur}`;
+      } else {
+        if (cur.startsWith('№')) {
+          cur = cur.slice(1).trim();
+        }
+        if (!cur.toLowerCase().startsWith(prefixStr.trim().toLowerCase())) {
+          inp.value = sanitizeRemark(`${prefixStr}${cur}`) + ' ';
+        }
       }
       inp.focus();
     }
 
-    /* РАЗБОР СТОРОНЫ, ДОКУМЕНТА И ТЕКСТА ПРИЧИНЫ */
     function extractPartyAndText(rawText, explicitDoc = '') {
       let str = sanitizeRemark(rawText);
       let party = '';
@@ -1495,7 +1556,6 @@
       const openB = String.fromCharCode(91); // '['
       const closeB = String.fromCharCode(93); // ']'
 
-      // 1. Извлекаем сторону в начале: [Подрядчик CPP]
       if (str.startsWith(openB)) {
         const closeIdx = str.indexOf(closeB);
         if (closeIdx > 1 && closeIdx < 45) {
@@ -1504,13 +1564,12 @@
         }
       }
 
-      // 2. Извлекаем документ, если он был записан в скобках [📄 ...]
       if (str.startsWith(openB)) {
         const closeIdx2 = str.indexOf(closeB);
         if (closeIdx2 > 1 && closeIdx2 < 65) {
           const secondTag = str.slice(1, closeIdx2).trim();
           if (secondTag.startsWith('📄') || secondTag.toLowerCase().includes('сз') || secondTag.toLowerCase().includes('исх')) {
-            if (!doc) doc = secondTag.replace(/^📄\s*/, '').trim();
+            if (!doc) doc = sanitizeRemark(secondTag.replace(/^📄\s*/, ''));
             str = str.slice(closeIdx2 + 1).trim();
           }
         }
@@ -2123,7 +2182,6 @@
       });
     }
 
-    /* РЕДАКТИРОВАНИЕ ЗАМЕЧАНИЯ ВМЕСТЕ С НОМЕРОМ ДОКУМЕНТА И СТОРОНОЙ */
     function editHistoryItem(idx) {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -2520,6 +2578,29 @@
           const allActiveObjects = (proc.objects || []).filter(o => !o.archived);
           const archivedObjects = (proc.objects || []).filter(o => o.archived);
 
+          // Считаем статус папки для цветовой подсветки кружка с цифрой
+          let procBlockersCount = 0;
+          let procOverdueCount = 0;
+          let procTotalSteps = 0;
+          let procDoneSteps = 0;
+
+          allActiveObjects.forEach(o => {
+            (o.steps || []).forEach(s => {
+              procTotalSteps++;
+              if (s.done) {
+                procDoneSteps++;
+              } else {
+                if (s.blocker) procBlockersCount++;
+                else if (isStepOverdue(s.date, s.done)) procOverdueCount++;
+              }
+            });
+          });
+
+          const isProcAllDone = procTotalSteps > 0 && procDoneSteps === procTotalSteps;
+          const folderBadgeClass = procBlockersCount > 0
+            ? 'badge-danger'
+            : (procOverdueCount > 0 ? 'badge-amber' : (isProcAllDone ? 'badge-green' : ''));
+
           const visibleObjects = filterOnlyIssues
             ? allActiveObjects.filter(o => (o.steps || []).some(s => !s.done && (s.blocker || isStepOverdue(s.date, s.done))))
             : allActiveObjects;
@@ -2535,7 +2616,7 @@
               <div class="folder-left">
                 <span class="folder-chevron ${isCollapsed ? 'collapsed' : ''}">▼</span>
                 <span class="folder-title-text">${escapeHtml(proc.title)}</span>
-                <span class="counter-badge">${allActiveObjects.length}</span>
+                <span class="counter-badge ${folderBadgeClass}">${allActiveObjects.length}</span>
               </div>
               <div class="folder-right-tools" onclick="event.stopPropagation()">
                 <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
@@ -2661,12 +2742,12 @@
 
                               <!-- СТРОКА 2: ЧИПЫ СРОКА И ЗАМЕЧАНИЯ -->
                               <div class="step-chips-bar">
-                                <button type="button" class="chip-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                <button type="button" class="chip-btn ${dateMeta.cls}" onclick="this.blur(); openDateModal(${proc.id}, ${obj.id}, ${s.id})">
                                   ${dateMeta.text}
                                 </button>
 
                                 ${!s.done ? `
-                                  <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
+                                  <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="this.blur(); openRiskModal(${proc.id}, ${obj.id},${s.id})">
                                     ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
                                   </button>
                                 ` : ''}
@@ -2695,14 +2776,14 @@
                         }).join('')}
                       </div>
 
-                      <!-- РОВНЫЕ КНОПКИ В ОДНУ СТРОКУ -->
+                      <!-- РОВНЫЕ КНОПКИ В ОДНУ СТРОКУ БЕЗ ЗАЛИПАНИЯ РАМКИ -->
                       <div class="obj-bottom-bar">
                         ${(hiddenStepsCount > 0 || isLocalShowAll) && reportMode === 'executive' && !isAllDone ? `
-                          <button type="button" class="btn-subtle-link" onclick="toggleObjShowAllSteps(${obj.id})">
+                          <button type="button" class="btn-subtle-link" onclick="this.blur(); toggleObjShowAllSteps(${obj.id})">
                             ${isLocalShowAll ? '▲ Свернуть пустые' : `👁 Все этапы (+${hiddenStepsCount})`}
                           </button>
                         ` : ''}
-                        <button type="button" class="btn-subtle-link" onclick="addCustomStep(${proc.id},${obj.id})">
+                        <button type="button" class="btn-subtle-link" onclick="this.blur(); addCustomStep(${proc.id},${obj.id})">
                           + Добавить задачу
                         </button>
                       </div>
@@ -2713,10 +2794,10 @@
 
               ${!filterOnlyIssues ? `
                 <div class="folder-footer-actions">
-                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
-                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
-                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
-                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
+                  <button class="btn-add-obj-subtle" onclick="this.blur(); createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
+                  <button class="btn-add-obj-subtle" onclick="this.blur(); createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
+                  <button class="btn-add-obj-subtle" onclick="this.blur(); createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
+                  <button class="btn-add-obj-subtle" onclick="this.blur(); createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
                 </div>
               ` : ''}
 
@@ -2766,15 +2847,15 @@
           (o.steps || []).forEach(s => {
             if (!s.done && s.blocker) {
               const hist = (s.history || []).map(h => {
-                const docPart = h.doc ? ` [📄 ${h.doc}]` : '';
-                return `[${h.date}]${docPart} ${h.text}`;
+                const docPart = h.doc ? ` [📄 ${sanitizeRemark(h.doc)}]` : '';
+                return `[${h.date}]${docPart} ${sanitizeRemark(h.text)}`;
               });
               blockers.push({
                 proc: p.title,
                 obj: o.title,
                 step: s.text,
                 date: s.date || 'срок не указан',
-                history: hist.length > 0 ? hist : [s.blocker]
+                history: hist.length > 0 ? hist : [sanitizeRemark(s.blocker)]
               });
             }
           });
@@ -2852,8 +2933,8 @@
             (o.steps || []).forEach(s => {
               const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
               const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
-              const lastDoc = (s.history && s.history.length > 0 && s.history[s.history.length - 1].doc) ? ` [📄 ${s.history[s.history.length - 1].doc}]` : '';
-              const blockStr = s.blocker ? ` (Задержка: ${s.blocker}${lastDoc})` : '';
+              const lastDoc = (s.history && s.history.length > 0 && s.history[s.history.length - 1].doc) ? ` [📄 ${sanitizeRemark(s.history[s.history.length - 1].doc)}]` : '';
+              const blockStr = s.blocker ? ` (Задержка: ${sanitizeRemark(s.blocker)}${lastDoc})` : '';
               txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
             });
             txt += `\n`;
@@ -2888,10 +2969,10 @@
 
           (o.steps || []).forEach(s => {
             const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
-            const docsFromHist = (s.history || []).map(h => h.doc).filter(Boolean).join(', ');
-            const docStr = docsFromHist || s.doc || "—";
+            const docsFromHist = (s.history || []).map(h => sanitizeRemark(h.doc)).filter(Boolean).join(', ');
+            const docStr = docsFromHist || sanitizeRemark(s.doc) || "—";
             const dateStr = s.date || "Не указан";
-            const histList = (s.history || []).map(h => `[${h.date}]${h.doc ? ' [📄 ' + h.doc + ']' : ''} ${h.text}`);
+            const histList = (s.history || []).map(h => `[${h.date}]${h.doc ? ' [📄 ' + sanitizeRemark(h.doc) + ']' : ''} ${sanitizeRemark(h.text)}`);
             const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
 
             rows.push({
