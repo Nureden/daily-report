@@ -320,27 +320,6 @@
       flex-shrink: 0;
     }
 
-    /* МИНИ-ИНДИКАТОРЫ ЗАДЕРЖЕК НА СВЕРНУТЫХ СТРОКАХ */
-    .alert-pill-mini {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 10.5px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 10px;
-      background: var(--danger-bg);
-      color: var(--danger);
-      border: 1px solid var(--danger-border);
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-    .alert-pill-mini.overdue-warn {
-      background: var(--amber-bg);
-      color: var(--amber);
-      border-color: var(--amber-border);
-    }
-
     .folder-right-tools {
       display: flex;
       align-items: center;
@@ -385,9 +364,6 @@
       background: #fcfdfc;
       border-color: var(--done-border);
     }
-    .item-card.has-issue-border {
-      border-left: 3px solid var(--danger);
-    }
 
     .item-header {
       display: flex;
@@ -428,13 +404,14 @@
       position: relative;
     }
 
+    /* ШКАЛА ПРОГРЕССА С ЦВЕТОВОЙ ИНДИКАЦИЕЙ */
     .progress-pill {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 4px;
       font-size: 11px;
       font-weight: 700;
@@ -447,15 +424,19 @@
       color: var(--done);
     }
     .progress-mini-bar {
-      width: 26px;
-      height: 4px;
+      width: 28px;
+      height: 5px;
       background: #e2e8f0;
-      border-radius: 2px;
+      border-radius: 3px;
       overflow: hidden;
     }
+    .progress-mini-bar.track-danger { background: #fecaca; }
+    .progress-mini-bar.track-amber { background: #fde68a; }
+
     .progress-mini-fill {
       height: 100%;
       background: var(--brand);
+      border-radius: 3px;
     }
     .progress-mini-fill.is-danger { background: var(--danger); }
     .progress-mini-fill.is-amber { background: var(--amber); }
@@ -966,7 +947,7 @@
 
     <!-- БАННЕР АКТИВНОГО ФИЛЬТРА ЗАДЕРЖЕК -->
     <div class="filter-active-banner" id="filterBanner">
-      <span>🚨 Показаны только объекты с замечаниями и просрочкой</span>
+      <span>Показаны только объекты с замечаниями и просрочкой</span>
       <button class="btn-reset-filter" onclick="toggleBlockersFilter()">Показать все ✕</button>
     </div>
 
@@ -1569,11 +1550,10 @@
       showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
     }
 
-    /* БЫСТРЫЙ ФИЛЬТР ПО КАРТОЧКЕ ЗАДЕРЖЕК */
     function toggleBlockersFilter() {
       filterOnlyIssues = !filterOnlyIssues;
       render();
-      showToast(filterOnlyIssues ? "🚨 Показаны только проблемные участки" : "Показаны все проекты");
+      showToast(filterOnlyIssues ? "Показаны только проблемные участки" : "Показаны все проекты");
     }
 
     function askConfirm(message, onYes) {
@@ -2232,7 +2212,6 @@
         let totalActiveObjs = 0;
         let totalBlockers = 0;
 
-        // Сначала считаем общую статистику по всей базе
         state.forEach(proc => {
           const activeObjects = (proc.objects || []).filter(o => !o.archived);
           activeObjects.forEach(o => {
@@ -2254,20 +2233,6 @@
           const allActiveObjects = (proc.objects || []).filter(o => !o.archived);
           const archivedObjects = (proc.objects || []).filter(o => o.archived);
 
-          // Считаем замечания и просрочки внутри папки
-          let procBlockersCount = 0;
-          let procOverdueCount = 0;
-
-          allActiveObjects.forEach(o => {
-            (o.steps || []).forEach(s => {
-              if (!s.done) {
-                if (s.blocker) procBlockersCount++;
-                else if (isStepOverdue(s.date, s.done)) procOverdueCount++;
-              }
-            });
-          });
-
-          // Если включен фильтр задержек — оставляем только проблемные объекты
           const visibleObjects = filterOnlyIssues
             ? allActiveObjects.filter(o => (o.steps || []).some(s => !s.done && (s.blocker || isStepOverdue(s.date, s.done))))
             : allActiveObjects;
@@ -2284,8 +2249,6 @@
                 <span class="folder-chevron ${isCollapsed ? 'collapsed' : ''}">▼</span>
                 <span class="folder-title-text">${escapeHtml(proc.title)}</span>
                 <span class="counter-badge">${allActiveObjects.length}</span>
-                ${procBlockersCount > 0 ? `<span class="alert-pill-mini" title="Активные замечания">🚨 ${procBlockersCount}</span>` : ''}
-                ${procOverdueCount > 0 ? `<span class="alert-pill-mini overdue-warn" title="Просроченные этапы">⏰ ${procOverdueCount}</span>` : ''}
               </div>
               <div class="folder-right-tools" onclick="event.stopPropagation()">
                 <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
@@ -2311,9 +2274,11 @@
                 const objBlockers = stepsArr.filter(s => !s.done && s.blocker).length;
                 const objOverdues = stepsArr.filter(s => !s.done && !s.blocker && isStepOverdue(s.date, s.done)).length;
                 const barColorClass = objBlockers > 0 ? 'is-danger' : (objOverdues > 0 ? 'is-amber' : '');
+                const trackColorClass = objBlockers > 0 ? 'track-danger' : (objOverdues > 0 ? 'track-amber' : '');
+                const visualWidth = (percent === 0 && (objBlockers > 0 || objOverdues > 0)) ? 25 : percent;
 
                 return `
-                  <div class="item-card ${isAllDone ? 'is-complete' : ''} ${objBlockers > 0 ? 'has-issue-border' : ''}">
+                  <div class="item-card ${isAllDone ? 'is-complete' : ''}">
                     <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
                       <div class="item-title-wrap">
                         <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
@@ -2321,13 +2286,10 @@
                       </div>
 
                       <div class="item-meta-right" onclick="event.stopPropagation()">
-                        ${objBlockers > 0 ? `<span class="alert-pill-mini" title="Замечаний: ${objBlockers}">🚨 ${objBlockers}</span>` : ''}
-                        ${objOverdues > 0 ? `<span class="alert-pill-mini overdue-warn" title="Просрочено этапов: ${objOverdues}">⏰ ${objOverdues}</span>` : ''}
-
                         ${tCount > 0 ? `
                           <div class="progress-pill ${isAllDone ? 'green' : ''}">
-                            <div class="progress-mini-bar">
-                              <div class="progress-mini-fill ${barColorClass}" style="width: ${percent}%;"></div>
+                            <div class="progress-mini-bar ${trackColorClass}">
+                              <div class="progress-mini-fill ${barColorClass}" style="width: ${visualWidth}%;"></div>
                             </div>
                             <span>${dCount}/${tCount} (${percent}%)</span>
                           </div>
