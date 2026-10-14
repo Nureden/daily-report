@@ -810,7 +810,7 @@
           <span>📊</span> Мониторинг проектов
         </div>
         <div class="dash-controls">
-          <button class="btn-icon-refresh" onclick="manualSync()" title="Синхронизировать">🔄</button>
+          <button class="btn-icon-refresh" onclick="manualSync()" title="Синхронизировать и свернуть все">🔄</button>
           <button class="btn-ai-compact" onclick="openAiModal()">✨ AI-Отчет</button>
         </div>
       </div>
@@ -1108,21 +1108,19 @@
     function sanitizeRemark(text) {
       if (!text) return '';
       let s = String(text);
-      // Очистка на случай если ранее попали сломанные теги
       if (s.includes('tag-party') || s.includes('lass="')) {
         s = s.replace(/<[^>]*>/g, '').replace(/(Petrochem\s*){2,}/g, '');
       }
       return s.trim().replace(/\s+/g, ' ');
     }
 
-    /* БЕЗОПАСНОЕ ФОРМАТИРОВАНИЕ ОТВЕТСТВЕННОЙ СТОРОНЫ БЕЗ REGEX */
     function formatPartyTag(rawText) {
       if (!rawText) return '';
       let str = sanitizeRemark(rawText);
       let badgeHtml = '';
 
-      const openBracket = String.fromCharCode(91); // '['
-      const closeBracket = String.fromCharCode(93); // ']'
+      const openBracket = String.fromCharCode(91);
+      const closeBracket = String.fromCharCode(93);
 
       if (str.startsWith(openBracket)) {
         const closeIdx = str.indexOf(closeBracket);
@@ -1222,14 +1220,24 @@
       } catch(e) { return false; }
     }
 
+    /* ПРИНУДИТЕЛЬНОЕ СВОРАЧИВАНИЕ ВСЕХ ПАПОК И ОБЪЕКТОВ ПРИ ЗАГРУЗКЕ / ОБНОВЛЕНИИ */
+    function collapseAllItems() {
+      state.forEach(p => {
+        p.collapsed = true;
+        (p.objects || []).forEach(o => {
+          o.collapsed = true;
+        });
+      });
+    }
+
     function normalizeStateHistory(arr) {
       if (!Array.isArray(arr)) return [];
       return arr.map(p => ({
         ...p,
-        collapsed: p.collapsed !== undefined ? !!p.collapsed : true,
+        collapsed: true, // Всегда свернуто при открытии и обновлении
         objects: (p.objects || []).map(o => ({
           ...o,
-          collapsed: o.collapsed !== undefined ? !!o.collapsed : true,
+          collapsed: true, // Всегда свернуто при открытии и обновлении
           steps: (o.steps || []).map(s => {
             const histClean = (s.history || [])
               .map(h => ({ date: h.date || 'Ранее', text: sanitizeRemark(h.text || '') }))
@@ -1284,6 +1292,11 @@
       try {
         const cloudRaw = await loadFromCloud();
         if (!cloudRaw) {
+          if (forceToast) {
+            collapseAllItems();
+            render();
+            showToast("Все вкладки свернуты");
+          }
           updateSyncTag(`● Версия ${currentRevision}`);
           return;
         }
@@ -1299,6 +1312,8 @@
             render();
             showToast(`Синхронизировано (v${currentRevision})`);
           } else if (forceToast) {
+            collapseAllItems();
+            render();
             showToast("Версия актуальна");
           }
         }
@@ -1307,6 +1322,8 @@
     }
 
     async function manualSync() {
+      collapseAllItems();
+      render();
       updateSyncTag(`⏳ Проверка...`);
       await syncWithCloud(true);
     }
