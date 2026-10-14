@@ -212,12 +212,11 @@
     }
     .btn-action-quiet:hover { background: var(--brand-light); }
 
-    /* РЕЕСТР */
+    /* РЕЕСТР НАПРАВЛЕНИЙ */
     .registry-card {
       background: var(--surface);
       border-radius: var(--radius-card);
       border: 1px solid var(--border);
-      overflow: hidden;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
     }
 
@@ -302,6 +301,7 @@
       gap: 7px;
       background: #f8fafc;
       border-top: 1px solid var(--border-subtle);
+      height: auto !important;
     }
     .folder-content.hidden { display: none !important; }
 
@@ -314,6 +314,8 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      height: auto !important;
+      max-height: none !important;
     }
     .item-card.is-complete {
       background: #fcfdfc;
@@ -443,10 +445,11 @@
       gap: 6px;
       padding-top: 6px;
       border-top: 1px dashed var(--border);
+      height: auto !important;
     }
     .item-body.hidden { display: none !important; }
 
-    /* ЭТАПЫ */
+    /* ЭТАПЫ (СТРОГОЕ АВТО-СЖАТИЕ) */
     .step-unit {
       display: flex;
       flex-direction: column;
@@ -455,6 +458,9 @@
       border-radius: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
     }
     .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
     .step-unit.blocked { background: #fffbfb; border-color: #fecaca; }
@@ -539,13 +545,16 @@
     }
     .step-del-btn:hover { background: var(--surface-subtle); color: var(--text-main); }
 
-    /* ЛЕНТА ЗАМЕЧАНИЙ */
+    /* ЛЕНТА ЗАМЕЧАНИЙ (ФИКСАЦИЯ ВЫСОТЫ) */
     .step-remarks-thread {
       display: flex;
       flex-direction: column;
       gap: 3px;
       margin-left: 24px;
       margin-top: 3px;
+      max-height: 160px;
+      overflow-y: auto;
+      height: auto !important;
     }
     .step-remark-item {
       display: flex;
@@ -555,6 +564,8 @@
       border-radius: 4px;
       font-size: 12px;
       line-height: 1.35;
+      height: auto !important;
+      min-height: 0 !important;
     }
     .step-remark-item.is-active-block {
       background: #fef2f2;
@@ -581,7 +592,7 @@
       white-space: nowrap;
     }
 
-    /* ТЕГИ СТОРОН */
+    /* ПОДСВЕТКА СТОРОН */
     .tag-party {
       display: inline-block;
       padding: 1px 5px;
@@ -1103,6 +1114,11 @@
       return { cls: '', text: `📅 ${dateStr}` };
     }
 
+    function sanitizeRemark(text) {
+      if (!text) return '';
+      return String(text).trim().replace(/\s+/g, ' ');
+    }
+
     let state = [];
 
     function parseRaw(raw) {
@@ -1177,11 +1193,23 @@
           ...o,
           collapsed: o.collapsed !== undefined ? !!o.collapsed : true,
           steps: (o.steps || []).map(s => {
-            if (!s.history) s.history = [];
-            if (s.blocker && s.history.length === 0) {
-              s.history.push({ date: s.updatedAt || 'Ранее', text: s.blocker });
+            const histClean = (s.history || [])
+              .map(h => ({ date: h.date || 'Ранее', text: sanitizeRemark(h.text || '') }))
+              .filter(h => h.text.length > 0);
+            
+            if (s.blocker && histClean.length === 0) {
+              const blkClean = sanitizeRemark(s.blocker);
+              if (blkClean.length > 0) {
+                histClean.push({ date: s.updatedAt || 'Ранее', text: blkClean });
+              }
             }
-            return s;
+
+            return {
+              ...s,
+              text: sanitizeRemark(s.text || 'Этап'),
+              blocker: s.blocker ? sanitizeRemark(s.blocker) : null,
+              history: histClean
+            };
           })
         }))
       }));
@@ -1543,14 +1571,17 @@
       if (!step || !step.history || !step.history[idx]) return;
 
       showTextModal("✏️ Изменить замечание", step.history[idx].text, (newText) => {
-        step.history[idx].text = newText;
-        if (idx === step.history.length - 1 && step.blocker) {
-          step.blocker = newText;
+        const cleaned = sanitizeRemark(newText);
+        if (cleaned) {
+          step.history[idx].text = cleaned;
+          if (idx === step.history.length - 1 && step.blocker) {
+            step.blocker = cleaned;
+          }
+          step.updatedAt = getTimestampStr();
+          renderModalHistoryList(step);
+          saveData();
+          showToast("Запись обновлена");
         }
-        step.updatedAt = getTimestampStr();
-        renderModalHistoryList(step);
-        saveData();
-        showToast("Запись обновлена");
       });
     }
 
@@ -1600,11 +1631,14 @@
 
     function promptAddRiskPreset() {
       showTextModal("➕ Новый шаблон причины", "", (val) => {
-        const list = getRiskPresets();
-        list.push(val);
-        saveRiskPresets(list);
-        renderPresetsList();
-        showToast("Шаблон сохранен");
+        const cleaned = sanitizeRemark(val);
+        if (cleaned) {
+          const list = getRiskPresets();
+          list.push(cleaned);
+          saveRiskPresets(list);
+          renderPresetsList();
+          showToast("Шаблон сохранен");
+        }
       });
     }
 
@@ -1624,7 +1658,7 @@
 
       if (!step.history) step.history = [];
       if (step.blocker && step.history.length === 0) {
-        step.history.push({ date: step.updatedAt || 'Ранее', text: step.blocker });
+        step.history.push({ date: step.updatedAt || 'Ранее', text: sanitizeRemark(step.blocker) });
       }
 
       document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
@@ -1648,7 +1682,7 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      const rawVal = document.getElementById('customRiskInput').value.trim();
+      const rawVal = sanitizeRemark(document.getElementById('customRiskInput').value);
       if (!rawVal) return;
 
       const partyPrefix = selectedPartyTag ? `[${selectedPartyTag}] ` : '';
@@ -1720,7 +1754,7 @@
 
         p.objects.push({
           id: Date.now(),
-          title: name,
+          title: sanitizeRemark(name),
           archived: false,
           collapsed: false,
           steps: templateSteps.map((text, idx) => ({
@@ -1745,18 +1779,21 @@
       if (!obj) return;
 
       showTextModal("➕ Добавить этап / задачу", "", (txt) => {
-        if (!obj.steps) obj.steps = [];
-        obj.steps.push({
-          id: Date.now(),
-          text: txt,
-          date: "",
-          done: false,
-          blocker: null,
-          history: [],
-          updatedAt: getTimestampStr()
-        });
-        saveData();
-        showToast("Этап добавлен");
+        const cleaned = sanitizeRemark(txt);
+        if (cleaned) {
+          if (!obj.steps) obj.steps = [];
+          obj.steps.push({
+            id: Date.now(),
+            text: cleaned,
+            date: "",
+            done: false,
+            blocker: null,
+            history: [],
+            updatedAt: getTimestampStr()
+          });
+          saveData();
+          showToast("Этап добавлен");
+        }
       });
     }
 
@@ -1816,180 +1853,184 @@
     }
 
     function render() {
-      const root = document.getElementById('processesRoot');
-      if (!root) return;
-      root.innerHTML = '';
+      try {
+        const root = document.getElementById('processesRoot');
+        if (!root) return;
+        root.innerHTML = '';
 
-      let totalDone = 0;
-      let totalPlan = 0;
-      let totalActiveObjs = 0;
-      let totalBlockers = 0;
+        let totalDone = 0;
+        let totalPlan = 0;
+        let totalActiveObjs = 0;
+        let totalBlockers = 0;
 
-      state.forEach(proc => {
-        const row = document.createElement('div');
-        const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true;
-        row.className = `folder-row`;
+        state.forEach(proc => {
+          const row = document.createElement('div');
+          const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true;
+          row.className = `folder-row`;
 
-        const activeObjects = (proc.objects || []).filter(o => !o.archived);
+          const activeObjects = (proc.objects || []).filter(o => !o.archived);
 
-        activeObjects.forEach(o => {
-          totalActiveObjs++;
-          (o.steps || []).forEach(s => {
-            if (s.done) totalDone++;
-            else {
-              totalPlan++;
-              if (s.blocker) totalBlockers++;
-            }
+          activeObjects.forEach(o => {
+            totalActiveObjs++;
+            (o.steps || []).forEach(s => {
+              if (s.done) totalDone++;
+              else {
+                totalPlan++;
+                if (s.blocker) totalBlockers++;
+              }
+            });
           });
-        });
 
-        row.innerHTML = `
-          <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
-            <div class="folder-left">
-              <span class="folder-chevron ${isCollapsed ? 'collapsed' : ''}">▼</span>
-              <span class="folder-title-text">${escapeHtml(proc.title)}</span>
-              <span class="counter-badge">${activeObjects.length}</span>
-            </div>
-            <div class="folder-right-tools" onclick="event.stopPropagation()">
-              <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
-              <div class="obj-dropdown-menu" id="fmenu-${proc.id}">
-                <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editProcessTitle(${proc.id})">✏️ Переименовать</button>
-                <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteProcess(${proc.id})">✕ Удалить направление</button>
+          row.innerHTML = `
+            <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
+              <div class="folder-left">
+                <span class="folder-chevron ${isCollapsed ? 'collapsed' : ''}">▼</span>
+                <span class="folder-title-text">${escapeHtml(proc.title)}</span>
+                <span class="counter-badge">${activeObjects.length}</span>
+              </div>
+              <div class="folder-right-tools" onclick="event.stopPropagation()">
+                <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
+                <div class="obj-dropdown-menu" id="fmenu-${proc.id}">
+                  <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editProcessTitle(${proc.id})">✏️ Переименовать</button>
+                  <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteProcess(${proc.id})">✕ Удалить направление</button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="folder-content ${isCollapsed ? 'hidden' : ''}">
-            ${activeObjects.map((obj, objIdx) => {
-              const dCount = (obj.steps || []).filter(s => s.done).length;
-              const tCount = (obj.steps || []).length;
-              const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
-              const isAllDone = tCount > 0 && dCount === tCount;
-              const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
+            <div class="folder-content ${isCollapsed ? 'hidden' : ''}">
+              ${activeObjects.map((obj, objIdx) => {
+                const dCount = (obj.steps || []).filter(s => s.done).length;
+                const tCount = (obj.steps || []).length;
+                const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
+                const isAllDone = tCount > 0 && dCount === tCount;
+                const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
 
-              return `
-                <div class="item-card ${isAllDone ? 'is-complete' : ''}">
-                  <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
-                    <div class="item-title-wrap">
-                      <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
-                      <span class="item-title">${escapeHtml(obj.title)}</span>
-                    </div>
-
-                    <div class="item-meta-right" onclick="event.stopPropagation()">
-                      ${tCount > 0 ? `
-                        <div class="progress-pill ${isAllDone ? 'green' : ''}">
-                          <div class="progress-mini-bar">
-                            <div class="progress-mini-fill" style="width: ${percent}%;"></div>
-                          </div>
-                          <span>${dCount}/${tCount} (${percent}%)</span>
-                        </div>
-                      ` : `
-                        <span class="progress-pill" style="opacity:0.6;">0 задач</span>
-                      `}
-
-                      <button class="btn-item-more" onclick="toggleMenuGeneric(event, 'omenu-${obj.id}')" title="Меню">···</button>
-                      <div class="obj-dropdown-menu" id="omenu-${obj.id}">
-                        <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editObjectTitle(${proc.id},${obj.id})">✏️ Переименовать</button>
-                        <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); cloneObject(${proc.id},${obj.id})">📋 Копировать</button>
-                        ${objIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, -1)">⬆️ Вверх</button>` : ''}
-                        ${objIdx < activeObjects.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, 1)">⬇️ Вниз</button>` : ''}
-                        <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteObject(${proc.id},${obj.id})">✕ Удалить</button>
+                return `
+                  <div class="item-card ${isAllDone ? 'is-complete' : ''}">
+                    <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
+                      <div class="item-title-wrap">
+                        <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
+                        <span class="item-title">${escapeHtml(obj.title)}</span>
                       </div>
-                    </div>
-                  </div>
 
-                  <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
-                    ${isAllDone ? `
-                      <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#059669;">
-                        <span>🎉 Все этапы закрыты</span>
-                        <button class="btn-date-chip" style="background:#059669; color:#fff;" onclick="archiveObject(${proc.id}, ${obj.id})">В архив</button>
-                      </div>
-                    ` : ''}
-
-                    <div style="display:flex; flex-direction:column; gap:5px;">
-                      ${(obj.steps || []).map(s => {
-                        const hasBlock = !s.done && !!s.blocker;
-                        const dateMeta = analyzeDeadline(s.date, s.done);
-                        const hist = s.history || [];
-
-                        return `
-                          <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
-                            <div class="step-row-top">
-                              <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
-                              <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
+                      <div class="item-meta-right" onclick="event.stopPropagation()">
+                        ${tCount > 0 ? `
+                          <div class="progress-pill ${isAllDone ? 'green' : ''}">
+                            <div class="progress-mini-bar">
+                              <div class="progress-mini-fill" style="width: ${percent}%;"></div>
                             </div>
+                            <span>${dCount}/${tCount} (${percent}%)</span>
+                          </div>
+                        ` : `
+                          <span class="progress-pill" style="opacity:0.6;">0 задач</span>
+                        `}
 
-                            <div class="step-row-bottom">
-                              <div class="step-chips">
-                                <button type="button" class="btn-date-chip ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
-                                  ${dateMeta.text}
-                                </button>
-                                ${!s.done ? `
-                                  <button class="btn-risk-chip ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
-                                    ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
-                                  </button>
-                                ` : ''}
+                        <button class="btn-item-more" onclick="toggleMenuGeneric(event, 'omenu-${obj.id}')" title="Меню">···</button>
+                        <div class="obj-dropdown-menu" id="omenu-${obj.id}">
+                          <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editObjectTitle(${proc.id},${obj.id})">✏️ Переименовать</button>
+                          <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); cloneObject(${proc.id},${obj.id})">📋 Копировать</button>
+                          ${objIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, -1)">⬆️ Вверх</button>` : ''}
+                          ${objIdx < activeObjects.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, 1)">⬇️ Вниз</button>` : ''}
+                          <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteObject(${proc.id},${obj.id})">✕ Удалить</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
+                      ${isAllDone ? `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#ecfdf5; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#059669;">
+                          <span>🎉 Все этапы закрыты</span>
+                          <button class="btn-date-chip" style="background:#059669; color:#fff;" onclick="archiveObject(${proc.id}, ${obj.id})">В архив</button>
+                        </div>
+                      ` : ''}
+
+                      <div style="display:flex; flex-direction:column; gap:5px;">
+                        ${(obj.steps || []).map(s => {
+                          const hasBlock = !s.done && !!s.blocker;
+                          const dateMeta = analyzeDeadline(s.date, s.done);
+                          const hist = s.history || [];
+
+                          return `
+                            <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
+                              <div class="step-row-top">
+                                <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                                <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
                               </div>
 
-                              <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
-                                <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
-                                <div class="obj-dropdown-menu" id="smenu-${s.id}">
-                                  <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
-                                  <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
+                              <div class="step-row-bottom">
+                                <div class="step-chips">
+                                  <button type="button" class="btn-date-chip ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                    ${dateMeta.text}
+                                  </button>
+                                  ${!s.done ? `
+                                    <button class="btn-risk-chip ${hasBlock ? 'active' : ''}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
+                                      ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
+                                    </button>
+                                  ` : ''}
+                                </div>
+
+                                <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
+                                  <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
+                                  <div class="obj-dropdown-menu" id="smenu-${s.id}">
+                                    <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
+                                    <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
+                                  </div>
                                 </div>
                               </div>
+
+                              ${hist.length > 0 ? `
+                                <div class="step-remarks-thread">
+                                  ${hist.map((hItem, hIdx) => {
+                                    const isLast = hIdx === hist.length - 1;
+                                    return `
+                                      <div class="step-remark-item ${hasBlock && isLast ? 'is-active-block' : 'is-resolved'}">
+                                        <span class="remark-icon">${hasBlock && isLast ? '🚨' : '✔'}</span>
+                                        <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                          <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text)}
+                                        </span>
+                                        ${isLast && hasBlock ? `
+                                          <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
+                                        ` : ''}
+                                      </div>
+                                    `;
+                                  }).join('')}
+                                </div>
+                              ` : ''}
                             </div>
+                          `;
+                        }).join('')}
+                      </div>
 
-                            ${hist.length > 0 ? `
-                              <div class="step-remarks-thread">
-                                ${hist.map((hItem, hIdx) => {
-                                  const isLast = hIdx === hist.length - 1;
-                                  return `
-                                    <div class="step-remark-item ${hasBlock && isLast ? 'is-active-block' : 'is-resolved'}">
-                                      <span class="remark-icon">${hasBlock && isLast ? '🚨' : '✔'}</span>
-                                      <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                        <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text)}
-                                      </span>
-                                      ${isLast && hasBlock ? `
-                                        <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
-                                      ` : ''}
-                                    </div>
-                                  `;
-                                }).join('')}
-                              </div>
-                            ` : ''}
-                          </div>
-                        `;
-                      }).join('')}
+                      <button class="btn-date-chip" style="border:1px dashed var(--border); font-size:11.5px; padding:6px; margin-top:2px;" onclick="addCustomStep(${proc.id},${obj.id})">
+                        + Добавить задачу
+                      </button>
                     </div>
-
-                    <button class="btn-date-chip" style="border:1px dashed var(--border); font-size:11.5px; padding:6px; margin-top:2px;" onclick="addCustomStep(${proc.id},${obj.id})">
-                      + Добавить задачу
-                    </button>
                   </div>
-                </div>
-              `;
-            }).join('')}
+                `;
+              }).join('')}
 
-            <div class="folder-footer-actions">
-              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
-              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
-              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
-              <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
+              <div class="folder-footer-actions">
+                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
+                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
+                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
+                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
+              </div>
             </div>
-          </div>
-        `;
+          `;
 
-        root.appendChild(row);
-      });
+          root.appendChild(row);
+        });
 
-      const bBox = document.getElementById('kpiBlockersBox');
-      if (bBox) bBox.className = totalBlockers > 0 ? 'kpi-cell danger' : 'kpi-cell';
+        const bBox = document.getElementById('kpiBlockersBox');
+        if (bBox) bBox.className = totalBlockers > 0 ? 'kpi-cell danger' : 'kpi-cell';
 
-      document.getElementById('mBlockers').textContent = totalBlockers;
-      document.getElementById('mDone').textContent = totalDone;
-      document.getElementById('mPlan').textContent = totalPlan;
-      document.getElementById('mTotal').textContent = totalActiveObjs;
+        document.getElementById('mBlockers').textContent = totalBlockers;
+        document.getElementById('mDone').textContent = totalDone;
+        document.getElementById('mPlan').textContent = totalPlan;
+        document.getElementById('mTotal').textContent = totalActiveObjs;
+      } catch(err) {
+        console.error("Render fatal error:", err);
+      }
     }
 
     function generateTelegramReport() {
