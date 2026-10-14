@@ -24,6 +24,10 @@
       --done-bg: #ecfdf5;
       --done-border: #a7f3d0;
 
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+
       --danger: #dc2626;
       --danger-bg: #fef2f2;
       --danger-border: #fecaca;
@@ -138,8 +142,16 @@
       background: #ffffff;
       display: flex;
       flex-direction: column;
+      position: relative;
+      transition: all 0.15s;
     }
+    .kpi-cell.clickable { cursor: pointer; user-select: none; }
+    .kpi-cell.clickable:active { transform: scale(0.98); }
     .kpi-cell.danger { border-color: var(--danger-border); background: var(--danger-bg); color: var(--danger); }
+    .kpi-cell.danger.active-filter {
+      box-shadow: 0 0 0 2px var(--danger);
+      background: #fee2e2;
+    }
     .kpi-cell.green { border-color: var(--done-border); background: var(--done-bg); color: var(--done); }
 
     .kpi-title {
@@ -147,7 +159,10 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      opacity: 0.8;
+      opacity: 0.85;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .kpi-val {
       font-size: 20px;
@@ -180,6 +195,32 @@
       background: #fff;
       color: var(--text-main);
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    /* ПЛАШКА АКТИВНОГО ФИЛЬТРА */
+    .filter-active-banner {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+    .filter-active-banner.show { display: flex; }
+    .btn-reset-filter {
+      background: #ffffff;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     /* СТРОКА ВВОДА */
@@ -235,6 +276,7 @@
       background: #ffffff;
       transition: background 0.15s;
       position: relative;
+      gap: 8px;
     }
     .folder-row:first-child .folder-header { border-radius: var(--radius-card) var(--radius-card) 0 0; }
     .folder-row:last-child .folder-header { border-radius: 0 0 var(--radius-card) var(--radius-card); }
@@ -243,7 +285,7 @@
     .folder-left {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       font-size: 14.5px;
       font-weight: 700;
       color: var(--text-main);
@@ -257,6 +299,7 @@
       width: 14px;
       display: inline-block;
       text-align: center;
+      flex-shrink: 0;
     }
     .folder-chevron.collapsed { transform: rotate(-90deg); }
 
@@ -275,6 +318,27 @@
       border-radius: 12px;
       border: 1px solid var(--border);
       flex-shrink: 0;
+    }
+
+    /* МИНИ-ИНДИКАТОРЫ ЗАДЕРЖЕК НА СВЕРНУТЫХ СТРОКАХ */
+    .alert-pill-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid var(--danger-border);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .alert-pill-mini.overdue-warn {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border-color: var(--amber-border);
     }
 
     .folder-right-tools {
@@ -321,6 +385,9 @@
       background: #fcfdfc;
       border-color: var(--done-border);
     }
+    .item-card.has-issue-border {
+      border-left: 3px solid var(--danger);
+    }
 
     .item-header {
       display: flex;
@@ -356,7 +423,7 @@
     .item-meta-right {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-shrink: 0;
       position: relative;
     }
@@ -390,6 +457,8 @@
       height: 100%;
       background: var(--brand);
     }
+    .progress-mini-fill.is-danger { background: var(--danger); }
+    .progress-mini-fill.is-amber { background: var(--amber); }
     .progress-pill.green .progress-mini-fill { background: var(--done); }
 
     .btn-item-more {
@@ -628,6 +697,42 @@
     }
     .btn-add-obj-subtle:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
 
+    /* БЛОК АРХИВА ВНУТРИ ПАПКИ */
+    .archive-box {
+      margin-top: 4px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 10px;
+    }
+    .archive-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .archive-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 7px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+    }
+    .archive-row-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      padding: 4px 6px;
+      background: var(--surface-subtle);
+      border-radius: 4px;
+    }
+
     /* ПАНЕЛЬ ОТЧЕТОВ */
     .floating-bar {
       position: fixed;
@@ -828,8 +933,11 @@
       </div>
 
       <div class="metrics-ribbon">
-        <div class="kpi-cell danger" id="kpiBlockersBox">
-          <span class="kpi-title">Задержки</span>
+        <div class="kpi-cell danger clickable" id="kpiBlockersBox" onclick="toggleBlockersFilter()" title="Нажмите, чтобы показать только проблемные участки">
+          <span class="kpi-title">
+            <span>Задержки</span>
+            <span style="font-size:9px; opacity:0.75;">🔍 фильтр</span>
+          </span>
           <span class="kpi-val" id="mBlockers">0</span>
         </div>
         <div class="kpi-cell green">
@@ -854,6 +962,12 @@
           📋 Полный отчет
         </button>
       </div>
+    </div>
+
+    <!-- БАННЕР АКТИВНОГО ФИЛЬТРА ЗАДЕРЖЕК -->
+    <div class="filter-active-banner" id="filterBanner">
+      <span>🚨 Показаны только объекты с замечаниями и просрочкой</span>
+      <button class="btn-reset-filter" onclick="toggleBlockersFilter()">Показать все ✕</button>
     </div>
 
     <!-- ВВОД НАПРАВЛЕНИЯ -->
@@ -1009,7 +1123,7 @@
     </div>
   </div>
 
-  <!-- БЫСТРОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (ВМЕСТО ТОРМОЗЯЩЕГО CONFIRM) -->
+  <!-- ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
   <div class="modal-overlay" id="confirmModalOverlay" onclick="closeConfirmModal(event)">
     <div class="modal-box" style="max-width:380px;" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -1040,6 +1154,7 @@
     }
 
     let reportMode = 'executive';
+    let filterOnlyIssues = false;
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
@@ -1126,6 +1241,17 @@
       const m = dispStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
       if (!m) return '';
       return `${m[3] || new Date().getFullYear()}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    }
+
+    function isStepOverdue(dateStr, isDone) {
+      if (isDone || !dateStr) return false;
+      const m = dateStr.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+      if (!m) return false;
+      const target = new Date(m[3] ? parseInt(m[3]) : new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      target.setHours(0,0,0,0);
+      return Math.round((target - today) / 86400000) < 0;
     }
 
     function analyzeDeadline(dateStr, isDone) {
@@ -1271,8 +1397,10 @@
     }
 
     function collapseAllItems() {
+      filterOnlyIssues = false;
       state.forEach(p => {
         p.collapsed = true;
+        p.showArchive = false;
         (p.objects || []).forEach(o => {
           o.collapsed = true;
         });
@@ -1284,6 +1412,7 @@
       return arr.map(p => ({
         ...p,
         collapsed: true,
+        showArchive: false,
         objects: (p.objects || []).map(o => ({
           ...o,
           collapsed: true,
@@ -1385,7 +1514,6 @@
       document.querySelectorAll('.obj-dropdown-menu').forEach(m => m.classList.remove('open'));
     });
 
-    /* МГНОВЕННОЕ ОБНОВЛЕНИЕ ИНТЕРФЕЙСА + ФОНОВАЯ ОТПРАВКА В ОБЛАКО */
     function saveData() {
       currentRevision++;
       const now = Date.now();
@@ -1397,11 +1525,9 @@
         localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
       } catch(e) {}
 
-      // 1. Отрисовываем интерфейс мгновенно без ожидания интернета
       render();
       updateSyncTag(`⏳ Синхр. v${currentRevision}...`);
 
-      // 2. Отправляем в облако в фоновом режиме с группировкой быстрых нажатий
       if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
       cloudSyncTimer = setTimeout(() => {
         pushCloudBackground();
@@ -1443,7 +1569,13 @@
       showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
     }
 
-    /* ВСТРОЕННОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ */
+    /* БЫСТРЫЙ ФИЛЬТР ПО КАРТОЧКЕ ЗАДЕРЖЕК */
+    function toggleBlockersFilter() {
+      filterOnlyIssues = !filterOnlyIssues;
+      render();
+      showToast(filterOnlyIssues ? "🚨 Показаны только проблемные участки" : "Показаны все проекты");
+    }
+
     function askConfirm(message, onYes) {
       document.getElementById('confirmModalText').textContent = message;
       confirmModalCallback = onYes;
@@ -1520,6 +1652,17 @@
       input.value = '';
       saveData();
       showToast("Направление добавлено");
+    }
+
+    function moveProcess(procId, direction) {
+      const idx = state.findIndex(p => p.id === procId);
+      if (idx < 0) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= state.length) return;
+
+      const item = state.splice(idx, 1)[0];
+      state.splice(newIdx, 0, item);
+      saveData();
     }
 
     function editProcessTitle(procId) {
@@ -1629,6 +1772,20 @@
         saveData();
         showToast("Скопировано");
       });
+    }
+
+    function moveStep(procId, objId, stepId, direction) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (!obj || !obj.steps) return;
+      const idx = obj.steps.findIndex(s => s.id === stepId);
+      if (idx < 0) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= obj.steps.length) return;
+
+      const item = obj.steps.splice(idx, 1)[0];
+      obj.steps.splice(newIdx, 0, item);
+      saveData();
     }
 
     function openEditStepModal(procId, objId, stepId) {
@@ -1927,9 +2084,11 @@
       const obj = p?.objects.find(o => o.id === objId);
       if (!obj) return;
 
-      obj.steps = obj.steps.filter(s => s.id !== stepId);
-      saveData();
-      showToast("Этап удален");
+      askConfirm("Удалить этот этап?", () => {
+        obj.steps = obj.steps.filter(s => s.id !== stepId);
+        saveData();
+        showToast("Этап удален");
+      });
     }
 
     function createObjectWithTemplate(procId, tplKey) {
@@ -1995,7 +2154,25 @@
       if (obj) {
         obj.archived = true;
         saveData();
-        showToast("В архиве");
+        showToast("Перемещено в архив");
+      }
+    }
+
+    function restoreObject(procId, objId) {
+      const p = state.find(x => x.id === procId);
+      const obj = p?.objects.find(o => o.id === objId);
+      if (obj) {
+        obj.archived = false;
+        saveData();
+        showToast("Объект возвращен в работу");
+      }
+    }
+
+    function toggleArchiveView(procId) {
+      const p = state.find(x => x.id === procId);
+      if (p) {
+        p.showArchive = !p.showArchive;
+        render();
       }
     }
 
@@ -2055,13 +2232,9 @@
         let totalActiveObjs = 0;
         let totalBlockers = 0;
 
+        // Сначала считаем общую статистику по всей базе
         state.forEach(proc => {
-          const row = document.createElement('div');
-          const isCollapsed = proc.collapsed !== undefined ? !!proc.collapsed : true;
-          row.className = `folder-row`;
-
           const activeObjects = (proc.objects || []).filter(o => !o.archived);
-
           activeObjects.forEach(o => {
             totalActiveObjs++;
             (o.steps || []).forEach(s => {
@@ -2072,33 +2245,75 @@
               }
             });
           });
+        });
+
+        const filterBanner = document.getElementById('filterBanner');
+        if (filterBanner) filterBanner.classList.toggle('show', filterOnlyIssues);
+
+        state.forEach((proc, procIdx) => {
+          const allActiveObjects = (proc.objects || []).filter(o => !o.archived);
+          const archivedObjects = (proc.objects || []).filter(o => o.archived);
+
+          // Считаем замечания и просрочки внутри папки
+          let procBlockersCount = 0;
+          let procOverdueCount = 0;
+
+          allActiveObjects.forEach(o => {
+            (o.steps || []).forEach(s => {
+              if (!s.done) {
+                if (s.blocker) procBlockersCount++;
+                else if (isStepOverdue(s.date, s.done)) procOverdueCount++;
+              }
+            });
+          });
+
+          // Если включен фильтр задержек — оставляем только проблемные объекты
+          const visibleObjects = filterOnlyIssues
+            ? allActiveObjects.filter(o => (o.steps || []).some(s => !s.done && (s.blocker || isStepOverdue(s.date, s.done))))
+            : allActiveObjects;
+
+          if (filterOnlyIssues && visibleObjects.length === 0) return;
+
+          const row = document.createElement('div');
+          const isCollapsed = filterOnlyIssues ? false : (proc.collapsed !== undefined ? !!proc.collapsed : true);
+          row.className = `folder-row`;
 
           row.innerHTML = `
             <div class="folder-header" onclick="toggleProcessCollapse(${proc.id})">
               <div class="folder-left">
                 <span class="folder-chevron ${isCollapsed ? 'collapsed' : ''}">▼</span>
                 <span class="folder-title-text">${escapeHtml(proc.title)}</span>
-                <span class="counter-badge">${activeObjects.length}</span>
+                <span class="counter-badge">${allActiveObjects.length}</span>
+                ${procBlockersCount > 0 ? `<span class="alert-pill-mini" title="Активные замечания">🚨 ${procBlockersCount}</span>` : ''}
+                ${procOverdueCount > 0 ? `<span class="alert-pill-mini overdue-warn" title="Просроченные этапы">⏰ ${procOverdueCount}</span>` : ''}
               </div>
               <div class="folder-right-tools" onclick="event.stopPropagation()">
                 <button class="btn-row-menu" onclick="toggleMenuGeneric(event, 'fmenu-${proc.id}')" title="Опции">···</button>
                 <div class="obj-dropdown-menu" id="fmenu-${proc.id}">
                   <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editProcessTitle(${proc.id})">✏️ Переименовать</button>
+                  ${procIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveProcess(${proc.id}, -1)">⬆️ Вверх</button>` : ''}
+                  ${procIdx < state.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveProcess(${proc.id}, 1)">⬇️ Вниз</button>` : ''}
                   <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteProcess(${proc.id})">✕ Удалить направление</button>
                 </div>
               </div>
             </div>
 
             <div class="folder-content ${isCollapsed ? 'hidden' : ''}">
-              ${activeObjects.map((obj, objIdx) => {
-                const dCount = (obj.steps || []).filter(s => s.done).length;
-                const tCount = (obj.steps || []).length;
+              ${visibleObjects.map((obj) => {
+                const objIdx = allActiveObjects.findIndex(x => x.id === obj.id);
+                const stepsArr = obj.steps || [];
+                const dCount = stepsArr.filter(s => s.done).length;
+                const tCount = stepsArr.length;
                 const percent = tCount > 0 ? Math.round((dCount / tCount) * 100) : 0;
                 const isAllDone = tCount > 0 && dCount === tCount;
-                const isObjCollapsed = obj.collapsed !== undefined ? !!obj.collapsed : true;
+                const isObjCollapsed = filterOnlyIssues ? false : (obj.collapsed !== undefined ? !!obj.collapsed : true);
+
+                const objBlockers = stepsArr.filter(s => !s.done && s.blocker).length;
+                const objOverdues = stepsArr.filter(s => !s.done && !s.blocker && isStepOverdue(s.date, s.done)).length;
+                const barColorClass = objBlockers > 0 ? 'is-danger' : (objOverdues > 0 ? 'is-amber' : '');
 
                 return `
-                  <div class="item-card ${isAllDone ? 'is-complete' : ''}">
+                  <div class="item-card ${isAllDone ? 'is-complete' : ''} ${objBlockers > 0 ? 'has-issue-border' : ''}">
                     <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
                       <div class="item-title-wrap">
                         <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
@@ -2106,10 +2321,13 @@
                       </div>
 
                       <div class="item-meta-right" onclick="event.stopPropagation()">
+                        ${objBlockers > 0 ? `<span class="alert-pill-mini" title="Замечаний: ${objBlockers}">🚨 ${objBlockers}</span>` : ''}
+                        ${objOverdues > 0 ? `<span class="alert-pill-mini overdue-warn" title="Просрочено этапов: ${objOverdues}">⏰ ${objOverdues}</span>` : ''}
+
                         ${tCount > 0 ? `
                           <div class="progress-pill ${isAllDone ? 'green' : ''}">
                             <div class="progress-mini-bar">
-                              <div class="progress-mini-fill" style="width: ${percent}%;"></div>
+                              <div class="progress-mini-fill ${barColorClass}" style="width: ${percent}%;"></div>
                             </div>
                             <span>${dCount}/${tCount} (${percent}%)</span>
                           </div>
@@ -2122,7 +2340,7 @@
                           <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); editObjectTitle(${proc.id},${obj.id})">✏️ Переименовать</button>
                           <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); cloneObject(${proc.id},${obj.id})">📋 Копировать</button>
                           ${objIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, -1)">⬆️ Вверх</button>` : ''}
-                          ${objIdx < activeObjects.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, 1)">⬇️ Вниз</button>` : ''}
+                          ${objIdx < allActiveObjects.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveObject(${proc.id}, ${obj.id}, 1)">⬇️ Вниз</button>` : ''}
                           <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteObject(${proc.id},${obj.id})">✕ Удалить</button>
                         </div>
                       </div>
@@ -2137,7 +2355,7 @@
                       ` : ''}
 
                       <div style="display:flex; flex-direction:column; gap:5px;">
-                        ${(obj.steps || []).map(s => {
+                        ${stepsArr.map((s, sIdx) => {
                           const hasBlock = !s.done && !!s.blocker;
                           const dateMeta = analyzeDeadline(s.date, s.done);
                           const hist = s.history || [];
@@ -2165,6 +2383,8 @@
                                   <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
                                   <div class="obj-dropdown-menu" id="smenu-${s.id}">
                                     <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
+                                    ${sIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, -1)">⬆️ Вверх</button>` : ''}
+                                    ${sIdx < stepsArr.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, 1)">⬇️ Вниз</button>` : ''}
                                     <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
                                   </div>
                                 </div>
@@ -2201,12 +2421,33 @@
                 `;
               }).join('')}
 
-              <div class="folder-footer-actions">
-                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
-                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
-                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
-                <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
-              </div>
+              ${!filterOnlyIssues ? `
+                <div class="folder-footer-actions">
+                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'land')">⚡ Сервитут (5)</button>
+                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'losses')">🌾 Потери (4)</button>
+                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'szz')">📐 СЗЗ (4)</button>
+                  <button class="btn-add-obj-subtle" onclick="createObjectWithTemplate(${proc.id}, 'empty')">+ Пустой</button>
+                </div>
+              ` : ''}
+
+              ${archivedObjects.length > 0 && !filterOnlyIssues ? `
+                <div class="archive-box">
+                  <div class="archive-header" onclick="toggleArchiveView(${proc.id})">
+                    <span>🗄 Архив закрытых (${archivedObjects.length})</span>
+                    <span>${proc.showArchive ? '▲ Скрыть' : '▼ Показать'}</span>
+                  </div>
+                  ${proc.showArchive ? `
+                    <div class="archive-list">
+                      ${archivedObjects.map(ao => `
+                        <div class="archive-row-item">
+                          <span style="font-weight:700; color:var(--done);">✔ ${escapeHtml(ao.title)}</span>
+                          <button class="btn-date-chip" onclick="restoreObject(${proc.id},${ao.id})">↩ Вернуть</button>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
             </div>
           `;
 
@@ -2214,7 +2455,9 @@
         });
 
         const bBox = document.getElementById('kpiBlockersBox');
-        if (bBox) bBox.className = totalBlockers > 0 ? 'kpi-cell danger' : 'kpi-cell';
+        if (bBox) {
+          bBox.className = `kpi-cell clickable ${totalBlockers > 0 ? 'danger' : ''} ${filterOnlyIssues ? 'active-filter' : ''}`;
+        }
 
         document.getElementById('mBlockers').textContent = totalBlockers;
         document.getElementById('mDone').textContent = totalDone;
