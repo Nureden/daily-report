@@ -51,7 +51,7 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      padding: 12px 12px 120px 12px;
+      padding: 10px 10px 140px 10px;
       font-size: 14px;
       line-height: 1.4;
       letter-spacing: -0.01em;
@@ -68,7 +68,7 @@
       background: var(--surface);
       border-radius: var(--radius-card);
       border: 1px solid var(--border);
-      padding: 13px 14px;
+      padding: 12px 13px;
       margin-bottom: 12px;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
@@ -224,7 +224,7 @@
       cursor: pointer;
     }
 
-    /* КОМПАКТНАЯ ШАПКА НАПРАВЛЕНИЙ (ВМЕСТО ГРОМОЗДКОГО ИНПУТА) */
+    /* ШАПКА НАПРАВЛЕНИЙ */
     .section-bar {
       display: flex;
       justify-content: space-between;
@@ -266,7 +266,7 @@
     .folder-row:last-child { border-bottom: none; }
 
     .folder-header {
-      padding: 11px 14px;
+      padding: 11px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -331,7 +331,7 @@
       background: transparent;
       border: none;
       font-size: 16px;
-      padding: 2px 7px;
+      padding: 2px 6px;
       cursor: pointer;
       border-radius: 4px;
       line-height: 1;
@@ -339,10 +339,10 @@
     .btn-row-menu:hover { background: var(--surface-subtle); color: var(--text-main); }
 
     .folder-content {
-      padding: 10px 12px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
       background: #f8fafc;
       border-top: 1px solid var(--border-subtle);
     }
@@ -353,7 +353,7 @@
       background: #ffffff;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      padding: 8px 11px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -368,14 +368,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       user-select: none;
     }
     .item-title-wrap {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
       min-width: 0;
     }
@@ -387,7 +387,7 @@
     }
     .item-chevron.collapsed { transform: rotate(-90deg); }
     .item-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-main);
       white-space: nowrap;
@@ -398,21 +398,21 @@
     .item-meta-right {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       flex-shrink: 0;
       position: relative;
     }
 
-    /* ЧЕСТНАЯ ШКАЛА ПРОГРЕССА (БЕЗ ЛОЖНОГО ЗАПОЛНЕНИЯ НА 0%) */
+    /* КОМПАКТНАЯ ШКАЛА ПРОГРЕССА (ЭКОНОМИЯ МЕСТА ДЛЯ ДЛИННЫХ НАЗВАНИЙ) */
     .progress-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 5px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--text-muted);
       white-space: nowrap;
@@ -433,10 +433,10 @@
       color: #b45309;
     }
     .progress-mini-bar {
-      width: 28px;
-      height: 5px;
+      width: 22px;
+      height: 4px;
       background: #e2e8f0;
-      border-radius: 3px;
+      border-radius: 2px;
       overflow: hidden;
     }
     .progress-pill.pill-danger .progress-mini-bar { background: #fee2e2; }
@@ -445,7 +445,7 @@
     .progress-mini-fill {
       height: 100%;
       background: var(--brand);
-      border-radius: 3px;
+      border-radius: 2px;
     }
     .progress-mini-fill.is-danger { background: var(--danger); }
     .progress-mini-fill.is-amber { background: var(--amber); }
@@ -456,7 +456,7 @@
       border: none;
       color: var(--text-subtle);
       font-size: 15px;
-      padding: 2px 6px;
+      padding: 2px 4px;
       cursor: pointer;
       line-height: 1;
       border-radius: 4px;
@@ -502,18 +502,18 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      padding-top: 7px;
+      padding-top: 6px;
       border-top: 1px dashed var(--border);
     }
     .item-body.hidden { display: none !important; }
 
-    /* 1. ГОРИЗОНТАЛЬНЫЙ КОНВЕЙЕР ЭТАПОВ */
+    /* КОМПАКТНЫЙ КОНВЕЙЕР (ПОМЕЩАЕТСЯ НА ЭКРАНЕ СМАРТФОНА) */
     .conveyor-strip {
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       overflow-x: auto;
-      padding: 2px 1px 5px 1px;
+      padding: 1px 0 3px 0;
       scrollbar-width: none;
     }
     .conveyor-strip::-webkit-scrollbar { display: none; }
@@ -521,10 +521,10 @@
     .conv-node {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 5px;
-      font-size: 11px;
+      gap: 3px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10.5px;
       font-weight: 600;
       white-space: nowrap;
       border: 1px solid var(--border);
@@ -564,17 +564,17 @@
     }
     .conv-arrow {
       color: #cbd5e1;
-      font-size: 9px;
+      font-size: 8px;
       flex-shrink: 0;
       user-select: none;
     }
 
-    /* ОДНОСТРОЧНЫЕ КОМПАКТНЫЕ ЭТАПЫ */
+    /* ЭТАПЫ: НАЗВАНИЕ И ··· ВЕРХНЕЙ СТРОКОЙ, ЧИПЫ ВТОРОЙ СТРОКОЙ */
     .step-unit {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      padding: 6px 9px;
+      padding: 6px 8px;
       border-radius: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
@@ -583,19 +583,18 @@
     .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
     .step-unit.blocked { background: #fffbfb; border-color: #fecaca; }
 
-    .step-main-line {
+    .step-top-bar {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 6px;
-      flex-wrap: wrap;
     }
     .step-left-part {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 7px;
       flex: 1;
-      min-width: 150px;
+      min-width: 0;
     }
     .step-check {
       width: 15px;
@@ -603,6 +602,7 @@
       cursor: pointer;
       accent-color: var(--done);
       flex-shrink: 0;
+      margin-top: 1px;
     }
     .step-text {
       font-size: 13px;
@@ -611,6 +611,7 @@
       cursor: pointer;
       overflow-wrap: break-word;
       user-select: none;
+      line-height: 1.3;
     }
     .step-unit.done .step-text {
       text-decoration: line-through;
@@ -618,19 +619,19 @@
       opacity: 0.75;
     }
 
-    .step-right-part {
+    .step-chips-bar {
       display: flex;
       align-items: center;
       gap: 4px;
       flex-wrap: wrap;
-      margin-left: auto;
+      padding-left: 22px;
     }
 
-    /* ЧИПЫ ДАТЫ, ДОКУМЕНТА И ЗАДЕРЖКИ (ПРИЗРАЧНЫЕ КОГДА ПУСТЫЕ) */
+    /* ЧИПЫ ДАТЫ, ДОКУМЕНТА И ЗАДЕРЖКИ */
     .chip-btn {
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
@@ -639,15 +640,15 @@
     }
     .chip-btn.ghost {
       background: transparent;
-      border: 1px dashed transparent;
-      color: var(--text-subtle);
+      border: 1px dashed #cbd5e1;
+      color: var(--text-muted);
       opacity: 0.75;
     }
     .chip-btn.ghost:hover {
       opacity: 1;
       background: #ffffff;
-      border-color: var(--border);
-      color: var(--text-muted);
+      border-color: #94a3b8;
+      color: var(--text-main);
     }
 
     .chip-btn.doc-active {
@@ -694,8 +695,8 @@
       background: transparent;
       border: none;
       color: var(--text-subtle);
-      font-size: 14px;
-      padding: 1px 5px;
+      font-size: 15px;
+      padding: 0 4px;
       cursor: pointer;
       line-height: 1;
       border-radius: 4px;
@@ -764,25 +765,29 @@
     .tag-party.mio { background: #f3e8ff; color: #6b21a8; }
     .tag-party.nao { background: #ecfdf5; color: #047857; }
 
-    /* СТРОКА НИЖНИХ ДЕЙСТВИЙ В ОБЪЕКТЕ */
+    /* РОВНАЯ ОДНОСТРОЧНАЯ ПАНЕЛЬ КНОПОК ВНИЗУ ОБЪЕКТА */
     .obj-bottom-bar {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      align-items: stretch;
       gap: 6px;
       margin-top: 2px;
     }
     .btn-subtle-link {
-      background: transparent;
+      background: #ffffff;
       border: 1px dashed var(--border);
       color: var(--text-muted);
       font-size: 11px;
       font-weight: 600;
-      padding: 4px 8px;
+      padding: 5px 6px;
       border-radius: 5px;
       cursor: pointer;
       flex: 1;
       text-align: center;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
     }
     .btn-subtle-link:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
 
@@ -846,29 +851,29 @@
       border-radius: 4px;
     }
 
-    /* КОМПАКТНАЯ ПАНЕЛЬ ОТЧЕТОВ */
+    /* ТОНКАЯ ПАНЕЛЬ ОТЧЕТОВ ВНИЗУ */
     .floating-bar {
       position: fixed;
-      bottom: 10px;
-      left: 12px;
-      right: 12px;
-      max-width: 560px;
+      bottom: 8px;
+      left: 10px;
+      right: 10px;
+      max-width: 520px;
       margin: 0 auto;
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.92);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 11px;
+      padding: 4px;
       display: flex;
-      gap: 5px;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+      gap: 4px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
       z-index: 100;
     }
     .fab-btn {
       flex: 1;
-      padding: 8px 4px;
-      font-size: 12.5px;
+      padding: 7px 4px;
+      font-size: 12px;
       font-weight: 700;
       border-radius: 8px;
       border: none;
@@ -1065,13 +1070,12 @@
         </div>
       </div>
 
-      <!-- ЖИВОЙ ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА ЭКРАНА И ОТЧЕТА -->
       <div class="format-switch">
         <button class="format-btn active" id="modeExecutive" onclick="setReportMode('executive')">
-          ⚡ Фокус в работе (Сводка)
+          ⚡ Фокус в работе
         </button>
         <button class="format-btn" id="modeFull" onclick="setReportMode('full')">
-          📋 Полный реестр (Все этапы)
+          📋 Полный реестр
         </button>
       </div>
     </div>
@@ -1268,7 +1272,8 @@
 
     let reportMode = 'executive';
     let filterOnlyIssues = false;
-    let pinnedStepsMap = {}; // Ручной просмотр этапа из конвейера в режиме Фокус
+    let pinnedStepsMap = {};
+    let expandedAllStepsObjMap = {}; // Локальное раскрытие всех этапов внутри конкретного объекта
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
@@ -1382,18 +1387,30 @@
       target.setHours(0,0,0,0);
 
       const diff = Math.round((target - today) / 86400000);
-      if (diff < 0) return { cls: 'overdue', text: `🔴 Просрочено (${Math.abs(diff)} дн.)` };
+      if (diff < 0) return { cls: 'overdue', text: `⏰ Просрочено (${Math.abs(diff)} дн.)` };
       if (diff === 0) return { cls: 'urgent', text: `🟠 Сегодня` };
       if (diff === 1) return { cls: 'urgent', text: `🟡 Завтра` };
       if (diff <= 3) return { cls: 'urgent', text: `🟡 Через ${diff} дн.` };
       return { cls: 'date-normal', text: `📅 ${dateStr}` };
     }
 
+    /* УМНОЕ СОКРАЩЕНИЕ НАЗВАНИЙ ДЛЯ МОБИЛЬНОГО КОНВЕЙЕРА */
     function shortenStepName(name) {
       if (!name) return '';
       const s = name.trim();
-      if (s.length <= 16) return s;
-      return s.slice(0, 14) + '…';
+      const lower = s.toLowerCase();
+      if (lower.includes('земкомисс')) return 'ЗК';
+      if (lower.includes('акт сверки') || lower.includes('нао')) return 'НАО';
+      if (lower.includes('экспликац') || lower.includes('гипрозем')) return 'Гипрозем';
+      if (lower.includes('зуп')) return 'ЗУП';
+      if (lower.includes('постановлен')) return 'Постан.';
+      if (lower.includes('акт на земл') || lower.includes('регистрац')) return 'Госакт';
+      if (lower.includes('расчет потер')) return 'Расчет';
+      if (lower.includes('землепользоват')) return 'Соглас.';
+      if (lower.includes('протокол')) return 'Протокол';
+      if (lower.includes('перечислен') || lower.includes('оплата')) return 'Оплата';
+      if (s.length <= 10) return s;
+      return s.slice(0, 9) + '…';
     }
 
     function sanitizeRemark(text) {
@@ -1521,6 +1538,7 @@
     function collapseAllItems() {
       filterOnlyIssues = false;
       pinnedStepsMap = {};
+      expandedAllStepsObjMap = {};
       state.forEach(p => {
         p.collapsed = true;
         p.showArchive = false;
@@ -1686,13 +1704,18 @@
       if (tag) tag.textContent = text;
     }
 
-    /* ПЕРЕКЛЮЧЕНИЕ ЖИВОГО РЕЖИМА ЭКРАНА И ФОРМАТА ОТЧЕТА */
     function setReportMode(m) {
       reportMode = m;
+      expandedAllStepsObjMap = {};
       document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
       document.getElementById('modeFull').classList.toggle('active', m === 'full');
       render();
-      showToast(m === 'executive' ? "⚡ Режим: Фокус на активных этапах" : "📋 Режим: Полный список всех этапов");
+      showToast(m === 'executive' ? "⚡ Режим: Фокус в работе" : "📋 Режим: Полный реестр");
+    }
+
+    function toggleObjShowAllSteps(objId) {
+      expandedAllStepsObjMap[objId] = !expandedAllStepsObjMap[objId];
+      render();
     }
 
     function toggleConveyorPin(objId, stepId) {
@@ -1915,7 +1938,6 @@
       });
     }
 
-    /* ПРИВЯЗКА ДОКУМЕНТА / СЗ / ИСХОДЯЩЕГО НОМЕРА К ЭТАПУ */
     function openDocModal(procId, objId, stepId) {
       const p = state.find(x => x.id === procId);
       const obj = p?.objects.find(o => o.id === objId);
@@ -2466,17 +2488,15 @@
                 const objBlockers = stepsArr.filter(s => !s.done && s.blocker).length;
                 const objOverdues = stepsArr.filter(s => !s.done && !s.blocker && isStepOverdue(s.date, s.done)).length;
 
-                // Честная шкала: без фальшивого заполнения при 0%, но с подсветкой самой капсулы
                 const pillStateClass = isAllDone ? 'green' : (objBlockers > 0 ? 'pill-danger' : (objOverdues > 0 ? 'pill-amber' : ''));
                 const barFillClass = objBlockers > 0 ? 'is-danger' : (objOverdues > 0 ? 'is-amber' : '');
 
-                // Определяем первый незавершенный этап (текущее звено конвейера)
                 const firstUnfinished = stepsArr.find(s => !s.done);
                 const currentActiveStepId = firstUnfinished ? firstUnfinished.id : null;
                 const pinnedStepId = pinnedStepsMap[obj.id] || null;
+                const isLocalShowAll = !!expandedAllStepsObjMap[obj.id];
 
-                // В режиме "Фокус" (executive) показываем под конвейером только проблемные, текущий активный или выбранный кликом этап
-                const stepsToRender = (reportMode === 'executive' && !isAllDone)
+                const stepsToRender = (reportMode === 'executive' && !isAllDone && !isLocalShowAll)
                   ? stepsArr.filter(s => (!s.done && (s.blocker || isStepOverdue(s.date, s.done))) || s.id === currentActiveStepId || s.id === pinnedStepId)
                   : stepsArr;
 
@@ -2514,14 +2534,14 @@
                     </div>
 
                     <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
-                      <!-- 1. ГОРИЗОНТАЛЬНЫЙ КОНВЕЙЕР ЭТАПОВ -->
+                      <!-- КОМПАКТНЫЙ КОНВЕЙЕР -->
                       ${stepsArr.length > 1 ? `
                         <div class="conveyor-strip" title="Нажмите на этап, чтобы развернуть его">
                           ${stepsArr.map((st, idx) => {
                             const stOverdue = isStepOverdue(st.date, st.done);
                             const nodeCls = st.done ? 'c-done' : (st.blocker ? 'c-blocked' : (stOverdue ? 'c-overdue' : (st.id === currentActiveStepId ? 'c-current' : '')));
                             const pinCls = (pinnedStepId === st.id) ? 'c-pinned' : '';
-                            const iconPrefix = st.done ? '✔ ' : (st.blocker ? '🚨 ' : (stOverdue ? '🔴 ' : (st.id === currentActiveStepId ? '▶ ' : '')));
+                            const iconPrefix = st.done ? '✔ ' : (st.blocker ? '🚨 ' : (stOverdue ? '⏰ ' : (st.id === currentActiveStepId ? '▶ ' : '')));
                             return `
                               <span class="conv-node ${nodeCls}${pinCls}" onclick="toggleConveyorPin(${obj.id},${st.id})">
                                 ${iconPrefix}${escapeHtml(shortenStepName(st.text))}
@@ -2549,43 +2569,40 @@
 
                           return `
                             <div class="step-unit ${s.done ? 'done' : ''} ${hasBlock ? 'blocked' : ''}">
-                              <!-- ОДНОСТРОЧНАЯ КОМПАКТНАЯ СТРУКТУРА ЭТАПА -->
-                              <div class="step-main-line">
+                              <!-- СТРОКА 1: ГАЛОЧКА + НАЗВАНИЕ СЛЕВА, ТРОЕТОЧИЕ СПРАВА -->
+                              <div class="step-top-bar">
                                 <div class="step-left-part">
                                   <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
                                   <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
                                 </div>
 
-                                <div class="step-right-part">
-                                  <!-- Кнопка документа / СЗ -->
-                                  <button type="button" class="chip-btn ${hasDoc ? 'doc-active' : 'ghost'}" onclick="openDocModal(${proc.id}, ${obj.id}, ${s.id})" title="Привязать номер СЗ, письма или документа">
-                                    ${hasDoc ? '📄 ' + escapeHtml(s.doc) : '📄 +Док'}
-                                  </button>
-
-                                  <!-- Кнопка срока -->
-                                  <button type="button" class="chip-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
-                                    ${dateMeta.text}
-                                  </button>
-
-                                  <!-- Кнопка замечания -->
-                                  ${!s.done ? `
-                                    <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
-                                      ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
-                                    </button>
-                                  ` : ''}
-
-                                  <!-- Меню этапа ··· -->
-                                  <div style="position:relative; display:inline-block;" onclick="event.stopPropagation()">
-                                    <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
-                                    <div class="obj-dropdown-menu" id="smenu-${s.id}">
-                                      <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
-                                      <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openDocModal(${proc.id}, ${obj.id}, ${s.id})">📄 Документ / СЗ</button>
-                                      ${sIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, -1)">⬆️ Вверх</button>` : ''}
-                                      ${sIdx < stepsArr.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, 1)">⬇️ Вниз</button>` : ''}
-                                      <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
-                                    </div>
+                                <div style="position:relative; flex-shrink:0;" onclick="event.stopPropagation()">
+                                  <button type="button" class="step-del-btn" onclick="toggleMenuGeneric(event, 'smenu-${s.id}')" title="Опции этапа">···</button>
+                                  <div class="obj-dropdown-menu" id="smenu-${s.id}">
+                                    <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openEditStepModal(${proc.id}, ${obj.id}, ${s.id})">✏️ Переименовать</button>
+                                    <button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); openDocModal(${proc.id}, ${obj.id}, ${s.id})">📄 Документ / СЗ</button>
+                                    ${sIdx > 0 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, -1)">⬆️ Вверх</button>` : ''}
+                                    ${sIdx < stepsArr.length - 1 ? `<button type="button" class="obj-dropdown-item" onclick="event.stopPropagation(); moveStep(${proc.id}, ${obj.id},${s.id}, 1)">⬇️ Вниз</button>` : ''}
+                                    <button type="button" class="obj-dropdown-item del-action" onclick="event.stopPropagation(); deleteStep(${proc.id}, ${obj.id}, ${s.id})">✕ Удалить</button>
                                   </div>
                                 </div>
+                              </div>
+
+                              <!-- СТРОКА 2: ЧИПЫ ДОКУМЕНТА, СРОКА И ЗАДЕРЖКИ -->
+                              <div class="step-chips-bar">
+                                <button type="button" class="chip-btn ${hasDoc ? 'doc-active' : 'ghost'}" onclick="openDocModal(${proc.id}, ${obj.id}, ${s.id})" title="Привязать номер СЗ, письма или документа">
+                                  ${hasDoc ? '📄 ' + escapeHtml(s.doc) : '📄 +Док'}
+                                </button>
+
+                                <button type="button" class="chip-btn ${dateMeta.cls}" onclick="openDateModal(${proc.id}, ${obj.id}, ${s.id})">
+                                  ${dateMeta.text}
+                                </button>
+
+                                ${!s.done ? `
+                                  <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="openRiskModal(${proc.id}, ${obj.id},${s.id})">
+                                    ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
+                                  </button>
+                                ` : ''}
                               </div>
 
                               ${hist.length > 0 ? `
@@ -2611,10 +2628,11 @@
                         }).join('')}
                       </div>
 
+                      <!-- РОВНЫЕ КНОПКИ В ОДНУ СТРОКУ -->
                       <div class="obj-bottom-bar">
-                        ${hiddenStepsCount > 0 ? `
-                          <button type="button" class="btn-subtle-link" onclick="setReportMode('full')">
-                            👁 Показать остальные этапы (${hiddenStepsCount})
+                        ${(hiddenStepsCount > 0 || isLocalShowAll) && reportMode === 'executive' && !isAllDone ? `
+                          <button type="button" class="btn-subtle-link" onclick="toggleObjShowAllSteps(${obj.id})">
+                            ${isLocalShowAll ? '▲ Свернуть пустые' : `👁 Все этапы (+${hiddenStepsCount})`}
                           </button>
                         ` : ''}
                         <button type="button" class="btn-subtle-link" onclick="addCustomStep(${proc.id},${obj.id})">
