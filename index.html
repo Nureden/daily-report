@@ -301,7 +301,6 @@
       gap: 7px;
       background: #f8fafc;
       border-top: 1px solid var(--border-subtle);
-      height: auto !important;
     }
     .folder-content.hidden { display: none !important; }
 
@@ -314,8 +313,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      height: auto !important;
-      max-height: none !important;
     }
     .item-card.is-complete {
       background: #fcfdfc;
@@ -445,11 +442,10 @@
       gap: 6px;
       padding-top: 6px;
       border-top: 1px dashed var(--border);
-      height: auto !important;
     }
     .item-body.hidden { display: none !important; }
 
-    /* ЭТАПЫ (СТРОГОЕ АВТО-СЖАТИЕ) */
+    /* ЭТАПЫ */
     .step-unit {
       display: flex;
       flex-direction: column;
@@ -458,9 +454,6 @@
       border-radius: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
     }
     .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
     .step-unit.blocked { background: #fffbfb; border-color: #fecaca; }
@@ -545,27 +538,24 @@
     }
     .step-del-btn:hover { background: var(--surface-subtle); color: var(--text-main); }
 
-    /* ЛЕНТА ЗАМЕЧАНИЙ (ФИКСАЦИЯ ВЫСОТЫ) */
+    /* ЛЕНТА ЗАМЕЧАНИЙ */
     .step-remarks-thread {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
       margin-left: 24px;
       margin-top: 3px;
-      max-height: 160px;
-      overflow-y: auto;
-      height: auto !important;
     }
     .step-remark-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
-      padding: 4px 8px;
+      padding: 5px 8px;
       border-radius: 4px;
       font-size: 12px;
-      line-height: 1.35;
-      height: auto !important;
-      min-height: 0 !important;
+      line-height: 1.4;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
     .step-remark-item.is-active-block {
       background: #fef2f2;
@@ -577,9 +567,9 @@
       border-left: 3px solid #94a3b8;
       color: #64748b;
     }
-    .remark-icon { font-size: 11px; flex-shrink: 0; }
-    .remark-date { font-weight: 700; opacity: 0.85; margin-right: 3px; }
-    .remark-text { flex: 1; cursor: pointer; }
+    .remark-icon { font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+    .remark-date { font-weight: 700; opacity: 0.85; margin-right: 4px; }
+    .remark-text { flex: 1; cursor: pointer; min-width: 0; }
     .btn-remark-clear {
       background: none;
       border: none;
@@ -590,16 +580,17 @@
       padding: 0 4px;
       text-decoration: underline;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* ПОДСВЕТКА СТОРОН */
     .tag-party {
       display: inline-block;
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 700;
-      margin-right: 4px;
+      margin-right: 5px;
       background: #e2e8f0;
       color: #1e293b;
     }
@@ -1116,7 +1107,54 @@
 
     function sanitizeRemark(text) {
       if (!text) return '';
-      return String(text).trim().replace(/\s+/g, ' ');
+      let s = String(text);
+      // Очистка на случай если ранее попали сломанные теги
+      if (s.includes('tag-party') || s.includes('lass="')) {
+        s = s.replace(/<[^>]*>/g, '').replace(/(Petrochem\s*){2,}/g, '');
+      }
+      return s.trim().replace(/\s+/g, ' ');
+    }
+
+    /* БЕЗОПАСНОЕ ФОРМАТИРОВАНИЕ ОТВЕТСТВЕННОЙ СТОРОНЫ БЕЗ REGEX */
+    function formatPartyTag(rawText) {
+      if (!rawText) return '';
+      let str = sanitizeRemark(rawText);
+      let badgeHtml = '';
+
+      const openBracket = String.fromCharCode(91); // '['
+      const closeBracket = String.fromCharCode(93); // ']'
+
+      if (str.startsWith(openBracket)) {
+        const closeIdx = str.indexOf(closeBracket);
+        if (closeIdx > 1 && closeIdx < 40) {
+          const partyRaw = str.slice(1, closeIdx).trim();
+          str = str.slice(closeIdx + 1).trim();
+
+          let cls = '';
+          let shortName = partyRaw;
+          const lower = partyRaw.toLowerCase();
+
+          if (lower.includes('cpp') || lower.includes('подрядчик')) {
+            cls = 'cpp';
+            shortName = 'Подрядчик CPP';
+          } else if (lower.includes('кмги') || lower.includes('субподряд') || lower.includes('инжиниринг')) {
+            cls = 'kmgi';
+            shortName = 'Субподряд КМГИ';
+          } else if (lower.includes('petrochem') || lower.includes('заказчик')) {
+            cls = 'kmgp';
+            shortName = 'KMG Petrochem';
+          } else if (lower.includes('акимат') || lower.includes('мио')) {
+            cls = 'mio';
+            shortName = 'Акимат / МИО';
+          } else if (lower.includes('нао') || lower.includes('кадастр') || lower.includes('гипрозем')) {
+            cls = 'nao';
+            shortName = 'НАО / Кадастр';
+          }
+          badgeHtml = `<span class="tag-party ${cls}">${escapeHtml(shortName)}</span>`;
+        }
+      }
+
+      return badgeHtml + escapeHtml(str);
     }
 
     let state = [];
@@ -1553,16 +1591,6 @@
       });
     }
 
-    function formatPartyTag(text) {
-      if (!text) return '';
-      return escapeHtml(text)
-        .replace(/[Подрядчик CPP]/g, '<span class="tag-party cpp">CPP</span>')
-        .replace(/[Субподряд КМГИ]/g, '<span class="tag-party kmgi">КМГИ</span>')
-        .replace(/[Заказчик KMG Petrochem]/g, '<span class="tag-party kmgp">Petrochem</span>')
-        .replace(/\[Акимат \/ МИО\]/g, '<span class="tag-party mio">МИО</span>')
-        .replace(/\[НАО \/ Кадастр\]/g, '<span class="tag-party nao">НАО</span>');
-    }
-
     function editHistoryItem(idx) {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -1616,17 +1644,20 @@
         const row = document.createElement('div');
         row.className = 'preset-row';
         row.innerHTML = `
-          <button type="button" class="preset-btn" onclick="applyPresetToInput('${escapeHtml(presetText)}')">${escapeHtml(presetText)}</button>
+          <button type="button" class="preset-btn" onclick="applyPresetByIndex(${idx})">${escapeHtml(presetText)}</button>
           <button type="button" class="preset-del-btn" onclick="deleteRiskPreset(${idx})" title="Удалить шаблон">✕</button>
         `;
         container.appendChild(row);
       });
     }
 
-    function applyPresetToInput(text) {
+    function applyPresetByIndex(idx) {
+      const list = getRiskPresets();
       const inp = document.getElementById('customRiskInput');
-      inp.value = text;
-      inp.focus();
+      if (inp && list[idx]) {
+        inp.value = list[idx];
+        inp.focus();
+      }
     }
 
     function promptAddRiskPreset() {
@@ -1685,7 +1716,9 @@
       const rawVal = sanitizeRemark(document.getElementById('customRiskInput').value);
       if (!rawVal) return;
 
-      const partyPrefix = selectedPartyTag ? `[${selectedPartyTag}] ` : '';
+      const openB = String.fromCharCode(91);
+      const closeB = String.fromCharCode(93);
+      const partyPrefix = selectedPartyTag ? `${openB}${selectedPartyTag}${closeB} ` : '';
       const fullEntry = `${partyPrefix}${rawVal}`;
 
       if (!step.history) step.history = [];
