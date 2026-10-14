@@ -236,6 +236,8 @@
       transition: background 0.15s;
       position: relative;
     }
+    .folder-row:first-child .folder-header { border-radius: var(--radius-card) var(--radius-card) 0 0; }
+    .folder-row:last-child .folder-header { border-radius: 0 0 var(--radius-card) var(--radius-card); }
     .folder-header:hover { background: var(--surface-subtle); }
 
     .folder-left {
@@ -313,6 +315,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      position: relative;
     }
     .item-card.is-complete {
       background: #fcfdfc;
@@ -410,11 +413,11 @@
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
-      z-index: 100;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+      z-index: 500;
       display: none;
       flex-direction: column;
-      min-width: 150px;
+      min-width: 155px;
       padding: 4px;
     }
     .obj-dropdown-menu.open { display: flex; }
@@ -454,6 +457,7 @@
       border-radius: 6px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
+      position: relative;
     }
     .step-unit.done { background: var(--done-bg); border-color: var(--done-border); }
     .step-unit.blocked { background: #fffbfb; border-color: #fecaca; }
@@ -675,8 +679,7 @@
     }
     @media (min-width: 600px) { .modal-overlay { align-items: center; } }
     
-    /* ПОВЕРХ ВСЕХ МОДАЛОК ДЛЯ ВВОДА И ПРАВКИ */
-    #textPromptModalOverlay {
+    #textPromptModalOverlay, #confirmModalOverlay {
       z-index: 2500;
       background: rgba(15, 23, 42, 0.55);
     }
@@ -979,7 +982,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА И ЗАМЕЧАНИЙ (ВСЕГДА ПОВЕРХ ОСТАЛЬНЫХ ОКОН) -->
+  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТЕКСТА И ЗАМЕЧАНИЙ -->
   <div class="modal-overlay" id="textPromptModalOverlay" onclick="closeTextModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-top">
@@ -987,7 +990,6 @@
         <button class="modal-x" onclick="closeTextModal()">✕</button>
       </div>
 
-      <!-- Выбор стороны при редактировании замечания -->
       <div id="editModalPartyBox" style="display:none;">
         <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ответственная сторона:</label>
         <div class="party-chips-ribbon" style="margin-top:4px;">
@@ -1003,6 +1005,21 @@
       <div class="modal-actions-row">
         <button class="btn-m-primary" onclick="submitTextModal()">Сохранить</button>
         <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeTextModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- БЫСТРОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (ВМЕСТО ТОРМОЗЯЩЕГО CONFIRM) -->
+  <div class="modal-overlay" id="confirmModalOverlay" onclick="closeConfirmModal(event)">
+    <div class="modal-box" style="max-width:380px;" onclick="event.stopPropagation()">
+      <div class="modal-top">
+        <div class="modal-head-title" style="color:var(--danger);">Удаление</div>
+        <button class="modal-x" onclick="closeConfirmModal()">✕</button>
+      </div>
+      <div id="confirmModalText" style="font-size:13.5px; color:var(--text-main);">Подтвердите удаление</div>
+      <div class="modal-actions-row">
+        <button class="btn-m-danger" style="flex:1; background:var(--danger); color:#fff; border:none;" onclick="confirmModalYes()">Да, удалить</button>
+        <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeConfirmModal()">Отмена</button>
       </div>
     </div>
   </div>
@@ -1026,9 +1043,12 @@
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let isSaving = false;
+    let pendingCloudSave = false;
+    let cloudSyncTimer = null;
     let selectedPartyTag = 'Подрядчик CPP';
     let editModalPartyTag = '';
     let textModalCallback = null;
+    let confirmModalCallback = null;
 
     const DEFAULT_RISK_PRESETS = [
       "Оплата не идет у подрядчика",
@@ -1137,7 +1157,6 @@
       return s.trim().replace(/\s+/g, ' ');
     }
 
-    /* РАЗБОР СТОРОНЫ И ТЕКСТА ЗАМЕЧАНИЯ */
     function extractPartyAndText(rawText) {
       let str = sanitizeRemark(rawText);
       let party = '';
@@ -1366,27 +1385,49 @@
       document.querySelectorAll('.obj-dropdown-menu').forEach(m => m.classList.remove('open'));
     });
 
-    async function saveData() {
-      if (isSaving) return;
-      isSaving = true;
+    /* МГНОВЕННОЕ ОБНОВЛЕНИЕ ИНТЕРФЕЙСА + ФОНОВАЯ ОТПРАВКА В ОБЛАКО */
+    function saveData() {
+      currentRevision++;
+      const now = Date.now();
+      const payload = { rev: currentRevision, updatedAt: now, data: state };
+      const json = JSON.stringify(payload);
 
       try {
-        currentRevision++;
-        const now = Date.now();
-        const payload = { rev: currentRevision, updatedAt: now, data: state };
-        const json = JSON.stringify(payload);
-
         localStorage.setItem(STORAGE_KEY, json);
         localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
+      } catch(e) {}
 
-        updateSyncTag(`⏳ v${currentRevision}`);
-        await saveToCloud(json);
+      // 1. Отрисовываем интерфейс мгновенно без ожидания интернета
+      render();
+      updateSyncTag(`⏳ Синхр. v${currentRevision}...`);
+
+      // 2. Отправляем в облако в фоновом режиме с группировкой быстрых нажатий
+      if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = setTimeout(() => {
+        pushCloudBackground();
+      }, 350);
+    }
+
+    async function pushCloudBackground() {
+      if (isSaving) {
+        pendingCloudSave = true;
+        return;
+      }
+      isSaving = true;
+      try {
+        const json = localStorage.getItem(STORAGE_KEY);
+        if (json) {
+          await saveToCloud(json);
+        }
         updateSyncTag(`● Версия ${currentRevision}`);
       } catch(e) {
-        console.error("saveData error:", e);
+        console.error("Cloud push error:", e);
       } finally {
         isSaving = false;
-        render();
+        if (pendingCloudSave) {
+          pendingCloudSave = false;
+          pushCloudBackground();
+        }
       }
     }
 
@@ -1402,7 +1443,24 @@
       showToast(m === 'executive' ? "Формат: Сводка" : "Формат: Таблица");
     }
 
-    /* МОДАЛЬНОЕ ОКНО ВВОДА И ПРАВКИ (С ПОДДЕРЖКОЙ ВЫБОРА СТОРОНЫ) */
+    /* ВСТРОЕННОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ */
+    function askConfirm(message, onYes) {
+      document.getElementById('confirmModalText').textContent = message;
+      confirmModalCallback = onYes;
+      document.getElementById('confirmModalOverlay').style.display = 'flex';
+    }
+
+    function closeConfirmModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('confirmModalOverlay').style.display = 'none';
+      confirmModalCallback = null;
+    }
+
+    function confirmModalYes() {
+      if (confirmModalCallback) confirmModalCallback();
+      closeConfirmModal();
+    }
+
     function showTextModal(title, initialValue, onSave, withPartySelector = false, initialParty = '') {
       document.getElementById('textModalTitle').textContent = title;
       const inp = document.getElementById('textModalInput');
@@ -1477,11 +1535,11 @@
     function deleteProcess(procId) {
       const p = state.find(x => x.id === procId);
       if (!p) return;
-      if (confirm(`Удалить направление «${p.title}» со всеми объектами?`)) {
+      askConfirm(`Удалить направление «${p.title}» со всеми объектами?`, () => {
         state = state.filter(x => x.id !== procId);
         saveData();
-        showToast("Удалено");
-      }
+        showToast("Направление удалено");
+      });
     }
 
     function toggleProcessCollapse(procId) {
@@ -1527,11 +1585,11 @@
       const obj = p?.objects.find(o => o.id === objId);
       if (!p || !obj) return;
 
-      if (confirm(`Удалить объект «${obj.title}»?`)) {
+      askConfirm(`Удалить объект «${obj.title}»?`, () => {
         p.objects = p.objects.filter(o => o.id !== objId);
         saveData();
-        showToast("Удалено");
-      }
+        showToast("Объект удален");
+      });
     }
 
     function editObjectTitle(procId, objId) {
@@ -1661,7 +1719,6 @@
       });
     }
 
-    /* РЕДАКТИРОВАНИЕ ВНЕСЕННОГО ЗАМЕЧАНИЯ (ТЕКСТ + ОТВЕТСТВЕННАЯ СТОРОНА) */
     function editHistoryItem(idx) {
       const { procId, objId, stepId } = activeModalTarget;
       const p = state.find(x => x.id === procId);
@@ -1718,7 +1775,6 @@
       btn.classList.add('selected');
     }
 
-    /* СПИСОК ШАБЛОНОВ С ВОЗМОЖНОСТЬЮ ПРАВКИ КАЖДОГО ШАБЛОНА */
     function renderPresetsList() {
       const container = document.getElementById('modalPresetsList');
       if (!container) return;
