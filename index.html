@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Мониторинг проектов</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -614,8 +614,8 @@
       min-width: 0;
     }
     .step-check {
-      width: 15px;
-      height: 15px;
+      width: 20px;
+      height: 20px;
       cursor: pointer;
       accent-color: var(--done);
       flex-shrink: 0;
@@ -1098,6 +1098,23 @@
       color: var(--text-subtle);
       font-weight: 500;
     }
+    .report-period {display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--text-muted)}
+    .report-period label {display:flex;gap:5px;align-items:center}
+    .report-period input {max-width:125px;min-height:36px;border:1px solid var(--border);border-radius:6px;padding:4px;background:#fff;color:var(--text-main)}
+    .sync-details {font-size:11px;color:var(--text-muted);margin-top:5px;min-height:12px}
+    .detail-inline {display:flex;gap:8px;align-items:center;font-size:12px}
+    .detail-inline select {flex:1}
+    .audit-log {font-size:12px;overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px}
+    .audit-log > div {padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface-subtle)}
+    .step-unit button,.step-unit a,.obj-bottom-bar button,.folder-footer-actions button {min-height:32px}
+    .step-check {cursor:pointer;min-width:20px;min-height:20px}
+    .step-check:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible {outline:2px solid var(--brand);outline-offset:2px}
+    .step-document-link {font-size:11px;color:#1d4ed8;text-decoration:underline}
+    .step-owner {font-size:11px;color:#64748b}
+    .step-unit .step-top-bar {min-height:28px}
+    .btn-remark-clear {min-height:28px}
+    #undoBtn:disabled {opacity:.4;cursor:not-allowed}
+    @media(max-width:480px){.report-period{gap:5px}.report-period input{max-width:116px}}
   </style>
 </head>
 <body>
@@ -1116,12 +1133,16 @@
       </div>
 
       <div class="metrics-ribbon">
-        <div class="kpi-cell danger clickable" id="kpiBlockersBox" onclick="toggleBlockersFilter()" title="Нажмите, чтобы отфильтровать проблемные участки">
+        <div class="kpi-cell danger clickable" id="kpiBlockersBox" onclick="toggleBlockersFilter('blockers')" title="Показать объекты с замечаниями">
           <span class="kpi-title">
-            <span>Задержки</span>
+            <span>Замечания</span>
             <span style="font-size:9px; opacity:0.75;">🔍 фильтр</span>
           </span>
           <span class="kpi-val" id="mBlockers">0</span>
+        </div>
+        <div class="kpi-cell" id="kpiOverdueBox" onclick="toggleBlockersFilter('overdue')" title="Показать просроченные объекты">
+          <span class="kpi-title">Просрочено</span>
+          <span class="kpi-val" id="mOverdue">0</span>
         </div>
         <div class="kpi-cell green">
           <span class="kpi-title">Сделано</span>
@@ -1130,6 +1151,10 @@
         <div class="kpi-cell">
           <span class="kpi-title">В работе</span>
           <span class="kpi-val" id="mPlan">0</span>
+        </div>
+        <div class="kpi-cell">
+          <span class="kpi-title">Ожидание</span>
+          <span class="kpi-val" id="mWaiting">0</span>
         </div>
         <div class="kpi-cell">
           <span class="kpi-title">Объектов</span>
@@ -1145,12 +1170,18 @@
           📋 Полный реестр
         </button>
       </div>
+      <div class="report-period" aria-label="Период отчёта">
+        <label>Отчёт с <input type="date" id="reportFrom" onchange="validateReportPeriod()"></label>
+        <label>по <input type="date" id="reportTo" onchange="validateReportPeriod()"></label>
+        <button type="button" class="chip-btn date-normal" onclick="copyWeeklyPlan()">План недели</button>
+      </div>
+      <div class="sync-details" id="syncDetails" role="status" aria-live="polite"></div>
     </div>
 
     <!-- БАННЕР АКТИВНОГО ФИЛЬТРА ЗАДЕРЖЕК -->
     <div class="filter-active-banner" id="filterBanner">
       <span>Показаны только объекты с замечаниями и просрочкой</span>
-      <button class="btn-reset-filter" onclick="toggleBlockersFilter()">Показать все ✕</button>
+      <button class="btn-reset-filter" onclick="toggleBlockersFilter('all')">Показать все ✕</button>
     </div>
 
     <!-- КОМПАКТНАЯ ШАПКА РЕЕСТРА -->
@@ -1169,7 +1200,10 @@
         <button class="chip-btn date-normal" onclick="this.blur(); triggerImportFile()">📤 Загрузить файл</button>
       </div>
       <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
-      <div class="footer-rev-tag" id="syncTag">● Синхронизировано</div>
+      <div class="footer-rev-tag" id="syncTag" role="status" aria-live="polite">● Загрузка данных...</div>
+      <button type="button" class="chip-btn ghost" id="retrySyncBtn" onclick="pushCloudBackground()" style="display:none">↻ Повторить синхронизацию</button>
+      <button type="button" class="chip-btn date-normal" onclick="undoLastChange()" id="undoBtn" disabled>↶ Отменить последнее действие</button>
+      <button type="button" class="chip-btn ghost" onclick="showAuditLog()">История изменений</button>
     </div>
   </div>
 
@@ -1189,11 +1223,13 @@
       </div>
 
       <div>
-        <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Ключ Gemini API:</label>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted);" for="geminiProxyUrlInput">Защищённый адрес AI-сервера:</label>
         <div style="display:flex; gap:6px; margin-top:3px;">
-          <input type="password" id="geminiApiKeyInput" class="modal-input-field" placeholder="AIzaSy...">
-          <button class="btn-m-primary" style="padding:7px 14px;" onclick="saveGeminiApiKey()">ОК</button>
+          <input type="url" id="geminiProxyUrlInput" class="modal-input-field" placeholder="https://ваш-сервер.kz/api/report">
+          <button class="btn-m-primary" style="padding:7px 14px;" onclick="saveAiProxyUrl()">ОК</button>
         </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">Ключ Gemini хранится только на вашем сервере. Доступ подтверждается Telegram.</div>
+        <label style="display:flex;gap:8px;font-size:12px;margin-top:8px;align-items:center"><input type="checkbox" id="aiConsent"> Разрешаю отправить содержимое отчёта на AI-сервер</label>
       </div>
 
       <button class="btn-m-primary" style="background:var(--ai);" onclick="runAiAnalytics()">
@@ -1245,6 +1281,7 @@
         <button class="modal-x" onclick="closeRiskModal()">✕</button>
       </div>
       <div style="font-size:12px; color:var(--text-muted);" id="riskModalStepTitle">Этап...</div>
+      <div class="detail-inline"><label for="riskWaiting">Статус:</label><select id="riskWaiting" class="modal-input-field"><option value="active">В работе</option><option value="waiting">Ожидаем ответ / действие</option></select></div>
 
       <!-- ИСТОРИЯ -->
       <div style="display:flex; flex-direction:column; gap:4px; max-height:130px; overflow-y:auto; background:var(--surface-subtle); padding:6px; border-radius:6px; border:1px solid var(--border);" id="modalHistoryLogBox"></div>
@@ -1332,6 +1369,25 @@
     </div>
   </div>
 
+  <!-- ОТВЕТСТВЕННЫЕ И ДОКУМЕНТЫ -->
+  <div class="modal-overlay" id="detailsModalOverlay" onclick="closeDetailsModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top"><div class="modal-head-title">Данные этапа</div><button class="modal-x" onclick="closeDetailsModal()">✕</button></div>
+      <label for="stepOwnerInput">Ответственный / организация</label>
+      <input id="stepOwnerInput" class="modal-input-field" maxlength="160" placeholder="НАО / Кадастр, исполнитель...">
+      <label for="stepUrlInput">Ссылка на документ (https://)</label>
+      <input id="stepUrlInput" class="modal-input-field" type="url" placeholder="https://...">
+      <label for="stepWorkflowStatus">Статус работы</label>
+      <select id="stepWorkflowStatus" class="modal-input-field"><option value="active">В работе</option><option value="waiting">Ожидаем ответ / действие</option></select>
+      <div class="modal-actions-row"><button class="btn-m-primary" onclick="saveStepDetails()">Сохранить</button><button class="btn-m-danger" onclick="closeDetailsModal()">Отмена</button></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="auditModalOverlay" onclick="closeAuditModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-top"><div class="modal-head-title">История изменений</div><button class="modal-x" onclick="closeAuditModal()">✕</button></div>
+      <div class="audit-log" id="auditLogBox"></div>
+    </div>
+  </div>
   <!-- ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
   <div class="modal-overlay" id="confirmModalOverlay" onclick="closeConfirmModal(event)">
     <div class="modal-box" style="max-width:380px;" onclick="event.stopPropagation()">
@@ -1339,7 +1395,7 @@
         <div class="modal-head-title" style="color:var(--danger);">Удаление</div>
         <button class="modal-x" onclick="closeConfirmModal()">✕</button>
       </div>
-      <div id="confirmModalText" style="font-size:13.5px; color:var(--text-main);">Подтвердите удаление</div>
+      <div id="confirmModalText" style="font-size:13.5px; color:var(--text-main); white-space:pre-wrap;">Подтвердите удаление</div>
       <div class="modal-actions-row">
         <button class="btn-m-danger" style="flex:1; background:var(--danger); color:#fff; border:none;" onclick="confirmModalYes()">Да, удалить</button>
         <button class="btn-m-danger" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;" onclick="closeConfirmModal()">Отмена</button>
@@ -1353,7 +1409,13 @@
     const tg = window.Telegram?.WebApp;
     const STORAGE_KEY = 'daily_report_vault_v18';
     const GEMINI_KEY_STORAGE = 'gemini_user_api_key';
-    const CHUNK_SIZE = 1200;
+    const CHUNK_SIZE = 900;
+    const SNAPSHOT_SCHEMA = 2; // Bundled application release 2.0
+    const LOCAL_HISTORY_KEY = STORAGE_KEY + '_snapshots';
+    const DEVICE_KEY = STORAGE_KEY + '_device';
+    const CLOUD_MANIFEST_KEY = 'mv2_manifest';
+    const CLOUD_SLOT_PREFIXES = ['mv2a_', 'mv2b_'];
+    const MAX_RETRIES = 3;
 
     if (tg) {
       try {
@@ -1364,10 +1426,22 @@
 
     let reportMode = 'executive';
     let filterOnlyIssues = false;
+    let issueFilterMode = 'all';
     let pinnedStepsMap = {};
     let expandedAllStepsObjMap = {};
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
+    let currentSnapshotId = '';
+    let syncedSnapshot = null;
+    let lastSyncError = '';
+    let undoStack = [];
+    let auditLog = [];
+    let lastActionName = 'Изменение данных';
+    let pendingLocalSave = false;
+    let deviceId = ''; // Initialized after Model module is defined
+    let lastCloudPointer = null;
+    let retryCount = 0;
+    let cloudSyncInProgress = false;
     let isSaving = false;
     let pendingCloudSave = false;
     let cloudSyncTimer = null;
@@ -1614,73 +1688,405 @@
       return html + escapeHtml(parsed.text);
     }
 
-    let state = [];
-
-    function parseRaw(raw) {
-      try {
-        const p = JSON.parse(raw);
-        if (p && Array.isArray(p.data)) {
-          return { rev: p.rev || 0, ts: p.updatedAt || 0, data: p.data };
+    // Model / validation module. Older completed steps deliberately retain unknown completion dates.
+    const Model = (() => {
+      const clone = x => x === undefined ? undefined : JSON.parse(JSON.stringify(x));
+      const same = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+      const isPlain = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+      function isDate(v) {
+        if (typeof v !== 'string') return false;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+        const d = new Date(v + 'T12:00:00');
+        return !Number.isNaN(d.getTime()) && d.toISOString().slice(0,10) === v;
+      }
+      function validUrl(v) {
+        if (!v) return '';
+        try { const url = new URL(v); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; }
+        catch(e) { return ''; }
+      }
+      function validateData(data) {
+        if (!Array.isArray(data) || data.length > 250) throw new Error('Слишком много направлений или неверный формат');
+        let count = 0;
+        const checkId = id => {
+          if (!(typeof id === 'number' && Number.isSafeInteger(id) || typeof id === 'string' && /^[a-zA-Z0-9_-]{5,100}$/.test(id))) throw new Error('Неверный ID записи');
+        };
+        const noDuplicateSiblings = arr => {
+          const ids=arr.map(x=>String(x.id));
+          if(new Set(ids).size!==ids.length)throw new Error('Дублирующийся ID в списке');
+        };
+        noDuplicateSiblings(data);
+        const checkText = (value,limit=2000) => { if(typeof value!=='string'||value.length>limit)throw new Error('Некорректное текстовое поле'); };
+        for(const proc of data) {
+          if(!isPlain(proc)||!Array.isArray(proc.objects)||proc.objects.length>2000)throw new Error('Неверное направление');
+          checkId(proc.id);checkText(proc.title,300);
+          noDuplicateSiblings(proc.objects);
+          for(const obj of proc.objects){
+            if(!isPlain(obj)||!Array.isArray(obj.steps)||obj.steps.length>2000)throw new Error('Неверный объект');
+            checkId(obj.id);checkText(obj.title,300);
+            noDuplicateSiblings(obj.steps);
+            for(const st of obj.steps){
+              if(++count>60000||!isPlain(st))throw new Error('Слишком много этапов');
+              checkId(st.id);checkText(st.text,1000);
+              if(st.date!==undefined&&typeof st.date!=='string')throw new Error('Неверный срок');
+              if(st.history!==undefined&&!Array.isArray(st.history))throw new Error('Неверная история');
+              if((st.history||[]).length>1000)throw new Error('История слишком велика');
+              for(const h of st.history||[]){
+                if(!isPlain(h))throw new Error('Неверная запись истории');
+                checkText(h.text||'',3000);checkText(h.doc||'',1200);
+              }
+            }
+          }
         }
-        if (Array.isArray(p)) return { rev: 0, ts: 0, data: p };
-      } catch(e) {}
+        return true;
+      }
+      function createId() {
+        if(window.crypto?.randomUUID) return window.crypto.randomUUID().replace(/-/g,'');
+        const arr = new Uint32Array(4); if(window.crypto?.getRandomValues)window.crypto.getRandomValues(arr);
+        else throw new Error('Нужен защищённый контекст для создания идентификаторов');
+        return Array.from(arr,v=>v.toString(16).padStart(8,'0')).join('');
+      }
+      function normalize(data){
+        validateData(data);
+        const stepIds=new Set();
+        const legacyId=(st,h,idx)=>{
+          let hash=2166136261;const str=[st.id,idx,h.date,h.text,h.doc].join('|');
+          for(let i=0;i<str.length;i++){hash^=str.charCodeAt(i);hash=Math.imul(hash,16777619);}
+          return 'legacyh_'+(hash>>>0).toString(16)+'_'+idx;
+        };
+        return data.map(proc=>({ ...proc, collapsed: true, showArchive:false,
+          objects:proc.objects.map(obj=>({...obj,collapsed:true,archived:!!obj.archived,
+            steps:obj.steps.map(st=>{
+              const hist = (st.history||[]).map((h,idx)=>({
+                ...h,id:h.id||legacyId(st,h,idx),date:String(h.date||'Ранее').slice(0,100),
+                text:sanitizeRemark(h.text||''),doc:sanitizeRemark(h.doc||''),
+                active:h.active===true,closedAt:h.closedAt||null
+              })).filter(h=>h.text||h.doc);
+              const blocker=st.blocker?sanitizeRemark(st.blocker):null;
+              if(blocker&&!hist.some(h=>h.active)) {
+                const last=hist.findLast(h=>h.text===blocker);
+                if(last && st.history?.some(h=>h.active!==undefined))last.active=true;
+                else if(last && st.history?.every(h=>h.active===undefined))last.active=true;
+                else hist.push({id:createId(),date:st.updatedAt||'Ранее',text:blocker,doc:sanitizeRemark(st.doc||''),active:true,closedAt:null});
+              }
+              if(!blocker)hist.forEach(h=>{h.active=false;});
+              let id=st.id;
+              if(stepIds.has(String(id))){id=createId();}
+              stepIds.add(String(id));
+              return {...st,id,text:sanitizeRemark(st.text||'Этап'),doc:sanitizeRemark(st.doc||''),
+                blocker,history:hist,done:!!st.done,completedAt:st.done && isDate(st.completedAt) ? st.completedAt : null,
+                owner:String(st.owner||'').slice(0,160),documentUrl:validUrl(st.documentUrl),
+                workflowStatus: st.workflowStatus==='waiting'?'waiting':'active'
+              };
+            })
+          }))
+        }));
+      }
+      // 3-way merge: preserve independent changes and recover same-field conflicts in history.
+      function merge(base,local,remote) {
+        let conflicts=[];
+        const mergeValue=(b,l,r,path)=>{
+          if(same(l,r))return clone(l);
+          if(same(l,b))return clone(r);
+          if(same(r,b))return clone(l);
+          conflicts.push(path);
+          return clone(l);
+        };
+        const arrayMerge=(b,l,r,path,childProp)=>{
+          const bm=new Map((b||[]).map(x=>[String(x.id),x]));
+          const lm=new Map((l||[]).map(x=>[String(x.id),x]));
+          const rm=new Map((r||[]).map(x=>[String(x.id),x]));
+          const ids=[...new Set([...lm.keys(),...rm.keys(),...bm.keys()])];
+          return ids.map(id=>{
+            const bv=bm.get(id),lv=lm.get(id),rv=rm.get(id);
+            if(!lv&&!rv)return null;
+            if(!bv){if(!lv)return clone(rv);if(!rv)return clone(lv);return entityMerge({},lv,rv,path+'/'+id,childProp);}
+            if(!lv){if(same(rv,bv))return null;conflicts.push(path+'/'+id+' удаление/редактирование');return clone(rv);}
+            if(!rv){if(same(lv,bv))return null;conflicts.push(path+'/'+id+' редактирование/удаление');return clone(lv);}
+            return entityMerge(bv,lv,rv,path+'/'+id,childProp);
+          }).filter(Boolean);
+        };
+        const entityMerge=(b,l,r,path,childProp)=>{
+          const result={};
+          const keys=new Set([...Object.keys(b||{}),...Object.keys(l||{}),...Object.keys(r||{})]);
+          for(const key of keys){
+            if(key==='collapsed'||key==='showArchive'){result[key]=l[key];continue;}
+            if(key===childProp){const next=key==='objects'?'steps':key==='steps'?'history':null;
+              result[key]=arrayMerge(b[key],l[key],r[key],path+'/'+key,next);continue;
+            }
+            result[key]=mergeValue(b[key],l[key],r[key],path+'/'+key);
+          }
+          return result;
+        };
+        const merged=arrayMerge(base||[],local||[],remote||[],'data','objects');
+        return {data:merged,conflicts};
+      }
+      return {clone,same,isDate,validUrl,validateData,normalize,merge,createId};
+    })();
+    function createId(){return Model.createId();}
+    try {deviceId=localStorage.getItem(DEVICE_KEY)||createId();localStorage.setItem(DEVICE_KEY,deviceId);}catch(e){deviceId=createId();}
+    let state = [];
+    function parseRaw(raw) {
+      if(!raw)return null;
+      try {
+        const p=JSON.parse(raw);
+        if(Array.isArray(p)){Model.validateData(p);return {rev:0,ts:0,id:'legacy',data:p,audit:[]};}
+        if(p && Array.isArray(p.data)){
+          Model.validateData(p.data);
+          return {rev:Number(p.rev)||0,ts:Number(p.updatedAt)||0,id:String(p.snapshotId||'legacy'),data:p.data,audit:Array.isArray(p.audit)?p.audit:[]};
+        }
+      }catch(e){console.warn('Недопустимое сохранение',e);}
       return null;
     }
-
-    function tgSetItemAsync(key, value) {
-      return new Promise((resolve) => {
-        if (!tg?.CloudStorage) return resolve(false);
-        try {
-          tg.CloudStorage.setItem(key, value, (err) => resolve(!err));
-        } catch(e) { resolve(false); }
+    // Cloud storage adapter: two independent slots and a manifest pointing at a fully verified slot.
+    const CloudStorage = (()=>{
+      const set=(key,val)=>new Promise(resolve=>{
+        if(!tg?.CloudStorage)return resolve(false);
+        try{tg.CloudStorage.setItem(key,val,err=>resolve(!err));}catch(e){resolve(false);}
       });
-    }
-
-    function tgGetItemAsync(key) {
-      return new Promise((resolve) => {
-        if (!tg?.CloudStorage) return resolve(null);
-        try {
-          tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : (val || '')));
-        } catch(e) { resolve(null); }
+      const get=key=>new Promise(resolve=>{
+        if(!tg?.CloudStorage)return resolve(null);
+        try{tg.CloudStorage.getItem(key,(err,val)=>resolve(err?null:(val||'')));}catch(e){resolve(null);}
       });
-    }
-
-    async function loadFromCloud() {
-      if (!tg?.CloudStorage) return null;
-      try {
-        const countStr = await tgGetItemAsync('c_count');
-        if (!countStr) return await tgGetItemAsync(STORAGE_KEY);
-
-        const count = parseInt(countStr, 10);
-        if (isNaN(count) || count <= 0) return null;
-
-        let full = '';
-        for (let i = 0; i < count; i++) {
-          const part = await tgGetItemAsync(`c_${i}`);
-          if (part === null) return null;
-          full += part;
+      const checksum=str=>{let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16);};
+      async function readSlot(slot,count,hash){
+        if(!Number.isSafeInteger(count)||count<1||count>400)return null;
+        let json='';
+        for(let i=0;i<count;i++){const part=await get(CLOUD_SLOT_PREFIXES[slot]+i);if(part===null)return null;json+=part;}
+        if(hash && checksum(json)!==hash)return null;
+        return parseRaw(json);
+      }
+      async function read(){
+        if(!tg?.CloudStorage)return {status:'unavailable'};
+        const manifestRaw=await get(CLOUD_MANIFEST_KEY);
+        if(manifestRaw){
+          try{
+            const m=JSON.parse(manifestRaw);
+            const first=await readSlot(m.slot,m.count,m.hash);
+            if(first)return {status:'ok',snapshot:first,manifest:m};
+            // Recover from previous complete slot, if pointer refers to damaged data.
+            if(m.previous){const old=await readSlot(m.previous.slot,m.previous.count,m.previous.hash);
+              if(old)return {status:'recovered',snapshot:old,manifest:m.previous};}
+            return {status:'error',error:'Повреждён облачный снимок. Локальные данные сохранены.'};
+          }catch(e){return {status:'error',error:'Неверный облачный манифест'};}
         }
-        return full;
-      } catch(e) { return null; }
-    }
-
-    async function saveToCloud(jsonStr) {
-      if (!tg?.CloudStorage) return false;
-      try {
-        const chunks = [];
-        for (let i = 0; i < jsonStr.length; i += CHUNK_SIZE) {
-          chunks.push(jsonStr.slice(i, i + CHUNK_SIZE));
+        // Import v18 data once without overwriting it.
+        const count=Number(await get('c_count'));
+        if(Number.isSafeInteger(count)&&count>0&&count<=400){let full='';
+          for(let i=0;i<count;i++){const part=await get('c_'+i);if(part===null)return {status:'error'};full+=part;}
+          const old=parseRaw(full);if(old)return {status:'legacy',snapshot:old,manifest:null};
         }
-        for (let i = 0; i < chunks.length; i++) {
-          const ok = await tgSetItemAsync(`c_${i}`, chunks[i]);
-          if (!ok) return false;
-        }
-        return await tgSetItemAsync('c_count', String(chunks.length));
-      } catch(e) { return false; }
+        const old=parseRaw(await get(STORAGE_KEY));
+        return old?{status:'legacy',snapshot:old,manifest:null}:{status:'empty'};
+      }
+      async function write(payload,previousManifest){
+        if(!tg?.CloudStorage)return {ok:false,error:'Нет Telegram CloudStorage'};
+        const json=JSON.stringify(payload);
+        const chunks=[];for(let i=0;i<json.length;i+=CHUNK_SIZE)chunks.push(json.slice(i,i+CHUNK_SIZE));
+        if(!chunks.length||chunks.length>400)return {ok:false,error:'Размер данных превышает лимит облака'};
+        const slot=previousManifest?.slot===0?1:0;
+        const prefix=CLOUD_SLOT_PREFIXES[slot];
+        for(let i=0;i<chunks.length;i++) if(!await set(prefix+i,chunks[i]))return {ok:false,error:'Ошибка записи фрагмента '+(i+1)};
+        const hash=checksum(json);
+        if(!await readSlot(slot,chunks.length,hash))return {ok:false,error:'Проверка записанных фрагментов не прошла'};
+        const manifest={slot,count:chunks.length,hash,id:payload.snapshotId,rev:payload.rev,updatedAt:payload.updatedAt,
+          previous:previousManifest?{slot:previousManifest.slot,count:previousManifest.count,hash:previousManifest.hash,id:previousManifest.id,rev:previousManifest.rev}:null};
+        if(!await set(CLOUD_MANIFEST_KEY,JSON.stringify(manifest)))return {ok:false,error:'Не удалось закрепить облачную версию'};
+        const confirm=await get(CLOUD_MANIFEST_KEY);
+        if(confirm!==JSON.stringify(manifest))return {ok:false,error:'Обнаружено параллельное сохранение'};
+        return {ok:true,manifest};
+      }
+      return {read,write,available:()=>!!tg?.CloudStorage};
+    })();
+    function persistLocal() {
+      const payload={schema:SNAPSHOT_SCHEMA,snapshotId:currentSnapshotId,rev:currentRevision,updatedAt:Date.now(),deviceId,data:state,audit:auditLog.slice(-250)};
+      try{
+        localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
+        // The legacy key remains readable by older builds. No longer write it: prevents rollback.
+        return true;
+      }catch(e){lastSyncError='Недостаточно места для локального сохранения';updateSyncTag('❌ Ошибка локального сохранения');return false;}
     }
+    function archiveSnapshot(snapshot,reason){
+      if(!snapshot)return;
+      try{
+        const old=JSON.parse(localStorage.getItem(LOCAL_HISTORY_KEY)||'[]');
+        old.unshift({reason,createdAt:new Date().toISOString(),snapshot});
+        const uniq=old.filter((v,i,a)=>a.findIndex(x=>x.snapshot?.snapshotId===v.snapshot?.snapshotId)===i).slice(0,5);
+        localStorage.setItem(LOCAL_HISTORY_KEY,JSON.stringify(uniq));
+      }catch(e){console.warn('Резервная локальная копия не создана',e);}
+    }
+    function getLocalPayload(){return parseRaw(localStorage.getItem(STORAGE_KEY)||'')||parseRaw(localStorage.getItem('manager_projects_permanent_data')||'');}
+    function syncStatus(label,detail='',failed=false){
+      updateSyncTag(label);
+      const msg=document.getElementById('syncDetails');if(msg)msg.textContent=detail;
+      const retry=document.getElementById('retrySyncBtn');if(retry)retry.style.display=failed?'inline-block':'none';
+    }
+    function updateSyncTag(text){const tag=document.getElementById('syncTag');if(tag)tag.textContent=text;}
+    async function loadData(){
+      const local=getLocalPayload();
+      if(local){
+        state=Model.normalize(local.data);auditLog=local.audit||[];
+        currentRevision=local.rev;currentSnapshotId=local.id;
+        render();syncStatus('● Локальные данные загружены','Проверяется облачная версия...');
+      } else {render();syncStatus('● Новая база','Локальной копии пока нет');}
+      await syncWithCloud();
+    }
+    async function syncWithCloud(forceToast=false){
+      if(cloudSyncInProgress)return;
+      cloudSyncInProgress=true;
+      try{
+        const remote=await CloudStorage.read();
+        if(remote.status==='unavailable'){
+          syncStatus('◉ Только на устройстве','Telegram CloudStorage недоступен');return;
+        }
+        if(remote.status==='error')throw new Error(remote.error||'Не удалось прочитать облако');
+        if(remote.status==='empty'){
+          syncStatus('◉ Только на устройстве','В облаке нет сохранения');
+          if(state.length||pendingLocalSave)queueCloudSave();return;
+        }
+        if(!remote.snapshot){syncStatus('◉ Только на устройстве','Данные облака недоступны');return;}
+        const cloud=remote.snapshot;
+        cloud.data=Model.normalize(cloud.data);
+        lastCloudPointer=remote.manifest;
+        const local=getLocalPayload();
+        const different=(!local || !Model.same(local.data,cloud.data));
+        // One-time migration: revision-aware; when there is no common ancestor, preserve both databases.
+        const base=syncedSnapshot?.data || (local?.id===cloud.id?cloud.data:null);
+        if(different){
+          if(!base && local?.data?.length && cloud.data?.length){
+            const merged=Model.merge([],state,cloud.data);
+            archiveSnapshot(local,'До объединения устройств');
+            state=Model.normalize(merged.data);
+            showToast('Данные с двух устройств объединены; проверьте конфликты');
+            syncStatus('⚠ Объединены разные копии',`${merged.conflicts.length} конфликтов, локальная копия сохранена`);
+            pendingLocalSave=true;
+          }else if(base){
+            const merged=Model.merge(base,state,cloud.data);
+            if(merged.conflicts.length){
+              archiveSnapshot(local,'До конфликтного объединения');
+              archiveSnapshot({snapshotId:cloud.id,data:cloud.data,rev:cloud.rev},'Облачный вариант при конфликте');
+              showToast(`Обнаружено конфликтов: ${merged.conflicts.length}. Сохранены резервные копии.`);
+            }
+            state=Model.normalize(merged.data);
+            pendingLocalSave=!Model.same(state,cloud.data);
+          }else{
+            state=Model.normalize(cloud.data);
+            pendingLocalSave=false;
+          }
+          render();
+        }
+        auditLog=[...new Map([...auditLog,...(cloud.audit||[])].map(x=>[x.id,x])).values()].slice(-250);
+        currentRevision=Math.max(currentRevision,cloud.rev);
+        syncedSnapshot=Model.clone(cloud);
+        if(!pendingLocalSave){currentSnapshotId=cloud.id;persistLocal();syncStatus('✓ Облако и устройство синхронизированы',`Версия ${currentRevision}`);}
+        else {currentRevision++;currentSnapshotId=createId();persistLocal();queueCloudSave();}
+        if(forceToast && !different)showToast('Версия актуальна');
+      }catch(e){lastSyncError=e.message;syncStatus('⚠ Ошибка синхронизации',e.message,true);console.error('syncWithCloud',e);}
+      finally{cloudSyncInProgress=false;}
+    }
+    async function manualSync(){
+      collapseAllItems();render();syncStatus('⏳ Сверка данных...');await syncWithCloud(true);
+      if(pendingLocalSave)queueCloudSave();
+    }
+    function queueCloudSave(delay=500){
+      if(cloudSyncTimer)clearTimeout(cloudSyncTimer);
+      cloudSyncTimer=setTimeout(()=>pushCloudBackground(),delay);
+    }
+    function snapshotBeforeChange(name){
+      lastActionName=name;
+      const raw=localStorage.getItem(STORAGE_KEY);
+      const prev=parseRaw(raw);
+      if(prev){undoStack.push({name,data:Model.clone(prev.data)});if(undoStack.length>15)undoStack.shift();}
+      const undoBtn=document.getElementById('undoBtn');if(undoBtn)undoBtn.disabled=undoStack.length===0;
+    }
+    function saveData(actionName,skipUndo=false){
+      const stackCaller=(new Error().stack||'').split('\n')[2]||'';
+      const actions={appendRiskFromModal:'Добавлено замечание',deleteHistoryItem:'Удалено замечание',editHistoryItem:'Исправлено замечание',saveDateFromModal:'Изменён срок',clearDateFromModal:'Очищен срок',moveObject:'Перемещён объект',moveProcess:'Изменён порядок направлений',moveStep:'Изменён порядок этапов',openEditStepModal:'Переименован этап',editProcessTitle:'Переименовано направление',editObjectTitle:'Переименован объект',createObjectWithTemplate:'Создан объект',cloneObject:'Скопирован объект',addCustomStep:'Добавлен этап',deleteStep:'Удалён этап',deleteObject:'Удалён объект',deleteProcess:'Удалено направление',archiveObject:'Объект в архиве',restoreObject:'Объект восстановлен'};
+      const caller=Object.keys(actions).find(x=>stackCaller.includes(x));
+      const action=actionName||(caller?actions[caller]:lastActionName)||'Изменение данных';
+      try{Model.validateData(state);}catch(e){showToast('Ошибка данных: '+e.message);console.error(e);return;}
+      const before=localStorage.getItem(STORAGE_KEY);
+      if(before&&!skipUndo)snapshotBeforeChange(action);
+      currentRevision++;currentSnapshotId=createId();
+      auditLog.push({id:createId(),at:new Date().toISOString(),device:deviceId,action});
+      auditLog=auditLog.slice(-250);
+      pendingLocalSave=true;
+      if(persistLocal()){
+        render();syncStatus(CloudStorage.available()?'⏳ Сохраняется...':'◉ Сохранено на устройстве',CloudStorage.available()?'Ожидается запись в облако':'Для облака откройте приложение в Telegram');
+        if(CloudStorage.available())queueCloudSave();
+      }
+      lastActionName='Изменение данных';
+    }
+    async function pushCloudBackground(){
+      if(isSaving){pendingCloudSave=true;return;}
+      isSaving=true;
+      try{
+        if(!CloudStorage.available()){
+          syncStatus('◉ Сохранено на устройстве','Telegram CloudStorage недоступен');return;
+        }
+        syncStatus('⏳ Запись в облако...','Проверка версии');
+        const remote=await CloudStorage.read();
+        if(remote.status==='error')throw new Error(remote.error||'Облако недоступно');
+        if(remote.status==='ok'||remote.status==='recovered'||remote.status==='legacy'){
+          const cloud=remote.snapshot;
+          cloud.data=Model.normalize(cloud.data);
+          if(cloud.id!==syncedSnapshot?.id){
+            const base=syncedSnapshot?.data||[];
+            const merged=Model.merge(base,state,cloud.data);
+            if(merged.conflicts.length){
+              archiveSnapshot(getLocalPayload(),'До конфликтного сохранения');
+              archiveSnapshot({snapshotId:cloud.id,data:cloud.data,rev:cloud.rev},'Второй вариант из облака');
+            }
+            state=Model.normalize(merged.data);
+            auditLog=[...new Map([...auditLog,...(cloud.audit||[])].map(x=>[x.id,x])).values()].slice(-250);
+            currentRevision=Math.max(currentRevision,cloud.rev)+1;
+            currentSnapshotId=createId();persistLocal();render();
+          }
+          lastCloudPointer=remote.manifest;
+        }
+        const payload={schema:SNAPSHOT_SCHEMA,snapshotId:currentSnapshotId,rev:currentRevision,updatedAt:Date.now(),deviceId,data:state,audit:auditLog};
+        const result=await CloudStorage.write(payload,lastCloudPointer);
+        if(!result.ok)throw new Error(result.error);
+        syncedSnapshot=Model.clone({id:payload.snapshotId,data:state,rev:payload.rev,audit:auditLog});
+        lastCloudPointer=result.manifest;
+        if(payload.snapshotId!==currentSnapshotId){pendingCloudSave=true;return;}
+        pendingLocalSave=false;retryCount=0;lastSyncError='';
+        syncStatus('✓ Сохранено на устройстве и в облаке',`Версия ${currentRevision}`);
+      }catch(e){
+        lastSyncError=e.message;
+        syncStatus('⚠ Только локальная копия','Облако: '+e.message,true);
+        if(retryCount<MAX_RETRIES){retryCount++;queueCloudSave(1000*Math.pow(2,retryCount));}
+        console.error('Cloud push error:',e);
+      }finally{
+        isSaving=false;
+        if(pendingCloudSave){pendingCloudSave=false;queueCloudSave(200);}
+      }
+    }
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncWithCloud();});
+    document.addEventListener('click',()=>{document.querySelectorAll('.obj-dropdown-menu').forEach(m=>m.classList.remove('open'));});
+    function undoLastChange(){
+      if(!undoStack.length)return;
+      const last=undoStack.pop();
+      const undone=getLocalPayload();archiveSnapshot(undone,'Перед отменой');
+      state=Model.normalize(last.data);
+      const b=document.getElementById('undoBtn');if(b)b.disabled=!undoStack.length;
+      saveData('Отмена: '+last.name,true);
+      showToast('Предыдущее состояние восстановлено');
+    }
+    function showAuditLog(){
+      const box=document.getElementById('auditLogBox');box.textContent='';
+      for(const x of auditLog.slice().reverse()){
+        const row=document.createElement('div');row.textContent=`${new Date(x.at).toLocaleString('ru-RU')} — ${x.action}`;
+        box.appendChild(row);
+      }
+      if(!auditLog.length)box.textContent='Пока нет зафиксированных изменений';
+      document.getElementById('auditModalOverlay').style.display='flex';
+    }
+    function closeAuditModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('auditModalOverlay').style.display='none';}
 
-    function collapseAllItems() {
+
+        function collapseAllItems() {
       filterOnlyIssues = false;
+      issueFilterMode = 'all';
       pinnedStepsMap = {};
       expandedAllStepsObjMap = {};
       state.forEach(p => {
@@ -1692,167 +2098,9 @@
       });
     }
 
-    function normalizeStateHistory(arr) {
-      if (!Array.isArray(arr)) return [];
-      return arr.map(p => ({
-        ...p,
-        collapsed: true,
-        showArchive: false,
-        objects: (p.objects || []).map(o => ({
-          ...o,
-          collapsed: true,
-          steps: (o.steps || []).map(s => {
-            const histClean = (s.history || [])
-              .map(h => ({
-                date: h.date || 'Ранее',
-                text: sanitizeRemark(h.text || ''),
-                doc: sanitizeRemark(h.doc || '')
-              }))
-              .filter(h => h.text.length > 0 || h.doc.length > 0);
-            
-            if (s.blocker && histClean.length === 0) {
-              const blkClean = sanitizeRemark(s.blocker);
-              if (blkClean.length > 0) {
-                histClean.push({ date: s.updatedAt || 'Ранее', text: blkClean, doc: sanitizeRemark(s.doc || '') });
-              }
-            }
+    function normalizeStateHistory(arr){return Model.normalize(arr);}
 
-            return {
-              ...s,
-              text: sanitizeRemark(s.text || 'Этап'),
-              doc: s.doc ? sanitizeRemark(s.doc) : '',
-              blocker: s.blocker ? sanitizeRemark(s.blocker) : null,
-              history: histClean
-            };
-          })
-        }))
-      }));
-    }
-
-    async function loadData() {
-      try {
-        let localState = null;
-        const rawLocal = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('manager_projects_permanent_data');
-        if (rawLocal) {
-          const res = parseRaw(rawLocal);
-          if (res && res.data) {
-            currentRevision = res.rev || 0;
-            localState = res.data;
-          }
-        }
-
-        if (localState && localState.length > 0) {
-          state = normalizeStateHistory(localState);
-          render();
-          updateSyncTag(`● Версия ${currentRevision}`);
-        } else {
-          render();
-        }
-
-        await syncWithCloud();
-      } catch(e) {
-        console.error("loadData error:", e);
-        render();
-      }
-    }
-
-    async function syncWithCloud(forceToast = false) {
-      try {
-        const cloudRaw = await loadFromCloud();
-        if (!cloudRaw) {
-          if (forceToast) {
-            collapseAllItems();
-            render();
-            showToast("Все вкладки свернуты");
-          }
-          updateSyncTag(`● Версия ${currentRevision}`);
-          return;
-        }
-
-        const res = parseRaw(cloudRaw);
-        if (res && res.data) {
-          const isDifferent = JSON.stringify(res.data) !== JSON.stringify(state);
-          if (res.rev > currentRevision || (forceToast && isDifferent) || state.length === 0) {
-            currentRevision = Math.max(currentRevision, res.rev || 0);
-            state = normalizeStateHistory(res.data);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ rev: currentRevision, updatedAt: res.ts, data: state }));
-            localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
-            render();
-            showToast(`Синхронизировано (v${currentRevision})`);
-          } else if (forceToast) {
-            collapseAllItems();
-            render();
-            showToast("Версия актуальна");
-          }
-        }
-        updateSyncTag(`● Версия ${currentRevision}`);
-      } catch(e) {}
-    }
-
-    async function manualSync() {
-      collapseAllItems();
-      render();
-      updateSyncTag(`⏳ Проверка...`);
-      await syncWithCloud(true);
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') syncWithCloud();
-    });
-
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.obj-dropdown-menu').forEach(m => m.classList.remove('open'));
-    });
-
-    function saveData() {
-      currentRevision++;
-      const now = Date.now();
-      const payload = { rev: currentRevision, updatedAt: now, data: state };
-      const json = JSON.stringify(payload);
-
-      try {
-        localStorage.setItem(STORAGE_KEY, json);
-        localStorage.setItem('manager_projects_permanent_data', JSON.stringify(state));
-      } catch(e) {}
-
-      render();
-      updateSyncTag(`⏳ Синхр. v${currentRevision}...`);
-
-      if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
-      cloudSyncTimer = setTimeout(() => {
-        pushCloudBackground();
-      }, 350);
-    }
-
-    async function pushCloudBackground() {
-      if (isSaving) {
-        pendingCloudSave = true;
-        return;
-      }
-      isSaving = true;
-      try {
-        const json = localStorage.getItem(STORAGE_KEY);
-        if (json) {
-          await saveToCloud(json);
-        }
-        updateSyncTag(`● Версия ${currentRevision}`);
-      } catch(e) {
-        console.error("Cloud push error:", e);
-      } finally {
-        isSaving = false;
-        if (pendingCloudSave) {
-          pendingCloudSave = false;
-          pushCloudBackground();
-        }
-      }
-    }
-
-    function updateSyncTag(text) {
-      const tag = document.getElementById('syncTag');
-      if (tag) tag.textContent = text;
-    }
-
-    function setReportMode(m) {
+        function setReportMode(m) {
       reportMode = m;
       expandedAllStepsObjMap = {};
       document.getElementById('modeExecutive').classList.toggle('active', m === 'executive');
@@ -1875,10 +2123,11 @@
       render();
     }
 
-    function toggleBlockersFilter() {
-      filterOnlyIssues = !filterOnlyIssues;
+    function toggleBlockersFilter(mode='blockers') {
+      issueFilterMode = issueFilterMode===mode ? 'all' : mode;
+      filterOnlyIssues=issueFilterMode!=='all';
       render();
-      showToast(filterOnlyIssues ? "Показаны только проблемные участки" : "Показаны все проекты");
+      showToast(issueFilterMode==='blockers'?'Объекты с замечаниями':issueFilterMode==='overdue'?'Объекты с просрочкой':'Показаны все проекты');
     }
 
     function askConfirm(message, onYes) {
@@ -1949,7 +2198,7 @@
     function openAddProcessModal() {
       showTextModal("➕ Новое направление", "", (val) => {
         state.push({
-          id: Date.now(),
+          id: createId(),
           title: sanitizeRemark(val),
           collapsed: false,
           showArchive: false,
@@ -2061,12 +2310,12 @@
       showTextModal("📋 Копирование объекта", src.title + " (Копия)", (newTitle) => {
         const nowTs = getTimestampStr();
         p.objects.push({
-          id: Date.now(),
+          id: createId(),
           title: newTitle,
           archived: false,
           collapsed: false,
           steps: (src.steps || []).map((s, i) => ({
-            id: Date.now() + i + 1,
+            id: createId(),
             text: s.text,
             date: s.date,
             done: false,
@@ -2173,7 +2422,7 @@
         row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#fff; padding:6px 8px; border-radius:6px; font-size:12px; border:1px solid #e2e8f0; gap:6px;";
         row.innerHTML = `
           <span style="flex:1; cursor:pointer;" onclick="editHistoryItem(${idx})" title="Нажмите для редактирования">
-            <b>[${escapeHtml(item.date)}]:</b> ${formatPartyTag(item.text, item.doc)}
+            <b>[${escapeHtml(item.date)}] ${item.active?'🚨 Активно':'✔ Закрыто'}:</b> ${formatPartyTag(item.text, item.doc)}
           </span>
           <button type="button" class="preset-act-btn" onclick="editHistoryItem(${idx})" title="Редактировать">✏️</button>
           <button type="button" class="preset-act-btn del" onclick="deleteHistoryItem(${idx})" title="Удалить">✕</button>
@@ -2206,7 +2455,7 @@
             step.history[idx].text = finalStr;
             step.history[idx].doc = cleanedDoc;
 
-            if (idx === step.history.length - 1 && step.blocker) {
+            if (step.history[idx].active && step.blocker) {
               step.blocker = finalStr;
               step.doc = cleanedDoc;
             }
@@ -2230,13 +2479,11 @@
       if (!step || !step.history) return;
 
       step.history.splice(idx, 1);
-      if (step.history.length > 0) {
-        const last = step.history[step.history.length - 1];
-        step.blocker = last.text;
-        step.doc = last.doc || '';
-      } else {
-        step.blocker = null;
-      }
+      const stillActive = step.history.filter(h => h.active);
+      const lastActive = stillActive[stillActive.length-1];
+      step.blocker = lastActive ? lastActive.text : null;
+      if(lastActive)step.doc=lastActive.doc||'';
+      // Closed history entries must never reactivate a blocker.
       step.updatedAt = getTimestampStr();
       renderModalHistoryList(step);
       document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
@@ -2310,29 +2557,51 @@
       renderPresetsList();
     }
 
+    function getStepAtTarget(){
+      const {procId,objId,stepId}=activeModalTarget;
+      return state.find(p=>p.id===procId)?.objects.find(o=>o.id===objId)?.steps.find(s=>s.id===stepId);
+    }
+    function openStepDetails(procId,objId,stepId){
+      activeModalTarget={procId,objId,stepId};
+      const step=getStepAtTarget();if(!step)return;
+      document.getElementById('stepOwnerInput').value=step.owner||'';
+      document.getElementById('stepUrlInput').value=step.documentUrl||'';
+      document.getElementById('stepWorkflowStatus').value=step.workflowStatus||'active';
+      document.getElementById('detailsModalOverlay').style.display='flex';
+    }
+    function closeDetailsModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('detailsModalOverlay').style.display='none';}
+    function saveStepDetails(){
+      const step=getStepAtTarget();if(!step)return;
+      const rawUrl=document.getElementById('stepUrlInput').value.trim();
+      const url=Model.validUrl(rawUrl);
+      if(rawUrl&&!url){showToast('Ссылка должна начинаться с https:// или http://');return;}
+      step.owner=document.getElementById('stepOwnerInput').value.trim().slice(0,160);
+      step.documentUrl=url;
+      step.workflowStatus=document.getElementById('stepWorkflowStatus').value==='waiting'?'waiting':'active';
+      step.updatedAt=getTimestampStr();
+      closeDetailsModal();saveData('Ответственный, документ или статус этапа');
+    }
     function openRiskModal(procId, objId, stepId) {
       activeModalTarget = { procId, objId, stepId };
-      const p = state.find(x => x.id === procId);
-      const obj = p?.objects.find(o => o.id === objId);
-      const step = obj?.steps.find(s => s.id === stepId);
-      if (!step) return;
-
-      if (!step.history) step.history = [];
-      if (step.blocker && step.history.length === 0) {
-        step.history.push({ date: step.updatedAt || 'Ранее', text: sanitizeRemark(step.blocker), doc: sanitizeRemark(step.doc || '') });
+      const step=getStepAtTarget();
+      const obj=state.find(p=>p.id===procId)?.objects.find(o=>o.id===objId);
+      if(!step||!obj)return;
+      if(!step.history)step.history=[];
+      if(step.blocker && !step.history.some(h=>h.active)) {
+        step.history.push({id:createId(),date:step.updatedAt||'Ранее',text:sanitizeRemark(step.blocker),doc:sanitizeRemark(step.doc||''),active:true,closedAt:null});
       }
-
-      document.getElementById('riskModalStepTitle').textContent = `${obj.title} → ${step.text}`;
-      document.getElementById('customRiskInput').value = '';
-      document.getElementById('customDocInput').value = '';
-      renderModalHistoryList(step);
-      renderPresetsList();
-
-      document.getElementById('riskClearBtn').style.display = step.blocker ? 'block' : 'none';
-      document.getElementById('riskModalOverlay').style.display = 'flex';
+      document.getElementById('riskModalStepTitle').textContent=`${obj.title} → ${step.text}`;
+      document.getElementById('customRiskInput').value='';
+      document.getElementById('customDocInput').value='';
+      renderModalHistoryList(step);renderPresetsList();
+      document.getElementById('riskClearBtn').style.display=step.blocker?'block':'none';
+      document.getElementById('riskWaiting').value=step.workflowStatus||'active';
+      document.getElementById('riskWaiting').onchange=()=>{step.workflowStatus=document.getElementById('riskWaiting').value;saveData('Статус ожидания изменён');};
+      document.getElementById('riskModalOverlay').style.display='flex';
     }
 
-    function closeRiskModal(e) {
+
+        function closeRiskModal(e) {
       if (e && e.target !== e.currentTarget) return;
       document.getElementById('riskModalOverlay').style.display = 'none';
     }
@@ -2360,7 +2629,8 @@
       if (!step.history) step.history = [];
       const timestamp = getTimestampStr();
 
-      step.history.push({ date: timestamp, text: fullEntry, doc: docVal });
+      (step.history||[]).forEach(h=>{if(h.active){h.active=false;h.closedAt=new Date().toISOString();}});
+      step.history.push({ id:createId(),date: timestamp, text: fullEntry, doc: docVal, active:true,closedAt:null });
       step.blocker = fullEntry;
       if (docVal) step.doc = docVal;
       step.updatedAt = timestamp;
@@ -2377,8 +2647,9 @@
       if (!step) return;
 
       step.blocker = null;
+      (step.history||[]).forEach(h=>{if(h.active){h.active=false;h.closedAt=new Date().toISOString();}});
       step.updatedAt = getTimestampStr();
-      saveData();
+      saveData('Замечание закрыто');
       showToast("Блокер снят");
     }
 
@@ -2394,9 +2665,13 @@
       const step = obj?.steps.find(s => s.id === stepId);
       if (step) {
         step.done = !step.done;
-        if (step.done) step.blocker = null;
+        if (step.done) {
+          step.completedAt = getTodayISO();
+          step.blocker = null;
+          (step.history||[]).forEach(h => {if(h.active){h.active=false;h.closedAt=new Date().toISOString();}});
+        } else step.completedAt = null;
         step.updatedAt = getTimestampStr();
-        saveData();
+        saveData(step.done?'Этап выполнен':'Этап возвращён в работу');
       }
     }
 
@@ -2425,12 +2700,12 @@
         const templateSteps = WORKFLOW_TEMPLATES[tplKey] || [];
 
         p.objects.push({
-          id: Date.now(),
+          id: createId(),
           title: sanitizeRemark(name),
           archived: false,
           collapsed: false,
           steps: templateSteps.map((text, idx) => ({
-            id: Date.now() + idx,
+            id: createId(),
             text: text,
             doc: "",
             date: "",
@@ -2455,7 +2730,7 @@
         const cleaned = sanitizeRemark(txt);
         if (cleaned) {
           if (!obj.steps) obj.steps = [];
-          const newId = Date.now();
+          const newId = createId();
           obj.steps.push({
             id: newId,
             text: cleaned,
@@ -2501,52 +2776,58 @@
       }
     }
 
-    function downloadBackupFile() {
-      try {
-        const str = JSON.stringify(state, null, 2);
-        const blob = new Blob([str], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `backup_projects_${getTodayISO()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        navigator.clipboard?.writeText(str);
-        showToast("Файл скачан!");
-      } catch(e) {}
-    }
+    // Backup / restore module: validate before import, and save a downloadable pre-import backup.
+    const Backups=(()=>{
+      function build(){return {schema:SNAPSHOT_SCHEMA,type:'projects-monitoring-backup',exportedAt:new Date().toISOString(),
+        rev:currentRevision,snapshotId:currentSnapshotId,data:Model.clone(state),audit:Model.clone(auditLog),presets:getRiskPresets()};}
+      function download(payload,prefix='backup_projects'){
+        try{
+          const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+          const href=URL.createObjectURL(blob);
+          const a=document.createElement('a');a.href=href;a.download=`${prefix}_${getTodayISO()}.json`;
+          document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),30000);
+          return true;
+        }catch(e){console.error(e);showToast('Ошибка создания резервной копии');return false;}
+      }
+      function previewFile(e){
+        const file=e.target.files?.[0];e.target.value='';if(!file)return;
+        if(file.size>8*1024*1024){showToast('Файл слишком большой (макс. 8 МБ)');return;}
+        const reader=new FileReader();
+        reader.onerror=()=>showToast('Не удалось прочитать файл');
+        reader.onload=evt=>{
+          try{
+            const parsed=JSON.parse(evt.target.result);
+            const data=Array.isArray(parsed)?parsed:parsed.data;
+            Model.validateData(data);
+            const normalized=Model.normalize(data);
+            const objects=normalized.reduce((sum,p)=>sum+p.objects.length,0);
+            const steps=normalized.reduce((sum,p)=>sum+p.objects.reduce((v,o)=>v+o.steps.length,0),0);
+            const exportInfo=parsed.exportedAt?`\nСоздан: ${String(parsed.exportedAt).slice(0,19)}`:'\nДата резервной копии неизвестна';
+            askConfirm(`Импорт: ${normalized.length} направлений, ${objects} объектов, ${steps} этапов.${exportInfo}\nТекущая база будет заменена. Перед этим скачается её копия. Продолжить?`,()=>{
+              const previous=build();
+              if(!download(previous,'before_import')){showToast('Импорт отменён: не создана резервная копия');return;}
+              archiveSnapshot(getLocalPayload(),'Перед импортом');
+              state=normalized;
+              if(Array.isArray(parsed.presets)){
+                const clean=parsed.presets.filter(x=>typeof x==='string'&&x.length<=300).slice(0,100);
+                if(clean.length)saveRiskPresets(clean);
+              }
+              auditLog=Array.isArray(parsed.audit)?parsed.audit.slice(-250):auditLog;
+              saveData('Восстановление из файла');
+              showToast('База восстановлена; резервная копия предыдущей базы скачана');
+            });
+          }catch(err){console.warn('Недопустимый JSON',err);showToast('Импорт отменён: '+err.message);}
+        };
+        reader.readAsText(file,'UTF-8');
+      }
+      return {build,download,previewFile};
+    })();
+    function downloadBackupFile(){if(Backups.download(Backups.build()))showToast('Резервная копия скачана');}
+    function triggerImportFile(){document.getElementById('backupFileInput').click();}
+    function handleFileImport(e){Backups.previewFile(e);}
 
-    function triggerImportFile() {
-      document.getElementById('backupFileInput').click();
-    }
 
-    function handleFileImport(e) {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const parsed = JSON.parse(evt.target.result);
-          const data = Array.isArray(parsed) ? parsed : (parsed.data || null);
-          if (Array.isArray(data)) {
-            state = normalizeStateHistory(data);
-            saveData();
-            showToast("База восстановлена из файла!");
-          } else {
-            alert("Некорректная структура файла!");
-          }
-        } catch(err) {
-          alert("Ошибка при чтении JSON-файла!");
-        }
-        e.target.value = '';
-      };
-      reader.readAsText(file);
-    }
-
-    function render() {
+        function render() {
       try {
         const root = document.getElementById('processesRoot');
         if (!root) return;
@@ -2556,6 +2837,8 @@
         let totalPlan = 0;
         let totalActiveObjs = 0;
         let totalBlockers = 0;
+        let totalOverdue = 0;
+        let totalWaiting = 0;
 
         state.forEach(proc => {
           const activeObjects = (proc.objects || []).filter(o => !o.archived);
@@ -2564,15 +2847,21 @@
             (o.steps || []).forEach(s => {
               if (s.done) totalDone++;
               else {
-                totalPlan++;
                 if (s.blocker) totalBlockers++;
+                else if (s.workflowStatus==='waiting')totalWaiting++;
+                else totalPlan++;
+                if(isStepOverdue(s.date,s.done))totalOverdue++;
               }
             });
           });
         });
 
         const filterBanner = document.getElementById('filterBanner');
-        if (filterBanner) filterBanner.classList.toggle('show', filterOnlyIssues);
+        if (filterBanner){
+          filterBanner.classList.toggle('show', filterOnlyIssues);
+          const label=filterBanner.querySelector('span');
+          if(label)label.textContent=issueFilterMode==='overdue'?'Показаны объекты с просрочкой':'Показаны объекты с активными замечаниями';
+        }
 
         state.forEach((proc, procIdx) => {
           const allActiveObjects = (proc.objects || []).filter(o => !o.archived);
@@ -2591,7 +2880,7 @@
                 procDoneSteps++;
               } else {
                 if (s.blocker) procBlockersCount++;
-                else if (isStepOverdue(s.date, s.done)) procOverdueCount++;
+                if (isStepOverdue(s.date, s.done)) procOverdueCount++;
               }
             });
           });
@@ -2602,7 +2891,7 @@
             : (procOverdueCount > 0 ? 'badge-amber' : (isProcAllDone ? 'badge-green' : ''));
 
           const visibleObjects = filterOnlyIssues
-            ? allActiveObjects.filter(o => (o.steps || []).some(s => !s.done && (s.blocker || isStepOverdue(s.date, s.done))))
+            ? allActiveObjects.filter(o => (o.steps || []).some(s => !s.done && (issueFilterMode==='blockers' ? !!s.blocker : isStepOverdue(s.date,s.done))))
             : allActiveObjects;
 
           if (filterOnlyIssues && visibleObjects.length === 0) return;
@@ -2640,7 +2929,7 @@
                 const isObjCollapsed = filterOnlyIssues ? false : (obj.collapsed !== undefined ? !!obj.collapsed : true);
 
                 const objBlockers = stepsArr.filter(s => !s.done && s.blocker).length;
-                const objOverdues = stepsArr.filter(s => !s.done && !s.blocker && isStepOverdue(s.date, s.done)).length;
+                const objOverdues = stepsArr.filter(s => !s.done && isStepOverdue(s.date, s.done)).length;
 
                 const pillStateClass = isAllDone ? 'green' : (objBlockers > 0 ? 'pill-danger' : (objOverdues > 0 ? 'pill-amber' : ''));
                 const barFillClass = objBlockers > 0 ? 'is-danger' : (objOverdues > 0 ? 'is-amber' : '');
@@ -2725,7 +3014,7 @@
                               <!-- СТРОКА 1: ГАЛОЧКА + НАЗВАНИЕ СЛЕВА, ТРОЕТОЧИЕ СПРАВА -->
                               <div class="step-top-bar">
                                 <div class="step-left-part">
-                                  <input type="checkbox" id="chk-${s.id}" class="step-check" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
+                                  <input type="checkbox" id="chk-${s.id}" class="step-check" aria-label="Выполнено: ${escapeHtml(s.text)}" ${s.done ? 'checked' : ''} onchange="toggleStep(${proc.id}, ${obj.id}, ${s.id})">
                                   <label class="step-text" for="chk-${s.id}">${escapeHtml(s.text)}</label>
                                 </div>
 
@@ -2743,9 +3032,13 @@
                               <!-- СТРОКА 2: ЧИПЫ СРОКА И ЗАМЕЧАНИЯ -->
                               <div class="step-chips-bar">
                                 <button type="button" class="chip-btn ${dateMeta.cls}" onclick="this.blur(); openDateModal(${proc.id}, ${obj.id}, ${s.id})">
-                                  ${dateMeta.text}
+                                  ${escapeHtml(dateMeta.text)}
                                 </button>
 
+                                <button type="button" class="chip-btn date-normal" onclick="openStepDetails(${proc.id},${obj.id},${s.id})" title="Ответственный и документ">${s.owner ? '👤 '+escapeHtml(s.owner.slice(0,26)) : '👤 Ответственный'}</button>
+                                ${!s.done && s.workflowStatus==='waiting' ? '<span class="chip-btn urgent" aria-label="Ожидание">⏳ Ожидание</span>' : ''}
+                                ${s.documentUrl ? `<a class="step-document-link" href="${escapeHtml(Model.validUrl(s.documentUrl))}" target="_blank" rel="noopener noreferrer">Документ ↗</a>` : ''}
+                                ${s.done && s.completedAt ? `<span class="step-owner">Закрыто: ${escapeHtml(s.completedAt)}</span>` : ''}
                                 ${!s.done ? `
                                   <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="this.blur(); openRiskModal(${proc.id}, ${obj.id},${s.id})">
                                     ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
@@ -2757,13 +3050,14 @@
                                 <div class="step-remarks-thread">
                                   ${hist.map((hItem, hIdx) => {
                                     const isLast = hIdx === hist.length - 1;
+                                    const isActive = hasBlock && hItem.active;
                                     return `
-                                      <div class="step-remark-item ${hasBlock && isLast ? 'is-active-block' : 'is-resolved'}">
-                                        <span class="remark-icon">${hasBlock && isLast ? '🚨' : '✔'}</span>
+                                      <div class="step-remark-item ${isActive ? 'is-active-block' : 'is-resolved'}">
+                                        <span class="remark-icon">${isActive ? '🚨' : '✔'}</span>
                                         <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
                                           <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text, hItem.doc)}
                                         </span>
-                                        ${isLast && hasBlock ? `
+                                        ${isActive ? `
                                           <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
                                         ` : ''}
                                       </div>
@@ -2827,10 +3121,14 @@
 
         const bBox = document.getElementById('kpiBlockersBox');
         if (bBox) {
-          bBox.className = `kpi-cell clickable ${totalBlockers > 0 ? 'danger' : ''} ${filterOnlyIssues ? 'active-filter' : ''}`;
+          bBox.className = `kpi-cell clickable ${totalBlockers > 0 ? 'danger' : ''} ${issueFilterMode==='blockers' ? 'active-filter' : ''}`;
         }
 
         document.getElementById('mBlockers').textContent = totalBlockers;
+        const overdueBox=document.getElementById('kpiOverdueBox');
+        if(overdueBox)overdueBox.className=`kpi-cell clickable ${totalOverdue>0?'danger':''} ${issueFilterMode==='overdue'?'active-filter':''}`;
+        document.getElementById('mOverdue').textContent=totalOverdue;
+        document.getElementById('mWaiting').textContent=totalWaiting;
         document.getElementById('mDone').textContent = totalDone;
         document.getElementById('mPlan').textContent = totalPlan;
         document.getElementById('mTotal').textContent = totalActiveObjs;
@@ -2839,213 +3137,190 @@
       }
     }
 
-    function generateTelegramReport() {
-      const today = getTodayStr();
-      const blockers = [];
-      state.forEach(p => {
-        (p.objects || []).filter(o => !o.archived).forEach(o => {
-          (o.steps || []).forEach(s => {
-            if (!s.done && s.blocker) {
-              const hist = (s.history || []).map(h => {
-                const docPart = h.doc ? ` [📄 ${sanitizeRemark(h.doc)}]` : '';
-                return `[${h.date}]${docPart} ${sanitizeRemark(h.text)}`;
-              });
-              blockers.push({
-                proc: p.title,
-                obj: o.title,
-                step: s.text,
-                date: s.date || 'срок не указан',
-                history: hist.length > 0 ? hist : [sanitizeRemark(s.blocker)]
-              });
-            }
-          });
-        });
-      });
-
-      if (reportMode === 'executive') {
-        let txt = `📊 СВОДКА ЗА СЕГОДНЯ | ${today}\n\n`;
-
-        if (blockers.length > 0) {
-          txt += `🚨 ТРЕБУЕТ ВНИМАНИЯ (БЛОКЕРЫ):\n`;
-          blockers.forEach(b => {
-            txt += `• ${b.obj} (${b.proc}):\n`;
-            txt += `  ⚠️ ${b.step} [${b.date}]\n`;
-            b.history.forEach(hStr => { txt += `     └ ${hStr}\n`; });
-          });
-          txt += `\n`;
+    // Reporting module. Period-specific completed milestones require real completion dates.
+    const Reports = (()=>{
+      const fmt = iso=>iso ? iso.split('-').reverse().join('.') : 'дата не установлена';
+      function getPeriod(){
+        const today=getTodayISO();
+        const from=document.getElementById('reportFrom')?.value||today;
+        const to=document.getElementById('reportTo')?.value||today;
+        return from<=to?{from,to}:{from:to,to:from};
+      }
+      function validatePeriod(){
+        const {from,to}=getPeriod();
+        document.getElementById('reportFrom').value=from;
+        document.getElementById('reportTo').value=to;
+      }
+      function collect(){
+        const rows=[];
+        for(const proc of state)for(const obj of proc.objects||[]){
+          if(obj.archived)continue;
+          for(const step of obj.steps||[])rows.push({proc,obj,step});
         }
-
-        let hasDone = false;
-        let doneTxt = `✅ ВЫПОЛНЕННЫЕ ЭТАПЫ:\n`;
-        state.forEach(p => {
-          (p.objects || []).filter(o => !o.archived).forEach(o => {
-            const todayDoneSteps = (o.steps || []).filter(s => s.done);
-            if (todayDoneSteps.length > 0) {
-              hasDone = true;
-              doneTxt += `• ${o.title} (${p.title}):\n`;
-              todayDoneSteps.forEach(s => {
-                doneTxt += `  - ${s.text} [закрыто]\n`;
-              });
-            }
-          });
+        return rows;
+      }
+      function status(step){
+        if(step.done)return 'Выполнено';
+        if(step.blocker)return 'Замечание';
+        if(isStepOverdue(step.date,step.done))return 'Просрочено';
+        if(step.workflowStatus==='waiting')return 'Ожидание';
+        return 'В работе';
+      }
+      function weeklyPlan(){
+        const d=new Date();d.setHours(12,0,0,0);
+        const monday=new Date(d);monday.setDate(d.getDate()+((8-d.getDay())%7||7));
+        const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);
+        const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+        const from=iso(monday),to=iso(sunday);
+        let txt=`📅 ПЛАН НА СЛЕДУЮЩУЮ НЕДЕЛЮ (${fmt(from)}–${fmt(to)})\n\n`;
+        const rows=collect().filter(x=>!x.step.done);
+        const urgent=rows.filter(x=>x.step.blocker||isStepOverdue(x.step.date,false));
+        const scheduled=rows.filter(x=>{
+          const due=displayToISO(x.step.date);return due&&due>=from&&due<=to;
         });
-        if (!hasDone) doneTxt += `• Текущие работы без закрытых этапов\n`;
-        txt += doneTxt + `\n`;
-
-        let hasPlan = false;
-        let planTxt = `⏳ ТЕКУЩИЙ ФОКУС В РАБОТЕ:\n`;
-        state.forEach(p => {
-          (p.objects || []).filter(o => !o.archived).forEach(o => {
-            const nextStep = (o.steps || []).find(s => !s.done && !s.blocker);
-            if (nextStep) {
-              hasPlan = true;
-              planTxt += `• ${o.title}: ${nextStep.text}${nextStep.date ? ` [${nextStep.date}]` : ''}\n`;
-            }
-          });
-        });
-        if (!hasPlan && blockers.length === 0) planTxt += `• Все текущие этапы завершены!\n`;
-        txt += planTxt;
-
+        const focus=rows.filter(x=>!urgent.includes(x)&&!scheduled.includes(x)&&x.step.workflowStatus!=='waiting');
+        const waiting=rows.filter(x=>x.step.workflowStatus==='waiting'&&!x.step.blocker);
+        const section=(name,list)=>{
+          txt+=name+':\n';
+          if(!list.length){txt+='• Нет задач\n\n';return;}
+          for(const {proc,obj,step} of list)txt+=`• ${proc.title} / ${obj.title}: ${step.text}${step.date?' ['+step.date+']':''}${step.owner?' — '+step.owner:''}\n`;
+          txt+='\n';
+        };
+        section('🚨 Перенесённые и проблемные',urgent);
+        section('📌 Срок на следующей неделе',scheduled.filter(x=>!urgent.includes(x)));
+        section('⏳ Ожидаем решения',waiting.filter(x=>!scheduled.includes(x)&&!urgent.includes(x)));
+        section('▶ Прочие незавершённые работы',focus.filter(x=>!scheduled.includes(x)).slice(0,30));
         return txt.trim();
-
-      } else {
-        let txt = `📋 ПОЛНЫЙ ОТЧЕТ ПО ОБЪЕКТАМ | ${today}\n\n`;
-        if (blockers.length > 0) {
-          txt += `🚨 ЗАДЕРЖКИ (${blockers.length}):\n`;
-          blockers.forEach(b => {
-            txt += `• ${b.obj}: ${b.step} [${b.date}]\n  ${b.history.join('\n  ')}\n`;
-          });
-          txt += `\n`;
-        }
-
-        state.forEach(p => {
-          const active = (p.objects || []).filter(o => !o.archived);
-          txt += `📂 НАПРАВЛЕНИЕ: ${p.title.toUpperCase()}\n`;
-          if (active.length === 0) {
-            txt += `  (все объекты в архиве)\n\n`;
-            return;
+      }
+      function generate(){
+        const {from,to}=getPeriod(),rows=collect();
+        if(reportMode==='executive'){
+          let txt=`📊 ОТЧЁТ ЗА ПЕРИОД ${fmt(from)}–${fmt(to)}\n\n`;
+          const completed=rows.filter(x=>x.step.done && x.step.completedAt && x.step.completedAt>=from&&x.step.completedAt<=to);
+          const unknown=rows.filter(x=>x.step.done&&!x.step.completedAt);
+          const blockers=rows.filter(x=>!x.step.done&&x.step.blocker);
+          const late=rows.filter(x=>isStepOverdue(x.step.date,x.step.done));
+          txt+=`✅ ВЫПОЛНЕНО ЗА ПЕРИОД (${completed.length}):\n`;
+          if(!completed.length)txt+='• Подтверждённых выполнений за период нет\n';
+          for(const {proc,obj,step} of completed)txt+=`• ${obj.title} (${proc.title}): ${step.text} — ${fmt(step.completedAt)}\n`;
+          if(unknown.length)txt+=`\nℹ️ Ранее отмечено выполненным без даты: ${unknown.length} (не включено в итоги периода)\n`;
+          txt+=`\n🚨 ТЕКУЩИЕ ЗАМЕЧАНИЯ (${blockers.length}):\n`;
+          if(!blockers.length)txt+='• Нет активных замечаний\n';
+          for(const {proc,obj,step} of blockers){
+            txt+=`• ${obj.title} (${proc.title}): ${step.text}${step.owner?' / '+step.owner:''}\n`;
+            for(const h of step.history||[])if(h.active)txt+=`  └ ${sanitizeRemark(h.text)}${h.doc?' ['+sanitizeRemark(h.doc)+']':''}\n`;
           }
-
-          active.forEach(o => {
-            const d = (o.steps || []).filter(s => s.done).length;
-            const t = (o.steps || []).length;
-            txt += `📌 ${o.title} [${d}/${t}]:\n`;
-            (o.steps || []).forEach(s => {
-              const icon = s.done ? '✔' : (s.blocker ? '⚠️' : '⏳');
-              const status = s.done ? '[выполнено]' : (s.date ? `[${s.date}]` : '');
-              const lastDoc = (s.history && s.history.length > 0 && s.history[s.history.length - 1].doc) ? ` [📄 ${sanitizeRemark(s.history[s.history.length - 1].doc)}]` : '';
-              const blockStr = s.blocker ? ` (Задержка: ${sanitizeRemark(s.blocker)}${lastDoc})` : '';
-              txt += `  ${icon} ${s.text} ${status}${blockStr}\n`;
-            });
-            txt += `\n`;
-          });
-        });
-
+          txt+=`\n⏰ ПРОСРОЧЕНО (${late.length}):\n`;
+          if(!late.length)txt+='• Нет просрочек\n';
+          for(const {obj,step} of late)txt+=`• ${obj.title}: ${step.text} [${step.date}]\n`;
+          const waiting=rows.filter(x=>!x.step.done&&x.step.workflowStatus==='waiting'&&!x.step.blocker);
+          txt+=`\n⌛ ОЖИДАНИЕ (${waiting.length}):\n`;
+          if(!waiting.length)txt+='• Нет этапов в ожидании\n';
+          for(const {obj,step} of waiting)txt+=`• ${obj.title}: ${step.text}${step.owner?' / '+step.owner:''}\n`;
+          const focus=rows.filter(x=>!x.step.done&&!x.step.blocker&&x.step.workflowStatus!=='waiting');
+          txt+=`\n▶ В РАБОТЕ (${focus.length}):\n`;
+          for(const {obj,step} of focus)txt+=`• ${obj.title}: ${step.text}${step.date?' ['+step.date+']':''}\n`;
+          return txt.trim();
+        }
+        let txt=`📋 ПОЛНЫЙ РЕЕСТР — ТЕКУЩЕЕ СОСТОЯНИЕ | ${getTodayStr()}\n\n`;
+        for(const proc of state){
+          txt+=`📂 ${proc.title}\n`;
+          for(const obj of proc.objects||[]){
+            if(obj.archived)continue;
+            const done=(obj.steps||[]).filter(x=>x.done).length;
+            txt+=`📌 ${obj.title} [${done}/${(obj.steps||[]).length}]\n`;
+            for(const step of obj.steps||[]){
+              txt+=`  • ${step.text} — ${status(step)}${step.date?' ['+step.date+']':''}${step.completedAt?' (выполнено '+fmt(step.completedAt)+')':''}${step.owner?' / '+step.owner:''}\n`;
+              if(step.documentUrl)txt+=`    Документ: ${step.documentUrl}\n`;
+              if(step.blocker)txt+=`    Замечание: ${step.blocker}\n`;
+            }
+          }
+          txt+='\n';
+        }
         return txt.trim();
       }
+      return {generate,weeklyPlan,getPeriod,validatePeriod,status};
+    })();
+    function generateTelegramReport(){return Reports.generate();}
+    function validateReportPeriod(){Reports.validatePeriod();}
+    async function safeCopy(text){
+      try{await navigator.clipboard.writeText(text);showToast('Скопировано');return true;}
+      catch(e){showToast('Нет доступа к буферу. Откройте страницу через HTTPS');return false;}
     }
-
-    function copyReport() {
-      const text = generateTelegramReport();
-      navigator.clipboard.writeText(text).then(() => showToast("Отчет скопирован!"));
+    function copyReport(){safeCopy(generateTelegramReport());}
+    function copyWeeklyPlan(){safeCopy(Reports.weeklyPlan());}
+    function shareToTelegram(){
+      const text=generateTelegramReport();
+      const url=`https://t.me/share/url?text=${encodeURIComponent(text)}`;
+      if(tg?.openTelegramLink)tg.openTelegramLink(url);else window.open(url,'_blank','noopener');
     }
-
-    function shareToTelegram() {
-      const text = generateTelegramReport();
-      const url = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
-      if (tg?.openTelegramLink) tg.openTelegramLink(url);
-      else window.open(url, '_blank');
-    }
-
-    function exportToExcel() {
-      const rows = [];
-      let tsvText = "Направление\tОбъект\tПрогресс\tЭтап\tДокумент / СЗ\tСрок\tСтатус\tИстория замечаний\n";
-
-      state.forEach(p => {
-        (p.objects || []).forEach(o => {
-          const total = (o.steps || []).length;
-          const done = (o.steps || []).filter(s => s.done).length;
-          const pct = total > 0 ? `${Math.round((done / total) * 100)}%` : '0%';
-
-          (o.steps || []).forEach(s => {
-            const statusStr = s.done ? "Выполнено" : (s.blocker ? "🚨 Задержка" : "В работе");
-            const docsFromHist = (s.history || []).map(h => sanitizeRemark(h.doc)).filter(Boolean).join(', ');
-            const docStr = docsFromHist || sanitizeRemark(s.doc) || "—";
-            const dateStr = s.date || "Не указан";
-            const histList = (s.history || []).map(h => `[${h.date}]${h.doc ? ' [📄 ' + sanitizeRemark(h.doc) + ']' : ''} ${sanitizeRemark(h.text)}`);
-            const fullHistStr = histList.length > 0 ? histList.join(' ➔ ') : (s.blocker || "—");
-
-            rows.push({
-              "Направление": p.title,
-              "Объект": o.title,
-              "Прогресс": pct,
-              "Этап": s.text,
-              "Документ / СЗ": docStr,
-              "Срок": dateStr,
-              "Статус": statusStr,
-              "Хронология": fullHistStr
-            });
-            tsvText += `${p.title}\t${o.title}\t${pct}\t${s.text}\t${docStr}\t${dateStr}\t${statusStr}\t${fullHistStr}\n`;
-          });
-        });
-      });
-
-      if (rows.length === 0) return showToast("Нет данных для выгрузки");
-
-      navigator.clipboard.writeText(tsvText);
-      try {
-        if (typeof XLSX !== 'undefined') {
-          const ws = XLSX.utils.json_to_sheet(rows);
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "Мониторинг");
-          XLSX.writeFile(wb, `Отчет_проектов_${getTodayStr()}.xlsx`);
-          showToast("Excel скачан + скопирован");
+    function exportToExcel(){
+      const rows=[];let tsv='Направление\tОбъект\tПрогресс\tЭтап\tОтветственный\tДокумент URL\tСрок\tВыполнено\tСтатус\tИстория\n';
+      const sanitizeCell=v=>{const t=String(v??'');return /^[=+@\-\t\r]/.test(t)?"'"+t:t;};
+      for(const proc of state)for(const obj of proc.objects||[]){
+        const total=(obj.steps||[]).length;const done=(obj.steps||[]).filter(x=>x.done).length;
+        for(const step of obj.steps||[]){
+          const history=(step.history||[]).map(h=>`[${h.date}] ${h.text} (${h.active?'открыто':'закрыто'})`).join(' → ');
+          const row={Направление:proc.title,Объект:obj.title,Прогресс:total?`${Math.round(done/total*100)}%`:'0%',Этап:step.text,
+            Ответственный:step.owner||'',Документ:step.documentUrl||step.doc||'',Срок:step.date||'', 'Дата выполнения':step.completedAt||'',
+            Статус:Reports.status(step),Хронология:history};
+          const safeRow=Object.fromEntries(Object.entries(row).map(([k,v])=>[k,sanitizeCell(v)]));
+          rows.push(safeRow);tsv+=Object.values(safeRow).map(v=>String(v).replace(/[\t\r\n]+/g,' ')).join('\t')+'\n';
         }
-      } catch(e) {
-        showToast("Таблица скопирована (Ctrl+V)");
       }
+      if(!rows.length){showToast('Нет данных для экспорта');return;}
+      if(typeof XLSX==='undefined'){safeCopy(tsv);showToast('Excel недоступен: скопирована таблица');return;}
+      try{
+        const ws=XLSX.utils.json_to_sheet(rows);
+        const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Мониторинг');
+        XLSX.writeFile(wb,`Мониторинг_${getTodayISO()}.xlsx`);
+        showToast('Excel скачан');
+      }catch(e){console.error(e);safeCopy(tsv);}
     }
 
-    function openAiModal() {
-      document.getElementById('geminiApiKeyInput').value = localStorage.getItem(GEMINI_KEY_STORAGE) || '';
-      document.getElementById('aiModalOverlay').style.display = 'flex';
-    }
-    function closeAiModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('aiModalOverlay').style.display = 'none';
-    }
-    function saveGeminiApiKey() {
-      const val = document.getElementById('geminiApiKeyInput').value.trim();
-      if (!val) return;
-      localStorage.setItem(GEMINI_KEY_STORAGE, val);
-      showToast("Ключ сохранен");
-    }
 
-    async function runAiAnalytics() {
-      const out = document.getElementById('aiOutput-analytics');
-      out.textContent = "⏳ Анализирую...";
-
-      const rawReport = generateTelegramReport();
-      const key = localStorage.getItem(GEMINI_KEY_STORAGE);
-      if (!key) return out.textContent = "⚠️ Укажите API-ключ Gemini";
-
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
-      const prompt = `Ты — ведущий эксперт PMO. Составь краткий и понятный управленческий отчет для руководства с хронологией рисков, номерами документов/СЗ и распределением по ответственным ([Подрядчик CPP], [Субподряд КМГИ], [Заказчик KMG Petrochem], [Акимат / МИО], [НАО / Кадастр]). Без сырых таблиц, строго по пунктам:\n${rawReport}`;
-
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        const data = await response.json();
-        out.textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Пустой ответ";
-      } catch (err) {
-        out.textContent = `Ошибка: ${err.message}`;
+        // AI module: browser never holds API credentials; the server verifies Telegram initData.
+    const AiClient=(()=>{
+      const KEY='projects_ai_proxy_url';
+      const url=()=>localStorage.getItem(KEY)||'';
+      function open(){
+        document.getElementById('geminiProxyUrlInput').value=url();
+        document.getElementById('aiConsent').checked=false;
+        document.getElementById('aiModalOverlay').style.display='flex';
       }
-    }
+      function save(){
+        const raw=document.getElementById('geminiProxyUrlInput').value.trim();
+        if(!raw){localStorage.removeItem(KEY);showToast('Адрес AI-сервера удалён');return;}
+        if(!/^https:\/\//i.test(raw)){showToast('Нужен адрес HTTPS');return;}
+        localStorage.setItem(KEY,raw);showToast('Адрес AI-сервера сохранён');
+      }
+      async function run(){
+        const out=document.getElementById('aiOutput-analytics');
+        if(!document.getElementById('aiConsent').checked){out.textContent='Подтвердите отправку данных отчёта на AI-сервер';return;}
+        if(!url()){out.textContent='Введите адрес защищённого AI-сервера';return;}
+        if(!tg?.initData){out.textContent='Для безопасного доступа к AI откройте приложение через Telegram';return;}
+        out.textContent='Формируется сводка...';
+        try{
+          const controller=new AbortController();
+          const timer=setTimeout(()=>controller.abort(),30000);
+          let response;
+          try{response=await fetch(url(),{method:'POST',headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg.initData},
+            body:JSON.stringify({report:generateTelegramReport()}),signal:controller.signal});}
+          finally{clearTimeout(timer);}
+          let data;try{data=await response.json();}catch(e){throw new Error('Неверный ответ сервера');}
+          if(!response.ok)throw new Error(data?.error||`Ошибка HTTP ${response.status}`);
+          out.textContent=String(data?.text||'Сервер вернул пустой ответ').slice(0,20000);
+        }catch(e){out.textContent='Ошибка: '+e.message;}
+      }
+      return {open,save,run};
+    })();
+    function openAiModal(){AiClient.open();}
+    function closeAiModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('aiModalOverlay').style.display='none';}
+    function saveAiProxyUrl(){AiClient.save();}
+    function runAiAnalytics(){AiClient.run();}
 
-    function copyAiOutput(elementId) {
+
+        function copyAiOutput(elementId) {
       const text = document.getElementById(elementId).innerText;
       if (text) navigator.clipboard.writeText(text).then(() => showToast("Скопировано!"));
     }
@@ -3062,6 +3337,9 @@
       return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, '&quot;');
     }
 
+    try{localStorage.removeItem(GEMINI_KEY_STORAGE);}catch(e){}
+    document.getElementById('reportFrom').value=getTodayISO();
+    document.getElementById('reportTo').value=getTodayISO();
     loadData();
   </script>
 </body>
