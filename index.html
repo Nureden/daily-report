@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Мониторинг проектов</title>
+  <title>Мониторинг проектов — дизайн 3.0</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -1116,6 +1116,119 @@
     #undoBtn:disabled {opacity:.4;cursor:not-allowed}
     @media(max-width:480px){.report-period{gap:5px}.report-period input{max-width:116px}}
   </style>
+<style id="design-v3-overrides">
+/* Design revision 3.0 — presentation only, preserves v2 data schema and controls */
+:root{--bg:#f5f7fb;--surface:#fff;--surface-subtle:#f7f9fc;--border:#e8edf4;--text-main:#18253c;--text-muted:#687991;--radius-card:16px;--radius-sm:10px;--amber:#bb741d;--amber-bg:#fff7e9;--amber-border:#f8dcaa}
+body{background:var(--bg);font-size:14px;letter-spacing:0;padding:15px 12px 125px}
+.app-container{max-width:980px}
+.dashboard-panel{padding:22px 24px 17px;border:1px solid #e7ecf3;box-shadow:0 4px 20px rgba(30,49,79,.035);margin-bottom:20px}
+.dash-header{margin-bottom:18px}
+.dash-title{font-size:21px;font-weight:750;letter-spacing:-.6px;gap:10px}
+.brand-mark{display:inline-flex;align-items:center;justify-content:center;background:#2563eb;color:#fff;width:33px;height:33px;border-radius:10px;font-size:22px;font-weight:400}
+.brand-subtitle{font-weight:650}
+.btn-ai-compact{border-radius:10px;padding:10px 15px;box-shadow:none;font-size:12px;background:#f1eaff;color:#6931cc;border:1px solid #e5d9ff}
+.btn-icon-refresh{height:36px;width:36px;background:#fff;border:1px solid var(--border);border-radius:10px}
+.metrics-ribbon{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:16px}
+.kpi-cell{padding:14px 15px;min-height:81px;border:1px solid #e7ecf2;border-radius:11px;background:#fff}
+.kpi-cell.clickable:hover{border-color:#bccddd;box-shadow:0 3px 12px rgba(29,53,86,.06)}
+.kpi-cell.danger{background:#fff;border-color:#f2d3d7;color:#b92841}
+.kpi-cell.amber{background:#fff;border-color:#f2e2ca;color:#a86c22}
+.kpi-cell.green{background:#fff;border-color:#d1e9db;color:#18835c}
+.kpi-cell.active-filter{box-shadow:0 0 0 2px currentColor,inset 0 0 0 2px #fff!important;background:#fff}
+.kpi-title{font-size:10.5px;letter-spacing:.3px;font-weight:720;opacity:1;line-height:1.3}
+.kpi-val{font-size:27px;letter-spacing:-.9px;font-weight:760;margin-top:7px;line-height:1}
+.kpi-indicator{font-size:14px;opacity:.45}
+.format-switch{background:#f0f4f9;padding:4px;gap:5px;border-radius:11px}
+.format-btn{padding:10px 12px;border-radius:8px;font-size:12.5px}
+.format-btn.active{box-shadow:0 2px 7px rgba(50,68,97,.08)}
+.report-period{margin-top:13px;gap:11px;font-size:11.5px}
+.report-period input{background:#fff;border:1px solid #e2e8f0;border-radius:8px;min-height:32px}
+.sync-details{font-size:11px;color:#718096}
+.section-bar{margin:0 0 10px;padding:0 4px}
+.section-bar-title{font-size:12px;color:#37445a;letter-spacing:.5px}
+.section-bar-second{font-weight:550;color:#8190a5}
+.btn-add-proc-compact{background:#fff;border:1px solid #d7e2f2;border-radius:9px;min-height:34px;padding:7px 13px}
+.registry-card{border:1px solid #e8edf3;border-radius:15px;box-shadow:0 4px 14px rgba(20,40,80,.022);overflow:visible}
+.folder-row{border-bottom:1px solid #e9edf3}
+.folder-header{padding:15px 17px;background:#fff;border-radius:15px 15px 0 0}
+.folder-left{font-size:14.5px;gap:10px}
+.folder-chevron{font-size:10px;color:#90a0b6}
+.counter-badge{padding:2px 8px;border:0;background:#eff2f7;color:#6c7b90}
+.counter-badge.badge-danger{background:#fff0f0;color:#b92942;border:0}
+.counter-badge.badge-amber{background:#fff3e2;color:#a97120;border:0}
+.folder-content{padding:9px 13px 14px;gap:9px;background:#fafbfd;border-top:1px solid #eef1f5}
+.item-card{border:1px solid #e4eaf1;border-radius:12px;background:#fff;padding:13px 15px 11px;gap:9px;box-shadow:0 2px 7px rgba(20,40,80,.015)}
+.item-card.is-complete{background:#fff;border-color:#d8eade}
+.item-header{min-height:29px;gap:10px}
+.item-title{font-size:14px;font-weight:730;letter-spacing:-.15px}
+.item-chevron{font-size:10px;color:#8e9aae}
+.progress-pill{background:#f3f6fa;border:0;border-radius:7px;font-size:11px;padding:5px 8px;color:#5e718b}
+.progress-pill.green{background:#edf9f1;color:#147c54;border:0}
+.progress-pill.pill-danger,.progress-pill.pill-amber{background:#f3f6fa;border:0;color:#56677f}
+.progress-mini-bar{width:28px;height:5px;background:#dfe7f1}
+.progress-mini-fill,.progress-mini-fill.is-danger,.progress-mini-fill.is-amber{background:#527aa9}
+.btn-row-menu,.btn-item-more{min-width:30px;min-height:30px;font-size:19px;border-radius:8px;color:#8696a9}
+.object-overview{padding:2px 0 3px 18px;cursor:pointer;display:flex;flex-direction:column;gap:8px;outline-offset:2px}
+.overview-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.overview-stage{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;min-width:0}
+.overview-label{color:#91a0b3;font-size:11px;white-space:nowrap}
+.overview-name{font-size:12.5px;color:#364a65;font-weight:650;overflow-wrap:anywhere}
+.summary-status{font-size:11px;white-space:nowrap;font-weight:700;border-radius:6px;padding:4px 8px}
+.summary-blocked{color:#b83248;background:#fff0f1}
+.summary-overdue{color:#ad7025;background:#fff5e5}
+.summary-done{color:#167950;background:#eaf8ef}
+.summary-waiting{color:#715f99;background:#f4efff}
+.summary-active{color:#376c9b;background:#edf5ff}
+.overview-progress{display:flex;align-items:center;gap:8px;color:#8392a7;font-size:10.5px;flex-wrap:wrap}
+.overview-bar{width:90px;height:5px;border-radius:20px;background:#edf1f5;overflow:hidden}
+.overview-fill{height:100%;background:#4f87bd;border-radius:20px}
+.overview-due{padding-left:6px;color:#77879b}
+.overview-issues{color:#b83248;margin-left:auto;font-size:10.5px}
+.item-body{padding:11px 0 0;border-top:1px solid #eef1f6;gap:9px}
+.conveyor-strip{gap:5px;padding:1px 0 4px}
+.conv-node{background:#f4f6fa;border:0;border-radius:6px;color:#7c8ba0;font-size:11px;padding:5px 9px}
+.conv-node.c-done{background:#eaf7ee;border:0;color:#21825c}
+.conv-node.c-blocked{background:#fff0f1;border:0;color:#b9324b}
+.conv-node.c-overdue{background:#fff6e7;border:0;color:#ac762c}
+.conv-node.c-current{background:#edf4ff;border:0;color:#2b68ab}
+.conv-arrow{color:#aebbd0}
+.step-unit,.step-unit.blocked,.step-unit.done{border-radius:9px;padding:10px 12px;gap:8px;background:#fff;border:1px solid #e9edf3;border-left:3px solid #d9e2ef}
+.step-unit.blocked{border-left-color:#cc3853}
+.step-unit.done{background:#fcfefd;border-left-color:#35a577}
+.step-text{font-size:13px;font-weight:650;line-height:1.42}
+.step-unit.done .step-text{color:#7a9286}
+.step-left-part{align-items:center;gap:10px}
+.step-check{width:18px;height:18px;min-height:18px;min-width:18px}
+.step-top-bar{align-items:center}
+.step-chips-bar{padding-left:28px;gap:7px}
+.chip-btn{font-size:11px;border-radius:6px;padding:5px 8px}
+.chip-btn.overdue{background:#fff3e4;border:1px solid #f3d7ae;color:#a96a20}
+.chip-btn.risk-active{background:#fff0f1;border:1px solid #f0c9d0;color:#b7354b}
+.chip-btn.ghost{background:#fff;color:#7d8b9f;border:1px dashed #d8e0eb;opacity:1}
+.chip-btn.date-normal{border:1px solid #e8edf3;color:#6b7c92;background:#fff}
+.plan-date{font-size:11px;color:#76869b;background:#f4f6f9;padding:5px 7px;border-radius:6px}
+.step-remarks-thread{gap:5px;margin:0 0 0 28px;padding-top:1px}
+.step-remark-item,.step-remark-item.is-active-block,.step-remark-item.is-resolved{border-radius:8px;padding:9px 11px;background:#f8fafd;border:0;color:#687a91;font-size:11.5px;align-items:center}
+.step-remark-item.is-active-block{background:#fff8f8;border-left:2px solid #d5445a;color:#8d3f4b}
+.remark-label{display:block;font-weight:750;color:#b5324a;font-size:10px;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+.remark-date{font-size:10px;color:#8b98a8;margin-right:5px}
+.history-toggle{border:0;background:transparent;color:#477ab0;text-align:left;padding:5px 1px;font-size:11.5px;font-weight:680;cursor:pointer;width:max-content}
+.history-toggle:hover{text-decoration:underline}
+.history-older[hidden]{display:none!important}
+.history-older{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.btn-remark-clear{color:#af3750;text-decoration:none;border:1px solid #f2d1d7;border-radius:6px;padding:4px 8px;min-height:28px}
+.tag-doc{background:#eff4fb;border:0;color:#567696;font-size:10px}
+.tag-party{border-radius:4px;font-size:10px}
+.obj-bottom-bar{margin-top:0}
+.btn-subtle-link{min-height:36px!important;border:1px dashed #e0e7ef;border-radius:8px;font-size:11.5px;color:#69809a;background:#fff}
+.folder-footer-actions{margin-top:8px}
+.btn-add-obj-subtle{border:1px dashed #d9e3ee;border-radius:8px;min-height:34px;font-size:11px;background:#fff}
+.floating-bar{max-width:440px;bottom:12px;padding:5px;background:#17243b;box-shadow:0 8px 28px rgba(13,28,52,.2);border-radius:14px}
+.fab-btn{padding:11px 7px;border-radius:9px;font-size:12px}
+.footer-subtle-wrap{margin-top:22px}
+@media(max-width:700px){.dashboard-panel{padding:16px}.metrics-ribbon{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi-cell{min-height:78px}.dash-title{font-size:18px}.item-card{padding:11px}.folder-content{padding:8px}.overview-stage{gap:4px}.object-overview{padding-left:15px}}
+@media(max-width:420px){body{padding:7px 7px 110px}.dashboard-panel{padding:12px 11px}.brand-subtitle{display:none}.dash-title{font-size:17px}.brand-mark{width:29px;height:29px}.btn-ai-compact{padding:8px 10px}.kpi-cell{padding:11px;min-height:73px}.kpi-val{font-size:24px}.kpi-title{font-size:9.5px}.folder-left{font-size:13px}.item-title{font-size:13px}.overview-main{align-items:flex-start}.overview-stage{flex-direction:column;gap:2px}.overview-label{font-size:10px}.overview-name{font-size:12px}.summary-status{font-size:10px}.step-chips-bar{padding-left:0}.step-remarks-thread{margin-left:0}.object-overview{padding-left:15px}.item-header{gap:3px}.progress-pill{font-size:10px}.report-period{gap:5px}}
+</style>
 </head>
 <body>
 
@@ -1124,50 +1237,50 @@
     <div class="dashboard-panel">
       <div class="dash-header">
         <div class="dash-title">
-          <span>📊</span> Мониторинг проектов
+          <span class="brand-mark">◈</span> <span>Мониторинг <span class="brand-subtitle">проектов</span></span>
         </div>
         <div class="dash-controls">
           <button class="btn-icon-refresh" onclick="manualSync()" title="Синхронизировать и свернуть все">🔄</button>
-          <button class="btn-ai-compact" onclick="openAiModal()">✨ AI-Отчет</button>
+          <button class="btn-ai-compact" onclick="openAiModal()">✧ AI-отчёт</button>
         </div>
       </div>
 
       <div class="metrics-ribbon">
         <div class="kpi-cell danger clickable" id="kpiBlockersBox" onclick="toggleBlockersFilter('blockers')" title="Показать объекты с замечаниями">
           <span class="kpi-title">
-            <span>Замечания</span>
-            <span style="font-size:9px; opacity:0.75;">🔍 фильтр</span>
+            <span>Активные замечания</span>
+            <span class="kpi-indicator">↗</span>
           </span>
           <span class="kpi-val" id="mBlockers">0</span>
         </div>
         <div class="kpi-cell" id="kpiOverdueBox" onclick="toggleBlockersFilter('overdue')" title="Показать просроченные объекты">
-          <span class="kpi-title">Просрочено</span>
+          <span class="kpi-title">Просрочено этапов</span>
           <span class="kpi-val" id="mOverdue">0</span>
         </div>
         <div class="kpi-cell green">
-          <span class="kpi-title">Сделано</span>
+          <span class="kpi-title">Этапов выполнено</span>
           <span class="kpi-val" id="mDone">0</span>
         </div>
         <div class="kpi-cell">
-          <span class="kpi-title">В работе</span>
+          <span class="kpi-title">Этапов в работе</span>
           <span class="kpi-val" id="mPlan">0</span>
         </div>
         <div class="kpi-cell">
-          <span class="kpi-title">Ожидание</span>
+          <span class="kpi-title">В ожидании</span>
           <span class="kpi-val" id="mWaiting">0</span>
         </div>
         <div class="kpi-cell">
-          <span class="kpi-title">Объектов</span>
+          <span class="kpi-title">Объектов всего</span>
           <span class="kpi-val" id="mTotal">0</span>
         </div>
       </div>
 
       <div class="format-switch">
         <button class="format-btn active" id="modeExecutive" onclick="setReportMode('executive')">
-          ⚡ Фокус в работе
+          Фокус в работе
         </button>
         <button class="format-btn" id="modeFull" onclick="setReportMode('full')">
-          📋 Полный реестр
+          Полный реестр
         </button>
       </div>
       <div class="report-period" aria-label="Период отчёта">
@@ -1186,7 +1299,7 @@
 
     <!-- КОМПАКТНАЯ ШАПКА РЕЕСТРА -->
     <div class="section-bar">
-      <span class="section-bar-title">Направления и участки</span>
+      <span class="section-bar-title">Направления <span class="section-bar-second">и участки</span></span>
       <button class="btn-add-proc-compact" onclick="this.blur(); openAddProcessModal()">+ Направление</button>
     </div>
 
@@ -1209,9 +1322,9 @@
 
   <!-- КОМПАКТНАЯ ПАНЕЛЬ ОТЧЕТОВ -->
   <div class="floating-bar">
-    <button class="fab-btn" onclick="copyReport()">📋 Текст</button>
-    <button class="fab-btn" onclick="exportToExcel()">📊 Excel</button>
-    <button class="fab-btn" onclick="shareToTelegram()">✈️ В Telegram</button>
+    <button class="fab-btn" onclick="copyReport()">Текст</button>
+    <button class="fab-btn" onclick="exportToExcel()">Excel</button>
+    <button class="fab-btn" onclick="shareToTelegram()">В Telegram ↗</button>
   </div>
 
   <!-- МОДАЛЬНОЕ ОКНО AI -->
@@ -1429,6 +1542,7 @@
     let issueFilterMode = 'all';
     let pinnedStepsMap = {};
     let expandedAllStepsObjMap = {};
+    let expandedHistoryStepMap = {};
     let activeModalTarget = { procId: null, objId: null, stepId: null };
     let currentRevision = 0;
     let currentSnapshotId = '';
@@ -2107,6 +2221,14 @@
       document.getElementById('modeFull').classList.toggle('active', m === 'full');
       render();
       showToast(m === 'executive' ? "⚡ Режим: Фокус в работе" : "📋 Режим: Полный реестр");
+    }
+
+    function toggleHistoryVisibility(stepId) {
+      expandedHistoryStepMap[stepId] = !expandedHistoryStepMap[stepId];
+      const body=document.getElementById('history-older-'+stepId);
+      const button=document.getElementById('history-toggle-'+stepId);
+      if(body) body.hidden=!expandedHistoryStepMap[stepId];
+      if(button) button.textContent=(expandedHistoryStepMap[stepId]?'Скрыть историю':'История замечаний')+' ('+ (body?.dataset.count||'0') +')';
     }
 
     function toggleObjShowAllSteps(objId) {
@@ -2936,6 +3058,10 @@
 
                 const firstUnfinished = stepsArr.find(s => !s.done);
                 const currentActiveStepId = firstUnfinished ? firstUnfinished.id : null;
+                const currentStep = stepsArr.find(s => !s.done && s.blocker) || firstUnfinished;
+                const currentDue = currentStep && currentStep.date ? String(currentStep.date).replace(/^до\s+/, '') : '';
+                const currentStatus = isAllDone ? 'Завершено' : objBlockers ? 'Замечание' : objOverdues ? 'Просрочка' : currentStep?.workflowStatus === 'waiting' ? 'Ожидание' : 'В работе';
+                const currentStatusCls = isAllDone ? 'summary-done' : objBlockers ? 'summary-blocked' : objOverdues ? 'summary-overdue' : currentStep?.workflowStatus === 'waiting' ? 'summary-waiting' : 'summary-active';
                 const pinnedStepId = pinnedStepsMap[obj.id] || null;
                 const isLocalShowAll = !!expandedAllStepsObjMap[obj.id];
 
@@ -2947,9 +3073,9 @@
 
                 return `
                   <div class="item-card ${isAllDone ? 'is-complete' : ''}">
-                    <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})">
+                    <div class="item-header" onclick="toggleObjectCollapse(${proc.id},${obj.id})" role="button" tabindex="0" aria-expanded="${!isObjCollapsed}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleObjectCollapse(${proc.id},${obj.id});}">
                       <div class="item-title-wrap">
-                        <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}">▼</span>
+                        <span class="item-chevron ${isObjCollapsed ? 'collapsed' : ''}" aria-hidden="true">▼</span>
                         <span class="item-title">${escapeHtml(obj.title)}</span>
                       </div>
 
@@ -2959,7 +3085,7 @@
                             <div class="progress-mini-bar">
                               <div class="progress-mini-fill ${barFillClass}" style="width: ${percent}%;"></div>
                             </div>
-                            <span>${dCount}/${tCount} (${percent}%)</span>
+                            <span>${dCount}/${tCount}</span>
                           </div>
                         ` : `
                           <span class="progress-pill" style="opacity:0.6;">0 задач</span>
@@ -2976,9 +3102,24 @@
                       </div>
                     </div>
 
+                    <div class="object-overview" onclick="toggleObjectCollapse(${proc.id},${obj.id})" role="button" tabindex="0" aria-label="${isObjCollapsed?'Развернуть':'Свернуть'} этапы объекта" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleObjectCollapse(${proc.id},${obj.id});}">
+                      <div class="overview-main">
+                        <div class="overview-stage">
+                          <span class="overview-label">${isAllDone?'Все этапы завершены':'Текущий этап'}</span>
+                          <span class="overview-name">${escapeHtml(currentStep ? currentStep.text : (isAllDone?'Готово':'Этапы не добавлены'))}</span>
+                        </div>
+                        <span class="summary-status ${currentStatusCls}">${currentStatus}</span>
+                      </div>
+                      <div class="overview-progress">
+                        <div class="overview-bar"><div class="overview-fill" style="width:${percent}%"></div></div>
+                        <span>${percent}%</span>
+                        ${currentDue && !isAllDone ? `<span class="overview-due">План: ${escapeHtml(currentDue)}</span>` : ''}
+                        ${objBlockers > 0 ? `<span class="overview-issues">${objBlockers} акт. замеч.</span>` : ''}
+                      </div>
+                    </div>
                     <div class="item-body ${isObjCollapsed ? 'hidden' : ''}">
                       <!-- КОМПАКТНЫЙ КОНВЕЙЕР -->
-                      ${stepsArr.length > 1 ? `
+                      ${stepsArr.length > 1 && (reportMode === 'full' || isLocalShowAll) ? `
                         <div class="conveyor-strip" title="Нажмите на этап, чтобы развернуть его">
                           ${stepsArr.map((st, idx) => {
                             const stOverdue = isStepOverdue(st.date, st.done);
@@ -3032,37 +3173,39 @@
                               <!-- СТРОКА 2: ЧИПЫ СРОКА И ЗАМЕЧАНИЯ -->
                               <div class="step-chips-bar">
                                 <button type="button" class="chip-btn ${dateMeta.cls}" onclick="this.blur(); openDateModal(${proc.id}, ${obj.id}, ${s.id})">
-                                  ${escapeHtml(dateMeta.text)}
+                                  ${dateMeta.cls==='overdue' ? 'Просрочка · '+escapeHtml(dateMeta.text.replace(/[^\d]/g,'').replace(/^(\d+).*$/,'$1'))+' дн.' : escapeHtml(dateMeta.text)}
                                 </button>
+                                ${s.date && !s.done ? `<span class="plan-date">План: ${escapeHtml(String(s.date).replace(/^до\s+/,''))}</span>` : ''}
 
-                                <button type="button" class="chip-btn date-normal" onclick="openStepDetails(${proc.id},${obj.id},${s.id})" title="Ответственный и документ">${s.owner ? '👤 '+escapeHtml(s.owner.slice(0,26)) : '👤 Ответственный'}</button>
+                                <button type="button" class="chip-btn date-normal" onclick="openStepDetails(${proc.id},${obj.id},${s.id})" title="Ответственный и документ">${s.owner ? 'Ответственный: '+escapeHtml(s.owner.slice(0,26)) : 'Ответственный не назначен'}</button>
                                 ${!s.done && s.workflowStatus==='waiting' ? '<span class="chip-btn urgent" aria-label="Ожидание">⏳ Ожидание</span>' : ''}
                                 ${s.documentUrl ? `<a class="step-document-link" href="${escapeHtml(Model.validUrl(s.documentUrl))}" target="_blank" rel="noopener noreferrer">Документ ↗</a>` : ''}
                                 ${s.done && s.completedAt ? `<span class="step-owner">Закрыто: ${escapeHtml(s.completedAt)}</span>` : ''}
                                 ${!s.done ? `
                                   <button type="button" class="chip-btn ${hasBlock ? 'risk-active' : (hist.length > 0 ? 'risk-notes' : 'ghost')}" onclick="this.blur(); openRiskModal(${proc.id}, ${obj.id},${s.id})">
-                                    ${hasBlock ? '🚨 Замечание' : (hist.length > 0 ? '📝 Заметки (' + hist.length + ')' : '+ Задержка')}
+                                    ${hasBlock ? 'Замечание · активно' : (hist.length > 0 ? 'Замечания (' + hist.length + ')' : '+ Замечание')}
                                   </button>
                                 ` : ''}
                               </div>
 
                               ${hist.length > 0 ? `
                                 <div class="step-remarks-thread">
-                                  ${hist.map((hItem, hIdx) => {
-                                    const isLast = hIdx === hist.length - 1;
-                                    const isActive = hasBlock && hItem.active;
-                                    return `
-                                      <div class="step-remark-item ${isActive ? 'is-active-block' : 'is-resolved'}">
-                                        <span class="remark-icon">${isActive ? '🚨' : '✔'}</span>
-                                        <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
-                                          <span class="remark-date">[${escapeHtml(hItem.date)}]</span> ${formatPartyTag(hItem.text, hItem.doc)}
-                                        </span>
-                                        ${isActive ? `
-                                          <button class="btn-remark-clear" onclick="event.stopPropagation(); clearBlocker(${proc.id}, ${obj.id},${s.id})">Снять</button>
-                                        ` : ''}
-                                      </div>
-                                    `;
-                                  }).join('')}
+                                  ${hist.filter(hItem=>hasBlock && hItem.active).map(hItem => `
+                                    <div class="step-remark-item is-active-block">
+                                      <span class="remark-text" onclick="openRiskModal(${proc.id}, ${obj.id}, ${s.id})">
+                                        <span class="remark-label">Текущее замечание</span>
+                                        <span class="remark-date">${escapeHtml(hItem.date)}</span> ${formatPartyTag(hItem.text,hItem.doc)}
+                                      </span>
+                                      <button class="btn-remark-clear" onclick="event.stopPropagation();clearBlocker(${proc.id},${obj.id},${s.id})">Снять</button>
+                                    </div>`).join('')}
+                                  ${hist.filter(h=>!h.active || !hasBlock).length > 0 ? `
+                                    <button type="button" class="history-toggle" id="history-toggle-${s.id}" onclick="toggleHistoryVisibility(${s.id})">${expandedHistoryStepMap[s.id]?'Скрыть историю':'История замечаний'} (${hist.filter(h=>!h.active || !hasBlock).length})</button>
+                                    <div class="history-older" id="history-older-${s.id}" data-count="${hist.filter(h=>!h.active || !hasBlock).length}" ${expandedHistoryStepMap[s.id]?'':'hidden'}>
+                                      ${hist.filter(h=>!h.active || !hasBlock).map(hItem=>`
+                                        <div class="step-remark-item is-resolved">
+                                          <span class="remark-text" onclick="openRiskModal(${proc.id},${obj.id},${s.id})"><span class="remark-date">${escapeHtml(hItem.date)}</span> ${formatPartyTag(hItem.text,hItem.doc)}</span>
+                                        </div>`).join('')}
+                                    </div>` : ''}
                                 </div>
                               ` : ''}
                             </div>
@@ -3126,7 +3269,7 @@
 
         document.getElementById('mBlockers').textContent = totalBlockers;
         const overdueBox=document.getElementById('kpiOverdueBox');
-        if(overdueBox)overdueBox.className=`kpi-cell clickable ${totalOverdue>0?'danger':''} ${issueFilterMode==='overdue'?'active-filter':''}`;
+        if(overdueBox)overdueBox.className=`kpi-cell clickable ${totalOverdue>0?'amber':''} ${issueFilterMode==='overdue'?'active-filter':''}`;
         document.getElementById('mOverdue').textContent=totalOverdue;
         document.getElementById('mWaiting').textContent=totalWaiting;
         document.getElementById('mDone').textContent = totalDone;
